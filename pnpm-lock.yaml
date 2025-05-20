@@ -23,6 +23,9 @@ importers:
       lucide-react:
         specifier: ^0.511.0
         version: 0.511.0(react@19.1.0)
+      mdast:
+        specifier: ^3.0.0
+        version: 3.0.0
       next:
         specifier: 15.3.2
         version: 15.3.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -50,6 +53,9 @@ importers:
       rehype-raw:
         specifier: ^7.0.0
         version: 7.0.0
+      rehype-react:
+        specifier: ^8.0.0
+        version: 8.0.0
       rehype-sanitize:
         specifier: ^6.0.0
         version: 6.0.0
@@ -62,6 +68,9 @@ importers:
       remark-rehype:
         specifier: ^11.1.2
         version: 11.1.2
+      unified:
+        specifier: ^11.0.5
+        version: 11.0.5
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -3640,6 +3649,10 @@ packages:
   mdast-util-to-string@4.0.0:
     resolution: {integrity: sha512-0H44vDimn51F0YwvxSJSm0eCDOJTRlmN0R1yBh4HLj9wiV1Dn0QoXGbvFAWj2hSItVTlCmBF1hqKlIyUBVFLPg==}
 
+  mdast@3.0.0:
+    resolution: {integrity: sha512-xySmf8g4fPKMeC07jXGz971EkLbWAJ83s4US2Tj9lEdnZ142UP5grN73H1Xd3HzrdbU5o9GYYP/y8F9ZSwLE9g==}
+    deprecated: '`mdast` was renamed to `remark`'
+
   media-typer@1.1.0:
     resolution: {integrity: sha512-aisnrDP4GNe06UcKFnV5bfMNPBUw4jsLGaWwWfnH3v02GnBuXX2MCVn5RbrWo0j3pczUilYblq7fQ7Nw2t5XKw==}
     engines: {node: '>= 0.8'}
@@ -4245,6 +4258,9 @@ packages:
 
   rehype-raw@7.0.0:
     resolution: {integrity: sha512-/aE8hCfKlQeA8LmyeyQvQF3eBiLRGNlfBJEvWH7ivp9sBqs7TNqBL5X3v157rM4IFETqDnIOO+z5M/biZbo9Ww==}
+
+  rehype-react@8.0.0:
+    resolution: {integrity: sha512-vzo0YxYbB2HE+36+9HWXVdxNoNDubx63r5LBzpxBGVWM8s9mdnMdbmuJBAX6TTyuGdZjZix6qU3GcSuKCIWivw==}
 
   rehype-recma@1.0.0:
     resolution: {integrity: sha512-lqA4rGUf1JmacCNWWZx0Wv1dHqMwxzsDWYMTowuplHF3xH0N/MmrZ/G3BDZnzAkRmxDadujCjaKM2hqYdCBOGw==}
@@ -8944,8 +8960,8 @@ snapshots:
       '@typescript-eslint/parser': 8.32.1(eslint@9.26.0)(typescript@5.8.3)
       eslint: 9.26.0
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0)(eslint@9.26.0)
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.26.0)
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint@9.26.0))(eslint@9.26.0)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint@9.26.0))(eslint@9.26.0))(eslint@9.26.0)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.26.0)
       eslint-plugin-react: 7.37.5(eslint@9.26.0)
       eslint-plugin-react-hooks: 5.2.0(eslint@9.26.0)
@@ -8964,7 +8980,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0)(eslint@9.26.0):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint@9.26.0))(eslint@9.26.0):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.1
@@ -8975,22 +8991,22 @@ snapshots:
       tinyglobby: 0.2.13
       unrs-resolver: 1.7.2
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.26.0)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint@9.26.0))(eslint@9.26.0))(eslint@9.26.0)
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.26.0):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint@9.26.0))(eslint@9.26.0))(eslint@9.26.0):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.32.1(eslint@9.26.0)(typescript@5.8.3)
       eslint: 9.26.0
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0)(eslint@9.26.0)
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint@9.26.0))(eslint@9.26.0)
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.26.0):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint@9.26.0))(eslint@9.26.0))(eslint@9.26.0):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8
@@ -9001,7 +9017,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.26.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.26.0)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.32.1(eslint@9.26.0)(typescript@5.8.3))(eslint@9.26.0))(eslint@9.26.0))(eslint@9.26.0)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -10034,6 +10050,8 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
 
+  mdast@3.0.0: {}
+
   media-typer@1.1.0: {}
 
   merge-anything@5.1.7:
@@ -10769,6 +10787,14 @@ snapshots:
       '@types/hast': 3.0.4
       hast-util-raw: 9.1.0
       vfile: 6.0.3
+
+  rehype-react@8.0.0:
+    dependencies:
+      '@types/hast': 3.0.4
+      hast-util-to-jsx-runtime: 2.3.6
+      unified: 11.0.5
+    transitivePeerDependencies:
+      - supports-color
 
   rehype-recma@1.0.0:
     dependencies:

@@ -1,11 +1,5 @@
 import { sva } from "styled-system/css";
-import { MDXRemote } from "next-mdx-remote-client/rsc";
-import { components } from "@/components/MDXRemoteComponents";
-import rehypeSanitize from "rehype-sanitize";
-import rehypeStringify from "rehype-stringify";
-import rehypeRaw from "rehype-raw";
-import remarkParse from "remark-parse";
-import remarkRehype from "remark-rehype";
+import { MarkdownParser } from "./MarkdownParser";
 
 const postBody = sva({
   slots: ["root"],
@@ -29,20 +23,7 @@ export async function PostBody({ body }: PostBodyProps) {
 
   return (
     <main className={classes.root}>
-      <MDXRemote
-        source={body}
-        components={components}
-        options={{
-          mdxOptions: {
-            remarkPlugins: [
-              remarkParse,
-              [remarkRehype, { allowDangerousHtml: false, skipHtml: true }],
-            ],
-            rehypePlugins: [rehypeRaw, rehypeStringify, rehypeSanitize],
-            format: "md",
-          },
-        }}
-      />
+      <MarkdownParser body={body} />
     </main>
   );
 }
