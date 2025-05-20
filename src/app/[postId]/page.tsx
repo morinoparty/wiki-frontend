@@ -1,4 +1,5 @@
 import { getPostBySlug } from "@/lib/getPostBySlug";
+import { getAllPosts } from "@/lib/getAllPosts";
 import { notFound } from "next/navigation";
 import { css } from "styled-system/css";
 import { PostHeader } from "@/components/PostHeader";
@@ -56,4 +57,9 @@ export default async function Page({ params }: PageProps) {
       </nav>
     </div>
   );
+}
+
+export async function generateStaticParams() {
+  const posts = await getAllPosts();
+  return posts.map((post) => ({ postId: post.slug }));
 }
