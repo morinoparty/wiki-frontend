@@ -61,5 +61,5 @@ export default async function Page({ params }: PageProps) {
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
-  return posts.map((post) => ({ postId: post.slug }));
+  return posts.map((post) => ({ postId: post.slug.toLowerCase() }));
 }

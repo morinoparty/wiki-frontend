@@ -1,6 +1,5 @@
 import { sva } from "styled-system/css";
 import { MDXRemote } from "next-mdx-remote-client/rsc";
-import { Suspense } from "react";
 import { components } from "@/components/MDXRemoteComponents";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
@@ -30,22 +29,20 @@ export async function PostBody({ body }: PostBodyProps) {
 
   return (
     <main className={classes.root}>
-      <Suspense fallback={<div>Loading...</div>}>
-        <MDXRemote
-          source={body}
-          components={components}
-          options={{
-            mdxOptions: {
-              remarkPlugins: [
-                remarkParse,
-                [remarkRehype, { allowDangerousHtml: false, skipHtml: true }],
-              ],
-              rehypePlugins: [rehypeRaw, rehypeStringify, rehypeSanitize],
-              format: "md",
-            },
-          }}
-        />
-      </Suspense>
+      <MDXRemote
+        source={body}
+        components={components}
+        options={{
+          mdxOptions: {
+            remarkPlugins: [
+              remarkParse,
+              [remarkRehype, { allowDangerousHtml: false, skipHtml: true }],
+            ],
+            rehypePlugins: [rehypeRaw, rehypeStringify, rehypeSanitize],
+            format: "md",
+          },
+        }}
+      />
     </main>
   );
 }
