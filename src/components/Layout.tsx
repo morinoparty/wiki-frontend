@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/toaster";
 import { sva } from "../../styled-system/css";
 import { Footer } from "./Footer";
 
@@ -44,7 +45,10 @@ export default function Layout({
     <div className={styles.container}>
       <div className={styles.sidebar}>{sidebar}</div>
       <div className={styles.main}>
-        <div className={styles.mainContainer}>{children}</div>
+        <div className={styles.mainContainer}>
+          <Toaster />
+          {children}
+        </div>
         <Footer />
       </div>
     </div>

@@ -65,7 +65,9 @@ export function PostHeader({
       {image && (
         <div
           className={classes.image}
-          style={{ backgroundImage: `url(${image})` }}
+          style={{
+            backgroundImage: `url(${image})`,
+          }}
         />
       )}
       <div className={classes.info}>

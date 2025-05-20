@@ -69,7 +69,12 @@ export function PostHeaderEdit({
         className={classes.image}
         style={
           image
-            ? { backgroundImage: `url(${image})`, position: "relative" }
+            ? {
+                backgroundImage: `url(${
+                  "https://wiki-contentdev.yahiro.workers.dev/" + image
+                })`,
+                position: "relative",
+              }
             : {
                 background: "#f5f5f5",
                 minHeight: "420px",
@@ -118,7 +123,7 @@ export function PostHeaderEdit({
         />
       </div>
       <div className={classes.info}>
-        <p className={classes.category}>
+        <div className={classes.category}>
           <Tag width={16} />
           <Editable.Root
             value={category}
@@ -131,7 +136,7 @@ export function PostHeaderEdit({
             <Editable.Preview />
             <Editable.Input />
           </Editable.Root>
-        </p>
+        </div>
         <Editable.Root
           value={title}
           onValueChange={handleTitleChange}

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/Button";
 import { getAllPosts } from "@/lib/getAllPosts";
 import { Edit } from "lucide-react";
@@ -89,7 +88,11 @@ export default async function Home() {
             })}
           >
             <img
-              src={post.image || "/assets/placeholder.svg"}
+              src={
+                post.image
+                  ? "https://wiki-contentdev.yahiro.workers.dev/" + post.image
+                  : "/assets/placeholder.svg"
+              }
               alt={post.title}
               className={css({
                 display: "block",
@@ -153,7 +156,7 @@ export default async function Home() {
                 }}
                 asChild
               >
-                <Link href={`/dashboard/posts/${post.slug}`}>
+                <Link href={`/dashboard/posts/${post.slug.toLowerCase()}`}>
                   <Edit />
                   編集
                 </Link>
