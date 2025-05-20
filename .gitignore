@@ -49,3 +49,5 @@ styled-system-studio
 public/search-index.json
 
 .wrangler/Users/yahiro/Documents/working/wiki-frontend/.env.local
+
+.wrangler
