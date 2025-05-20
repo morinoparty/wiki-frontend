@@ -27,7 +27,11 @@ export default async function Page({ params }: PageProps) {
       })}
     >
       <PostHeader
-        image={post.image}
+        image={
+          post.image
+            ? "https://wiki-contentdev.yahiro.workers.dev/" + post.image
+            : undefined
+        }
         category={post.category}
         title={post.title}
         description={post.description}

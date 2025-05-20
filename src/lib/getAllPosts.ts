@@ -1,35 +1,16 @@
-import fs from "fs";
-import path from "path";
-
-// 投稿データの型定義
-export type WikiPost = {
-  title: string;
-  slug: string;
-  description: string;
-  date: string;
-  category: string;
-  body: string;
-  image?: string;
-};
-
-export type GetAllPostsOptions = {
-  sortBy?: "date" | "title";
-  order?: "asc" | "desc";
-};
+import type { WikiPost, GetAllPostsOptions } from "@/types/wiki";
 
 // assets/content/wiki ディレクトリ内の全JSONファイルをまとめて取得する関数
 export async function getAllPosts(
   options?: GetAllPostsOptions
 ): Promise<WikiPost[]> {
-  const dirPath = path.join(process.cwd(), "assets/content/wiki");
-  const files = fs
-    .readdirSync(dirPath)
-    .filter((file) => file.endsWith(".json"));
-  const posts = files.map((file) => {
-    const filePath = path.join(dirPath, file);
-    const content = fs.readFileSync(filePath, "utf-8");
-    return JSON.parse(content) as WikiPost;
-  });
+  const res = await fetch(
+    "https://wiki-contentdev.yahiro.workers.dev/wiki.json"
+  );
+  if (!res.ok) {
+    throw new Error("Failed to fetch posts");
+  }
+  const posts = (await res.json()) as WikiPost[];
 
   if (options?.sortBy) {
     const { sortBy, order = "desc" } = options;

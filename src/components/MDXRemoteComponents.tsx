@@ -178,12 +178,20 @@ export const components = {
   img: (props: React.ComponentProps<"img">) => {
     const { src = "", alt = "", ...rest } = props;
     if (typeof src !== "string") return null;
+    // 外部画像かどうかを判定
+    const isExternal =
+      src.startsWith("http://") ||
+      src.startsWith("https://") ||
+      src.startsWith("//");
     return (
       <img
-        src={src}
+        src={
+          isExternal ? src : "https://wiki-contentdev.yahiro.workers.dev/" + src
+        }
         alt={alt}
         style={{
           maxWidth: "100%",
+
           borderRadius: "8px",
           margin: "16px 0",
         }}

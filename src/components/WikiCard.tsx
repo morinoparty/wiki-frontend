@@ -1,6 +1,6 @@
 import { sva } from "styled-system/css";
-import { WikiPost } from "../lib/getAllPosts";
 import Link from "next/link";
+import { WikiPost } from "@/types/wiki";
 
 const wikiCardStyles = sva({
   slots: [
@@ -46,12 +46,20 @@ const wikiCardStyles = sva({
 
 export default function WikiCard({ post }: { post: WikiPost }) {
   const styles = wikiCardStyles();
+  const link =
+    // 全てを小文字に変換
+    post.slug.toLowerCase();
+
   return (
-    <Link href={`/${post.slug}`}>
+    <Link href={`/${link}`}>
       <article className={styles.card}>
         <img
           className={styles.image}
-          src={post.image || "/assets/placeholder.svg"}
+          src={
+            post.image
+              ? "https://wiki-contentdev.yahiro.workers.dev/" + post.image
+              : "/assets/placeholder.svg"
+          }
           alt={post.title}
         />
 

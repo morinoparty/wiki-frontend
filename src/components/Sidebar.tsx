@@ -5,8 +5,10 @@ import { UserBox } from "./UserBox";
 import { SearchBox } from "@/components/SearchBox";
 import { NotLoginNote } from "./NotLoginNote";
 import { AuthConditional } from "./AuthConditional";
+import { getAllCategories } from "@/lib/getAllCategories";
 
-export function Sidebar() {
+export async function Sidebar() {
+  const categories = await getAllCategories();
   return (
     <aside
       className={css({
@@ -55,15 +57,12 @@ export function Sidebar() {
             カテゴリ一覧
           </NavListItem>
           <NavListCategory>
-            {[
-              "チュートリアル",
-              "MOD・プラグイン",
-              "イベント",
-              "観光案内",
-              "投稿",
-            ].map((category) => (
-              <NavListCategoryItem key={category} href={`/${category}`}>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
+            {categories.map((category) => (
+              <NavListCategoryItem
+                key={category.slug}
+                href={`/category/${category.slug}`}
+              >
+                {category.title}
               </NavListCategoryItem>
             ))}
           </NavListCategory>
