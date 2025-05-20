@@ -1,0 +1,11 @@
+@layer reset, base, tokens, recipes, utilities;
+
+@font-face {
+    font-family: 'Satoshi-Variable';
+    src: url('/assets/fonts/Satoshi-Variable.woff2') format('woff2'),
+         url('/assets/fonts/Satoshi-Variable.woff') format('woff'),
+         url('/assets/fonts/Satoshi-Variable.ttf') format('truetype');
+    font-weight: 400 900;
+    font-display: swap;
+    font-style: normal;
+}

@@ -1,0 +1,32 @@
+/*
+  PandaCSSカラートークン（custom-colors-preset.ts）を利用したMilkdown/Crepe用カスタムCSS変数定義
+*/
+.milkdown {
+  --crepe-color-background: #ffffff;
+  --crepe-color-on-background: #2d634b; /* leaf.700 */
+  --crepe-color-surface: #eaf2ef; /* leaf.50 */
+  --crepe-color-surface-low: #cdebdf; /* leaf.100 */
+  --crepe-color-on-surface: #347e5e; /* leaf.600 */
+  --crepe-color-on-surface-variant: #5ea181; /* leaf.500 */
+  --crepe-color-outline: #a8a8a8;
+  --crepe-color-primary: #347e5e; /* leaf.600 */
+  --crepe-color-secondary: #b5deca; /* leaf.200 */
+  --crepe-color-on-secondary: #133323; /* leaf.900 */
+  --crepe-color-inverse: #1f4634; /* leaf.800 */
+  --crepe-color-on-inverse: #eaf2ef; /* leaf.50 */
+  --crepe-color-inline-code: #ba1a1a; /* fallback: red系 */
+  --crepe-color-error: #ca6255; /* red.500 */
+  --crepe-color-hover: #e9f2f2; /* sea.50 */
+  --crepe-color-selected: #c9eaed; /* sea.100 */
+  --crepe-color-inline-area: #acdde1; /* sea.200 */
+
+  --crepe-font-title: "Noto Serif", Cambria, "Times New Roman", Times, serif;
+  --crepe-font-default: "Noto Sans", Arial, Helvetica, sans-serif;
+  --crepe-font-code: "Space Mono", Fira Code, Menlo, Monaco, "Courier New",
+    Courier, monospace;
+
+  --crepe-shadow-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15),
+    0px 1px 2px 0px rgba(0, 0, 0, 0.3);
+  --crepe-shadow-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.15),
+    0px 1px 2px 0px rgba(0, 0, 0, 0.3);
+}

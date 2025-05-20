@@ -1,0 +1,50 @@
+backend:
+  name: git-gateway
+  branch: master
+
+media_folder: public/img
+public_folder: /img
+
+collections:
+  - name: "wiki"
+    label: "Wiki"
+    format: "json"
+    folder: "assets/content/wiki"
+    create: true
+    slug: "{{fields.slug}}"
+    editor:
+      preview: false
+    fields:
+      - { label: "タイトル", name: "title", widget: "string" }
+      - { label: "URL(英数字を使ってください)", name: "slug", widget: "string" }
+      - { label: "かんたんな説明文", name: "description", widget: "string" }
+      - { label: "作成日", name: "date", widget: "datetime" }
+      - {
+          label: "カバー画像",
+          name: "image",
+          widget: "image",
+          required: false,
+          tagname: "",
+        }
+      - {
+          label: "カテゴリ",
+          name: "category",
+          widget: "relation",
+          collection: "categories", # 別のcollectionのnameと一致させて紐づけ
+          searchFields: ["title", "body"], # 選択する時に検索できるフィールド
+          valueField: "title", # 選択後に表示されるフィールド
+          displayFields: ["title"], # 選択中に一覧に表示されるフィールド
+        }
+      - { label: "本文", name: "body", widget: "markdown" }
+  - name: "categories"
+    label: "カテゴリ"
+    format: "json"
+    folder: "assets/content/categories"
+    create: true
+    slug: "{{fields.slug}}"
+    editor:
+      preview: false
+    fields:
+      - { label: "カテゴリ名", name: "title", widget: "string" }
+      - { label: "URL(英数字を使ってください)", name: "slug", widget: "string" }
+      - { label: "説明文", name: "body", widget: "text" }
