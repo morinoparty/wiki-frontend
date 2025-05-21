@@ -7,20 +7,28 @@ const layoutStyles = sva({
   base: {
     container: {
       display: "grid",
-      gridTemplateColumns: "300px 1fr",
-      gridTemplateAreas: `
-        "sidebar main"
-        `,
+      gridTemplateColumns: {
+        base: "300px 1fr",
+        lgDown: "1fr",
+      },
+      gridTemplateAreas: {
+        base: '"sidebar main"',
+        lgDown: '"main"',
+      },
       minHeight: "100vh",
       backgroundColor: "leaf.50",
+      width: "100%",
     },
     sidebar: {
-      display: "grid",
       gridTemplateRows: "auto 1fr",
       gridArea: "sidebar",
       borderRight: "1px solid",
       borderColor: "leaf.200",
       minHeight: "100vh",
+      display: {
+        base: "grid",
+        lgDown: "none",
+      },
     },
     main: {
       display: "grid",

@@ -9,6 +9,7 @@ import {
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import { css } from "styled-system/css";
+import Link from "next/link";
 
 const PaginationLink = (
   props: IconButtonProps & { page?: "prev" | "next" | number }
@@ -35,7 +36,7 @@ const PaginationLink = (
         borderRadius: "16px",
       })}
     >
-      <a href={`?page=${pageValue()}`}>{props.children}</a>
+      <Link href={`?page=${pageValue()}`}>{props.children}</Link>
     </IconButton>
   );
 };
