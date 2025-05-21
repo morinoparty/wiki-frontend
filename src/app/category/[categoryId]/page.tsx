@@ -11,12 +11,13 @@ import { PaginationWrapper } from "./PaginationWrapper";
 
 interface PageProps {
   params: Promise<{ categoryId: string }>;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ page: string }>;
 }
 
 export default async function Page(props: PageProps) {
   const { params, searchParams } = props;
   const { categoryId } = await params;
+  const { page: searchParamsPage } = (await searchParams) || {};
 
   if (!categoryId) return notFound();
   const categories = await getAllCategories();
@@ -37,10 +38,10 @@ export default async function Page(props: PageProps) {
   // クエリパラメータからページ番号を取得
   const PAGE_SIZE = 12;
   let page = 1;
-  if (searchParams && searchParams.page) {
-    const pageParam = Array.isArray(searchParams.page)
-      ? searchParams.page[0]
-      : searchParams.page;
+  if (searchParams && searchParamsPage) {
+    const pageParam = Array.isArray(searchParamsPage)
+      ? searchParamsPage[0]
+      : searchParamsPage;
     page = parseInt(pageParam || "1", 10);
     if (isNaN(page) || page < 1) page = 1;
   }
