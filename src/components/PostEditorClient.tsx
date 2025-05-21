@@ -2,16 +2,15 @@
 import { toaster } from "@/components/ui/toaster";
 
 import { useState, useEffect } from "react";
-import { Button } from "@chakra-ui/react";
 import { PostHeaderEdit } from "@/components/PostHeaderEdit";
 // import { MilkdownCrepeEditor } from "@/components/Editor";
 import { css } from "styled-system/css";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
 import Editor from "@/components/Editor";
 import { useTransition } from "react";
 import { savePostAction } from "@/actions/savePost";
 import { WikiPostDetail } from "@/types/wiki";
+import { EditorNav } from "@/components/EditorNav";
+import { Button } from "@chakra-ui/react";
 
 interface PostEditorClientProps {
   post: WikiPostDetail;
@@ -65,49 +64,16 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
         pb: "200px",
       })}
     >
-      <nav
-        className={css({
-          position: "sticky",
-          top: 0,
-          zIndex: 10000000,
-          width: "100%",
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          px: "32px",
-          backgroundColor: "white",
-          textStyle: "body",
-        })}
-      >
-        <Button variant="ghost" textStyle={"body"} color={"leaf.600"} asChild>
-          <Link href="/dashboard">
-            <ChevronLeft />
-            戻る
-          </Link>
+      <EditorNav title="ページの編集">
+        <Button
+          textStyle={"body"}
+          onClick={handleSave}
+          loading={isPending}
+          disabled={!isDirty}
+        >
+          保存
         </Button>
-        <div>
-          <h2
-            className={css({
-              textStyle: "body",
-              color: "leaf.700",
-              fontWeight: "bold",
-            })}
-          >
-            ページの編集
-          </h2>
-        </div>
-        <div>
-          <Button
-            textStyle={"body"}
-            onClick={handleSave}
-            loading={isPending}
-            disabled={!isDirty}
-          >
-            保存
-          </Button>
-        </div>
-      </nav>
+      </EditorNav>
       <PostHeaderEdit
         image={form.image}
         category={form.category}

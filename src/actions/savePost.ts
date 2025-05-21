@@ -92,7 +92,10 @@ export async function savePostAction(
   revalidatePath("/dashboard/posts");
 
   if (commitData.commit.html_url) {
-    redirect(commitData.commit.html_url);
+    // girhub コミットidを取得
+    const commitId = commitData.commit.sha;
+    // GitHubのコミットURLにリダイレクト
+    redirect(`/dashboard/commit/${commitId}`);
   }
 
   return { success: true };
