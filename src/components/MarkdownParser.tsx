@@ -3,6 +3,7 @@ import rehypeSanitize from "rehype-sanitize";
 import rehypeRaw from "rehype-raw";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
+import remarkGfm from "remark-gfm";
 import rehypeReact from "rehype-react";
 import { components } from "./MDXRemoteComponents";
 import React from "react";
@@ -27,6 +28,7 @@ export function MarkdownParser({ body }: { body: string }) {
   const file = unified()
     .use(remarkParse)
     .use(remarkRehype, { allowDangerousHtml: false, skipHtml: true })
+    .use(remarkGfm)
     .use(rehypeRaw)
     .use(rehypeSanitize)
     .use(rehypeReact, rehypeReactOptions)
