@@ -1,8 +1,8 @@
 import { Cta } from "@/components/Cta";
 import WikiCard from "@/components/WikiCard";
+import { WikiCardGrid } from "@/components/WikiCardGrid";
 import { getAllPosts } from "@/lib/getAllPosts";
 import { css } from "styled-system/css";
-import { Grid } from "styled-system/jsx";
 
 export default async function Home() {
   const posts = await getAllPosts({
@@ -80,16 +80,11 @@ export default async function Home() {
             最近の投稿
           </h2>
 
-          <Grid
-            gridTemplateColumns={{
-              base: "repeat(3, 1fr)",
-            }}
-            gap={"64px 24px"}
-          >
+          <WikiCardGrid>
             {posts.splice(0, 6).map((post) => (
               <WikiCard key={post.slug} post={post} />
             ))}
-          </Grid>
+          </WikiCardGrid>
         </section>
 
         <section
@@ -107,16 +102,11 @@ export default async function Home() {
             おすすめのページ
           </h2>
 
-          <Grid
-            gridTemplateColumns={{
-              base: "repeat(3, 1fr)",
-            }}
-            gap={"64px 24px"}
-          >
+          <WikiCardGrid>
             {posts.splice(0, 6).map((post) => (
               <WikiCard key={post.slug} post={post} />
             ))}
-          </Grid>
+          </WikiCardGrid>
         </section>
 
         <Cta />

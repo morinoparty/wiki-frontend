@@ -71,9 +71,9 @@ export default async function Home() {
           marginBottom: "128px",
         })}
       >
-        {posts.map((post) => (
+        {posts.map((post, index) => (
           <div
-            key={post.slug}
+            key={post.slug + index}
             className={css({
               display: "grid",
               gridTemplateColumns: "subgrid",

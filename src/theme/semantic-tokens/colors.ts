@@ -5,7 +5,7 @@ export const colors = defineSemanticTokens.colors({
     DEFAULT: {
       value: {
         _light: "{colors.white}",
-        _dark: "{colors.black}",
+        _dark: "{colors.leaf.700}",
       },
     },
     subtle: {
@@ -28,7 +28,7 @@ export const colors = defineSemanticTokens.colors({
     },
     inverted: {
       value: {
-        _light: "{colors.black}",
+        _light: "{colors.leaf.700}",
         _dark: "{colors.white}",
       },
     },
@@ -66,7 +66,7 @@ export const colors = defineSemanticTokens.colors({
   fg: {
     DEFAULT: {
       value: {
-        _light: "{colors.black}",
+        _light: "{colors.leaf.700}",
         _dark: "{colors.gray.50}",
       },
     },
@@ -85,7 +85,7 @@ export const colors = defineSemanticTokens.colors({
     inverted: {
       value: {
         _light: "{colors.gray.50}",
-        _dark: "{colors.black}",
+        _dark: "{colors.leaf.700}",
       },
     },
     error: {
@@ -173,7 +173,7 @@ export const colors = defineSemanticTokens.colors({
     contrast: {
       value: {
         _light: "{colors.white}",
-        _dark: "{colors.black}",
+        _dark: "{colors.leaf.700}",
       },
     },
     fg: {
