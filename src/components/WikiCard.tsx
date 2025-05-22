@@ -16,11 +16,14 @@ const wikiCardStyles = sva({
     card: {
       display: "grid",
       gridTemplateRows: "auto auto",
-      gap: "16px",
+      gap: "20px",
       width: "100%",
       height: "fit-content",
+      overflow: "hidden",
     },
-    container: {},
+    container: {
+      overflow: "hidden",
+    },
     title: {
       height: "fit-content",
       fontSize: "18px",
@@ -31,6 +34,11 @@ const wikiCardStyles = sva({
     description: {
       textStyle: "body",
       fontSize: "14px",
+      mt: "0.4vh",
+      color: "leaf.700/50",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
     },
     image: {
       width: "100%",
@@ -65,6 +73,7 @@ export default function WikiCard({ post }: { post: WikiPost }) {
 
         <div className={styles.container}>
           <h2 className={styles.title}>{post.title}</h2>
+          <p className={styles.description}>{post.description}</p>
         </div>
       </article>
     </Link>

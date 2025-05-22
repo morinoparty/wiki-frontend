@@ -31,7 +31,7 @@ export default async function Home() {
       >
         <header
           className={css({
-            mb: "86px",
+            mb: "6.389vw",
           })}
         >
           <p
@@ -67,7 +67,7 @@ export default async function Home() {
 
         <section
           className={css({
-            mb: "92px",
+            mb: "6.389vw",
           })}
         >
           <h2

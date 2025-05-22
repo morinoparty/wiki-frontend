@@ -10,7 +10,7 @@ export const WikiCardGrid: React.FC<{
         lgDown: "repeat(auto-fit, minmax(300px, 1fr))",
       }}
       gap={{
-        base: "64px 24px",
+        base: "7.2vh 1.667vw",
         lgDown: "48px",
       }}
     >
