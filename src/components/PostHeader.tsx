@@ -10,7 +10,10 @@ export const postHeaderStyles = sva({
       borderColor: "leaf.100",
     },
     info: {
-      px: "90px",
+      px: {
+        base: "90px",
+        lgDown: "24px",
+      },
       maxWidth: "980px",
       mx: "auto",
       pt: "48px",

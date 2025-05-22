@@ -57,9 +57,18 @@ export default async function Page(props: PageProps) {
       <CategoryPosts posts={pagedPosts} />
       <div
         className={css({
-          px: "90px",
-          pt: "48px",
-          pb: "200px",
+          px: {
+            base: "90px",
+            lgDown: "24px",
+          },
+          pt: {
+            base: "48px",
+            lgDown: "24px",
+          },
+          pb: {
+            base: "200px",
+            lgDown: "100px",
+          },
         })}
       >
         <PaginationWrapper currentPage={page} totalPages={totalPages} />
@@ -84,7 +93,10 @@ const CategoryHeader: React.FC<WikiCategory> = ({ title, body }) => {
     >
       <div
         className={css({
-          px: "90px",
+          px: {
+            base: "90px",
+            lgDown: "24px",
+          },
           mx: "auto",
           pt: "48px",
           pb: "48px",
@@ -128,7 +140,10 @@ const CategoryPosts: React.FC<{
   return (
     <div
       className={css({
-        px: "90px",
+        px: {
+          base: "90px",
+          lgDown: "24px",
+        },
         pt: "48px",
         pb: "64px",
       })}

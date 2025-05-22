@@ -5,11 +5,11 @@ import { Search } from "lucide-react";
 import { sva } from "styled-system/css";
 
 export type PostDocument = {
-    slug: string;
-    title: string;
-    date: string;
-    tags: string;
-    content: string;
+  slug: string;
+  title: string;
+  date: string;
+  tags: string;
+  content: string;
 };
 
 // SVAでスタイルを定義
@@ -32,7 +32,7 @@ const searchBoxStyles = sva({
     "resultMeta",
     "resultTag",
     "resultExcerpt",
-    "emptyResult"
+    "emptyResult",
   ],
   base: {
     container: {
@@ -42,11 +42,26 @@ const searchBoxStyles = sva({
       display: "flex",
       alignItems: "center",
       gap: "16px",
-      pb: "24px",
-      width: "calc(100% + 42px + 32px)",
-      pl: "42px",
-      pr: "32px",
-      ml: "-42px",
+      width: {
+        base: "calc(100% + 42px + 32px)",
+        lgDown: "100%",
+      },
+      pb: {
+        base: "24px",
+        lgDown: "16px",
+      },
+      pl: {
+        base: "42px",
+        lgDown: "0",
+      },
+      pr: {
+        base: "32px",
+        lgDown: "0",
+      },
+      ml: {
+        base: "-42px",
+        lgDown: "0",
+      },
       color: "leaf.600",
       borderBottom: "1px solid",
       borderColor: "leaf.200",
@@ -186,8 +201,8 @@ const searchBoxStyles = sva({
       py: "32px",
       textAlign: "center",
       color: "leaf.500",
-    }
-  }
+    },
+  },
 });
 
 export const SearchBox = () => {
@@ -202,7 +217,7 @@ export const SearchBox = () => {
   // インデックスの初期化
   useEffect(() => {
     if (typeof window === "undefined") return;
-    
+
     async function initializeSearchIndex() {
       setIsLoading(true);
       try {
@@ -248,26 +263,34 @@ export const SearchBox = () => {
       const titleResults = indexRef.current.search(searchTerm, {
         index: "title",
         enrich: true,
-        limit: 10
+        limit: 10,
       });
 
       const contentsResults = indexRef.current.search(searchTerm, {
         index: "content",
         enrich: true,
-        limit: 10
+        limit: 10,
       });
 
       const tagsResults = indexRef.current.search(searchTerm, {
         index: "tags",
         enrich: true,
-        limit: 10
+        limit: 10,
       });
 
       const allResults = new Map<string, PostDocument>();
-      
+
       // 結果の処理
-      type EnrichedResult = { id: string; doc: PostDocument | null; highlight?: string };
-      type EnrichedDocumentSearchResult = { field?: keyof PostDocument; tag?: keyof PostDocument; result: EnrichedResult[] };
+      type EnrichedResult = {
+        id: string;
+        doc: PostDocument | null;
+        highlight?: string;
+      };
+      type EnrichedDocumentSearchResult = {
+        field?: keyof PostDocument;
+        tag?: keyof PostDocument;
+        result: EnrichedResult[];
+      };
       [titleResults, contentsResults, tagsResults].forEach((resultSet) => {
         if (resultSet && resultSet.length > 0) {
           (resultSet as EnrichedDocumentSearchResult[]).forEach((result) => {
@@ -293,12 +316,19 @@ export const SearchBox = () => {
   // 検索結果のハイライト
   const highlightText = (text: string, query: string) => {
     if (!query.trim()) return text;
-    
+
     try {
       const segments = text.split(new RegExp(`(${query})`, "gi"));
       return segments.map((segment, index) =>
         segment.toLowerCase() === query.toLowerCase() ? (
-          <span key={index} style={{ backgroundColor: "var(--colors-leaf-100)", fontWeight: "bold", color: "var(--colors-leaf-800)" }}>
+          <span
+            key={index}
+            style={{
+              backgroundColor: "var(--colors-leaf-100)",
+              fontWeight: "bold",
+              color: "var(--colors-leaf-800)",
+            }}
+          >
             {segment}
           </span>
         ) : (
@@ -321,7 +351,11 @@ export const SearchBox = () => {
   };
 
   // 記事の内容を抜粋（検索語を含む部分）
-  const getContentExcerpt = (content: string, query: string, length: number = 150) => {
+  const getContentExcerpt = (
+    content: string,
+    query: string,
+    length: number = 150
+  ) => {
     if (!query.trim()) return content.slice(0, length) + "...";
 
     const lowerContent = content.toLowerCase();
@@ -362,8 +396,8 @@ export const SearchBox = () => {
               <h3 className={styles.popoverHeaderTitle}>
                 「{searchTerm}」の検索結果 ({searchResults.length}件)
               </h3>
-              <button 
-                onClick={() => setIsOpen(false)} 
+              <button
+                onClick={() => setIsOpen(false)}
                 className={styles.popoverCloseButton}
                 aria-label="閉じる"
               >
@@ -381,18 +415,21 @@ export const SearchBox = () => {
                         </h4>
                         <div className={styles.resultMeta}>
                           <span>{formatDate(result.date)}</span>
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", borderRadius: "2rem" }}>
-                            {typeof result.tags === 'string' 
-                              ? result.tags.split(',').map((tag) => (
-                                  <span
-                                    key={tag}
-                                    className={styles.resultTag}
-                                  >
+                          <div
+                            style={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: "4px",
+                              borderRadius: "2rem",
+                            }}
+                          >
+                            {typeof result.tags === "string"
+                              ? result.tags.split(",").map((tag) => (
+                                  <span key={tag} className={styles.resultTag}>
                                     {highlightText(tag.trim(), searchTerm)}
                                   </span>
                                 ))
-                              : null
-                            }
+                              : null}
                           </div>
                         </div>
                         <div className={styles.resultExcerpt}>
@@ -416,4 +453,4 @@ export const SearchBox = () => {
       )}
     </div>
   );
-} 
+};

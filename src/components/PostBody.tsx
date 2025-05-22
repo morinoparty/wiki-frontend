@@ -7,7 +7,10 @@ const postBody = sva({
     root: {
       pt: "48px",
       pb: "240px",
-      px: "90px",
+      px: {
+        base: "90px",
+        lgDown: "24px",
+      },
       maxWidth: "980px",
       mx: "auto",
     },

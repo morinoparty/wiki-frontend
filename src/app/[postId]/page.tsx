@@ -43,15 +43,58 @@ export default async function Page({ params }: PageProps) {
       <nav
         className={css({
           position: "fixed",
-          zIndex: 10000000,
-          bottom: "24px",
-          right: "24px",
+          zIndex: 100,
+          bottom: {
+            base: "24px",
+            mdDown: "calc(70px + 16px)",
+          },
+          right: {
+            base: "24px",
+            mdDown: "16px",
+          },
         })}
       >
-        <Button asChild>
+        <Button
+          asChild
+          className={css({
+            width: {
+              base: undefined,
+              mdDown: "64px",
+            },
+            maxWidth: {
+              base: undefined,
+              mdDown: "64px",
+            },
+            height: {
+              base: undefined,
+              mdDown: "64px",
+            },
+            minWidth: {
+              base: undefined,
+              mdDown: "64px",
+            },
+            maxHeight: {
+              base: undefined,
+              mdDown: "64px",
+            },
+            borderRadius: {
+              base: undefined,
+              mdDown: "24px",
+            },
+          })}
+        >
           <Link href={`/dashboard/posts/${post.slug}`}>
             <Edit />
-            このページを編集
+            <span
+              className={css({
+                display: {
+                  base: "initial",
+                  mdDown: "none",
+                },
+              })}
+            >
+              このページを編集
+            </span>
           </Link>
         </Button>
       </nav>

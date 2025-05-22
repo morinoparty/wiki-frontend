@@ -4,7 +4,10 @@ const postCta = sva({
   slots: ["root"],
   base: {
     root: {
-      px: "90px",
+      px: {
+        base: "90px",
+        lgDown: "24px",
+      },
       mb: "90px",
       maxWidth: "980px",
       mx: "auto",

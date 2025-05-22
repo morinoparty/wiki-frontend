@@ -9,16 +9,33 @@ export const Cta: React.FC = () => {
         borderRadius: "32px",
         bg: "white",
         p: "24px",
+        pt: { base: "none", lgDown: "48px" },
         display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "24px",
-        width: "calc(100% + 48px)",
-        ml: "-24px",
+        gridTemplateColumns: {
+          base: "1fr 1fr",
+          lgDown: "1fr",
+        },
+        gridTemplateRows: {
+          base: "1fr",
+          lgDown: "auto 1fr",
+        },
+        gap: {
+          base: "24px",
+          lgDown: "52px",
+        },
+        width: {
+          base: "calc(100% + 48px)",
+          lgDown: "100%",
+        },
+        ml: {
+          base: "-24px",
+          lgDown: "0",
+        },
       })}
     >
       <div
         className={css({
-          p: "24px",
+          p: { base: "24px", lgDown: "0" },
         })}
       >
         <h2
@@ -36,7 +53,10 @@ export const Cta: React.FC = () => {
           className={css({
             textStyle: "body",
             color: "leaf.600",
-            mb: "64px",
+            mb: {
+              base: "64px",
+              lgDown: "48px",
+            },
           })}
         >
           {`のんびり、ゆったり、気ままに、あそべる\nMinecraftサーバー「もりのパーティ」に参加してみませんか?`}
@@ -53,6 +73,14 @@ export const Cta: React.FC = () => {
           backgroundSize: "cover",
           backgroundPosition: "center",
           borderRadius: "10px",
+          order: {
+            base: 1,
+            lgDown: 0,
+          },
+          aspectRatio: {
+            base: "inherit",
+            lgDown: "3/2",
+          },
         })}
       ></div>
     </section>

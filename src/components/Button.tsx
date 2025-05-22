@@ -4,6 +4,7 @@ import { Button as ChakraButton, type ButtonProps } from "@chakra-ui/react";
 export function Button(props: ButtonProps) {
   return (
     <ChakraButton
+      {...props}
       className={cx(
         css({
           textStyle: "button",
@@ -16,7 +17,6 @@ export function Button(props: ButtonProps) {
         }),
         props.className
       )}
-      {...props}
     >
       {props.children}
     </ChakraButton>

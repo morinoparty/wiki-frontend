@@ -11,11 +11,13 @@ const layoutStyles = sva({
         base: "300px 1fr",
         lgDown: "1fr",
       },
+      gridTemplateRows: "auto 1fr",
       gridTemplateAreas: {
         base: '"sidebar main"',
-        lgDown: '"main"',
+        lgDown: '"sidebar main"',
+        mdDown: '"sidebar" "main"',
       },
-      minHeight: "100vh",
+      minHeight: { base: "100vh", lgDown: "auto" },
       backgroundColor: "leaf.50",
       width: "100%",
     },
@@ -24,10 +26,9 @@ const layoutStyles = sva({
       gridArea: "sidebar",
       borderRight: "1px solid",
       borderColor: "leaf.200",
-      minHeight: "100vh",
+      minHeight: { base: "100vh", lgDown: "inherit" },
       display: {
         base: "grid",
-        lgDown: "none",
       },
     },
     main: {

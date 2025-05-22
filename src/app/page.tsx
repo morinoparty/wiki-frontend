@@ -24,21 +24,30 @@ export default async function Home() {
 
       <div
         className={css({
-          px: "90px",
+          px: {
+            base: "90px",
+            lgDown: "24px",
+          },
           pt: "40px",
           pb: "128px",
         })}
       >
         <header
           className={css({
-            mb: "6.389vw",
+            mb: {
+              base: "6.389vw",
+              lgDown: "100px",
+            },
           })}
         >
           <p
             className={css({
               textStyle: "body",
               color: "leaf.600/50",
-              mb: "28px",
+              mb: {
+                base: "28px",
+                lgDown: "32px",
+              },
             })}
           >
             Minecraft コミュニティ「もりのパーティ」の公式Wiki
@@ -58,7 +67,10 @@ export default async function Home() {
             className={css({
               textStyle: "body",
               color: "leaf.600",
-              width: "50%",
+              width: {
+                base: "50%",
+                lgDown: "100%",
+              },
             })}
           >
             ここはみんなでもりぱに関する情報の共有をする場所です！もりぱにログインしたことがあれば、すぐに使い始めることができます。
@@ -67,14 +79,20 @@ export default async function Home() {
 
         <section
           className={css({
-            mb: "6.389vw",
+            mb: {
+              base: "6.389vw",
+              lgDown: "128px",
+            },
           })}
         >
           <h2
             className={css({
               textStyle: "heading1",
               color: "leaf.600",
-              mb: "28px",
+              mb: {
+                base: "28px",
+                lgDown: "32px",
+              },
             })}
           >
             最近の投稿
