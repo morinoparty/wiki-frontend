@@ -13,7 +13,7 @@ export async function Sidebar() {
     <aside
       className={css({
         p: {
-          base: "48px 32px px 42px",
+          base: "48px 32px 24px 42px",
           lgDown: "24px",
           mdDown: "0 24px 0 24px",
         },
@@ -322,6 +322,7 @@ const SidebarLogo: React.FC = () => {
           height: {
             base: "38px",
             lgDown: "28px",
+            mdDown: "22px",
           },
           width: "auto",
         })}

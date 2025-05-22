@@ -16,8 +16,14 @@ export const postHeaderStyles = sva({
       },
       maxWidth: "980px",
       mx: "auto",
-      pt: "48px",
-      pb: "64px",
+      pt: {
+        base: "48px",
+        lgDown: "32px",
+      },
+      pb: {
+        base: "64px",
+        lgDown: "48px",
+      },
     },
     image: {
       width: "100%",
@@ -31,19 +37,32 @@ export const postHeaderStyles = sva({
       gap: "10px",
       textStyle: "body",
       color: "leaf.600",
-      mb: "42px",
+      mb: {
+        base: "42px",
+        lgDown: "16px",
+      },
     },
     title: {
-      fontSize: "40px",
+      fontSize: {
+        base: "40px",
+        lgDown: "32px",
+      },
       fontWeight: "bold",
       color: "leaf.700",
       textStyle: "heading1",
-      mb: "24px",
+      mb: {
+        base: "24px",
+        lgDown: "20px",
+      },
       width: "100%",
     },
     description: {
       textStyle: "body",
       color: "leaf.600",
+      fontSize: {
+        base: "18px",
+        lgDown: "14px",
+      },
       width: "100%",
     },
   },

@@ -7,9 +7,13 @@ export const Cta: React.FC = () => {
     <section
       className={css({
         borderRadius: "32px",
+        overflow: "hidden",
         bg: "white",
-        p: "24px",
-        pt: { base: "none", lgDown: "48px" },
+        p: {
+          base: "24px",
+          lgDown: "0",
+        },
+        pt: { base: "none", lgDown: "40px" },
         display: "grid",
         gridTemplateColumns: {
           base: "1fr 1fr",
@@ -21,7 +25,7 @@ export const Cta: React.FC = () => {
         },
         gap: {
           base: "24px",
-          lgDown: "52px",
+          lgDown: "32px",
         },
         width: {
           base: "calc(100% + 48px)",
@@ -35,14 +39,24 @@ export const Cta: React.FC = () => {
     >
       <div
         className={css({
-          p: { base: "24px", lgDown: "0" },
+          p: {
+            base: "24px 24px 24px 24px",
+            lgDown: "0 24px 0 24px",
+          },
         })}
       >
         <h2
           className={css({
             textStyle: "heading1",
             color: "leaf.600",
-            mb: "20px",
+            mb: {
+              base: "20px",
+              lgDown: "12px",
+            },
+            fontSize: {
+              base: "28px",
+              lgDown: "22px",
+            },
           })}
         >
           もりのパーティで、
@@ -55,7 +69,7 @@ export const Cta: React.FC = () => {
             color: "leaf.600",
             mb: {
               base: "64px",
-              lgDown: "48px",
+              lgDown: "32px",
             },
           })}
         >
@@ -72,7 +86,10 @@ export const Cta: React.FC = () => {
           backgroundImage: "url('/assets/top-community.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          borderRadius: "10px",
+          borderRadius: {
+            base: "10px",
+            lgDown: "0",
+          },
           order: {
             base: 1,
             lgDown: 0,
@@ -81,6 +98,7 @@ export const Cta: React.FC = () => {
             base: "inherit",
             lgDown: "3/2",
           },
+          width: "100%",
         })}
       ></div>
     </section>

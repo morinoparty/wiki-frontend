@@ -8,8 +8,18 @@ export function Button(props: ButtonProps) {
       className={cx(
         css({
           textStyle: "button",
-          px: "32px",
-          height: "50px",
+          px: {
+            base: "32px",
+            mdDown: "24px",
+          },
+          fontSize: {
+            base: "16px",
+            mdDown: "14px",
+          },
+          height: {
+            base: "50px",
+            mdDown: "46px",
+          },
           borderRadius: "16px",
           _hover: {
             bg: "leaf.700",

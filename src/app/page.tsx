@@ -28,7 +28,7 @@ export default async function Home() {
             base: "90px",
             lgDown: "24px",
           },
-          pt: "40px",
+          pt: { base: "40px", lgDown: "32px" },
           pb: "128px",
         })}
       >
@@ -44,9 +44,13 @@ export default async function Home() {
             className={css({
               textStyle: "body",
               color: "leaf.600/50",
+              fontSize: {
+                base: "16px",
+                lgDown: "14px",
+              },
               mb: {
                 base: "28px",
-                lgDown: "32px",
+                lgDown: "24px",
               },
             })}
           >
@@ -56,9 +60,12 @@ export default async function Home() {
           <img
             src="/assets/logo.svg"
             className={css({
-              height: "48px",
+              height: {
+                base: "48px",
+                lgDown: "38px",
+              },
               width: "auto",
-              mb: "38px",
+              mb: "32px",
             })}
             alt="もりのパーティWikiのロゴ"
           />
@@ -127,7 +134,14 @@ export default async function Home() {
           </WikiCardGrid>
         </section>
 
-        <Cta />
+        <div
+          className={css({
+            width: "calc(100% + 24px)",
+            ml: "-12px",
+          })}
+        >
+          <Cta />
+        </div>
       </div>
     </div>
   );

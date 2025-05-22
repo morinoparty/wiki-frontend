@@ -9,6 +9,9 @@ export const components = {
         color: "leaf.700",
         lineHeight: "1.85",
         my: "24px",
+        _first: {
+          mt: "0",
+        },
       })}
       {...props}
     />

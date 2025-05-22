@@ -11,7 +11,7 @@ export const WikiCardGrid: React.FC<{
       }}
       gap={{
         base: "7.2vh 1.667vw",
-        lgDown: "48px",
+        lgDown: "64px 24px",
       }}
     >
       {children}
