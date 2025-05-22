@@ -1,3 +1,4 @@
+import { PaginationWrapper } from "@/components/PaginationWrapper";
 import WikiCard from "@/components/WikiCard";
 import { WikiCardGrid } from "@/components/WikiCardGrid";
 import { getAllCategories } from "@/lib/getAllCategories";
@@ -7,7 +8,6 @@ import { Tag } from "lucide-react";
 import { notFound } from "next/navigation";
 import { useId } from "react";
 import { css } from "styled-system/css";
-import { PaginationWrapper } from "./PaginationWrapper";
 
 interface PageProps {
   params: Promise<{ categoryId: string }>;
