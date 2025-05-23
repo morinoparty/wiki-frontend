@@ -1,4 +1,5 @@
 import type { WikiPostDetail } from "@/types/wiki";
+import matter from "gray-matter";
 
 /**
  * 指定したslugに一致するWiki投稿データを取得する関数
@@ -9,13 +10,24 @@ export async function getPostBySlug(
   slug: string
 ): Promise<WikiPostDetail | null> {
   const res = await fetch(
-    `https://wiki-contentdev.yahiro.workers.dev/wiki/${encodeURIComponent(slug)}.json`
+    `https://wiki-contentdev.yahiro.workers.dev/wiki/${encodeURIComponent(slug)}.md`
   );
   if (!res.ok) {
     // 404などの場合はnullを返す
     return null;
   }
   // bodyを含む詳細データとして受け取る
-  const post = (await res.json()) as WikiPostDetail;
+  const markdown = await res.text();
+  const { data, content } = matter(markdown);
+  const post: WikiPostDetail = {
+    title: data.title ?? "",
+    slug: data.slug ?? slug,
+    description: data.description ?? "",
+    date: data.date ?? "",
+    category: data.category ?? "",
+    image: data.image,
+    body: content,
+  };
+
   return post;
 }
