@@ -16,7 +16,10 @@ const editorNavStyles = sva({
       gridTemplateColumns: "1fr auto 1fr",
       alignItems: "center",
       justifyContent: "space-between",
-      px: "32px",
+      px: {
+        base: "32px",
+        lgDown: "12px",
+      },
       backgroundColor: "white",
       textStyle: "body",
     },

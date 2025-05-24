@@ -1,20 +1,22 @@
 "use client";
 import { toaster } from "@/components/ui/toaster";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { PostHeaderEdit } from "@/components/PostHeaderEdit";
 // import { MilkdownCrepeEditor } from "@/components/Editor";
 import { css } from "styled-system/css";
-import Editor from "@/components/Editor";
 import { useTransition } from "react";
 import { savePostAction } from "@/actions/savePost";
 import { WikiPostDetail } from "@/types/wiki";
 import { EditorNav } from "@/components/EditorNav";
 import { Button } from "@chakra-ui/react";
+import dynamic from "next/dynamic";
 
 interface PostEditorClientProps {
   post: WikiPostDetail;
 }
+
+const EditorComp = dynamic(() => import("./Editor"), { ssr: false });
 
 export function PostEditorClient({ post }: PostEditorClientProps) {
   const [form, setForm] = useState(post);
@@ -30,10 +32,6 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
   const handleHeaderChange = (fields: Partial<WikiPostDetail>) => {
     setForm((prev) => ({ ...prev, ...fields }));
   };
-  const handleBodyChange = (body: string) => {
-    setForm((prev) => ({ ...prev, body }));
-  };
-
   const handleSave = () => {
     startTransition(async () => {
       await savePostAction(form).then((res) => {
@@ -74,6 +72,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
           保存
         </Button>
       </EditorNav>
+
       <PostHeaderEdit
         image={form.image}
         category={form.category}
@@ -81,13 +80,13 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
         description={form.description}
         onChange={handleHeaderChange}
       />
-      <div
-        className={css({
-          px: "90px",
-          pt: "48px",
-        })}
-      >
-        <Editor md={form.body} onChange={handleBodyChange} />
+      <div className={css({})}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <EditorComp
+            markdown={form.body}
+            onChange={(body) => setForm((prev) => ({ ...prev, body }))}
+          />
+        </Suspense>
       </div>
     </div>
   );

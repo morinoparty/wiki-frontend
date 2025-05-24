@@ -46,6 +46,7 @@ const footerStyles = sva({
       textStyle: "copyright",
       textAlign: "left",
       color: "leaf.600",
+      gridColumn: "1 / -1",
       mt: {
         base: "0",
         lgDown: "48px",
@@ -91,7 +92,13 @@ export function Footer() {
         </FooterLinkItem>
       </ul>
 
-      <p className={styles.copyright}>© MorinoParty. All rights reserved.</p>
+      <p className={styles.copyright}>
+        © morino.party
+        <br />
+        <span className={styles.description}>
+          &quot;Minecraft&quot; is a trademark of Mojang Synergies AB
+        </span>
+      </p>
     </footer>
   );
 }

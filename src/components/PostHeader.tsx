@@ -1,6 +1,8 @@
 import { sva } from "styled-system/css";
 import Link from "next/link";
 import { Tag } from "lucide-react";
+import { get } from "http";
+import { getAllCategories } from "@/lib/getAllCategories";
 
 export const postHeaderStyles = sva({
   slots: ["container", "info", "image", "category", "title", "description"],
@@ -75,13 +77,16 @@ interface PostHeaderProps {
   description: string;
 }
 
-export function PostHeader({
+export async function PostHeader({
   image,
   category,
   title,
   description,
 }: PostHeaderProps) {
   const classes = postHeaderStyles();
+  const allCategories = await getAllCategories();
+  const categoryData = allCategories.find((cat) => cat.title === category);
+
   return (
     <header className={classes.container}>
       {image && (
@@ -95,7 +100,9 @@ export function PostHeader({
       <div className={classes.info}>
         <p className={classes.category}>
           <Tag width={16} />
-          <Link href={`/category/${category}`}>{category}</Link>
+          <Link href={`/category/${categoryData?.slug}`}>
+            {categoryData?.title}
+          </Link>
         </p>
         <h1 className={classes.title}>{title}</h1>
         <p className={classes.description}>{description}</p>

@@ -1,266 +1,250 @@
-import { css } from "styled-system/css";
+import { sva } from "styled-system/css";
 
-// 必要に応じてカスタムコンポーネントを定義
+export const mdxStyles = sva({
+  slots: [
+    "p",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "ul",
+    "ol",
+    "li",
+    "a",
+    "blockquote",
+    "code",
+    "pre",
+    "img",
+    "hr",
+    "table",
+    "thead",
+    "tr",
+    "th",
+    "td",
+  ],
+  base: {
+    p: {
+      textStyle: "body",
+      color: "leaf.700",
+      lineHeight: "1.85",
+      my: "24px",
+      _first: { mt: "0" },
+    },
+    h1: {
+      fontSize: "32px",
+      fontWeight: "bold",
+      color: "leaf.700",
+      textStyle: "heading1",
+      mt: "56px",
+      mb: "32px",
+    },
+    h2: {
+      fontSize: "28px",
+      fontWeight: "bold",
+      color: "leaf.700",
+      textStyle: "heading2",
+      mt: "56px",
+      mb: "32px",
+    },
+    h3: {
+      fontSize: "24px",
+      fontWeight: "bold",
+      color: "leaf.700",
+      textStyle: "body",
+      mt: "48px",
+      mb: "12px",
+    },
+    h4: {
+      fontSize: "20px",
+      fontWeight: "bold",
+      color: "leaf.700",
+      textStyle: "heading4",
+      mt: "24px",
+      mb: "10px",
+    },
+    h5: {
+      fontSize: "18px",
+      fontWeight: "bold",
+      color: "leaf.700",
+      textStyle: "heading5",
+      mt: "18px",
+      mb: "8px",
+    },
+    h6: {
+      fontSize: "16px",
+      fontWeight: "bold",
+      color: "leaf.700",
+      textStyle: "heading6",
+      mt: "16px",
+      mb: "6px",
+    },
+    ul: {
+      pl: "24px",
+      my: "16px",
+      listStyle: "disc inside",
+      textStyle: "body",
+    },
+    ol: {
+      pl: "24px",
+      my: "16px",
+      listStyle: "decimal inside",
+      textStyle: "body",
+    },
+    li: {
+      mb: "8px",
+      textStyle: "body",
+    },
+    a: {
+      color: "blue.600",
+      textDecoration: "underline",
+      textStyle: "body",
+      _hover: { color: "blue.800" },
+    },
+    blockquote: {
+      borderLeft: "4px solid #A3C9A8",
+      pl: "16px",
+      color: "gray.700",
+      fontStyle: "italic",
+      my: "16px",
+      textStyle: "body",
+    },
+    code: {
+      background: "gray.100",
+      color: "gray.800",
+      px: "4px",
+      py: "2px",
+      borderRadius: "4px",
+      fontSize: "0.95em",
+      textStyle: "body",
+    },
+    pre: {
+      background: "gray.100",
+      color: "gray.800",
+      px: "16px",
+      py: "12px",
+      borderRadius: "8px",
+      overflowX: "auto",
+      my: "16px",
+      textStyle: "body",
+    },
+    img: {
+      maxWidth: "100%",
+      borderRadius: "8px",
+      margin: "16px 0",
+    },
+    hr: {
+      border: "none",
+      borderTop: "1px solid #E2E8F0",
+      my: "32px",
+    },
+    table: {
+      width: "100%",
+      borderCollapse: "collapse",
+      my: "24px",
+      textStyle: "body",
+    },
+    thead: {
+      background: "gray.50",
+    },
+    tr: {
+      borderBottom: "1px solid #E2E8F0",
+    },
+    th: {
+      fontWeight: "bold",
+      textAlign: "left",
+      px: "12px",
+      py: "8px",
+      background: "gray.100",
+      textStyle: "body",
+    },
+    td: {
+      px: "12px",
+      py: "8px",
+      textStyle: "body",
+    },
+  },
+});
+
 export const components = {
   p: (props: React.ComponentProps<"p">) => (
-    <p
-      className={css({
-        textStyle: "body",
-        color: "leaf.700",
-        lineHeight: "1.85",
-        my: "24px",
-        _first: {
-          mt: "0",
-        },
-      })}
-      {...props}
-    />
+    <p className={mdxStyles().p} {...props} />
   ),
   h1: (props: React.ComponentProps<"h1">) => (
-    <h1
-      className={css({
-        fontSize: "32px",
-        fontWeight: "bold",
-        color: "leaf.700",
-        textStyle: "heading1",
-        mt: "56px",
-        mb: "32px",
-      })}
-      {...props}
-    />
+    <h1 className={mdxStyles().h1} {...props} />
   ),
   h2: (props: React.ComponentProps<"h2">) => (
-    <h2
-      className={css({
-        fontSize: "28px",
-        fontWeight: "bold",
-        color: "leaf.700",
-        textStyle: "heading2",
-        mt: "56px",
-        mb: "32px",
-      })}
-      {...props}
-    />
+    <h2 className={mdxStyles().h2} {...props} />
   ),
   h3: (props: React.ComponentProps<"h3">) => (
-    <h3
-      className={css({
-        fontSize: "24px",
-        fontWeight: "bold",
-        color: "leaf.700",
-        textStyle: "body",
-        mt: "48px",
-        mb: "12px",
-      })}
-      {...props}
-    />
+    <h3 className={mdxStyles().h3} {...props} />
   ),
   h4: (props: React.ComponentProps<"h4">) => (
-    <h4
-      className={css({
-        fontSize: "20px",
-        fontWeight: "bold",
-        color: "leaf.700",
-        textStyle: "heading4",
-        mt: "24px",
-        mb: "10px",
-      })}
-      {...props}
-    />
+    <h4 className={mdxStyles().h4} {...props} />
   ),
   h5: (props: React.ComponentProps<"h5">) => (
-    <h5
-      className={css({
-        fontSize: "18px",
-        fontWeight: "bold",
-        color: "leaf.700",
-        textStyle: "heading5",
-        mt: "18px",
-        mb: "8px",
-      })}
-      {...props}
-    />
+    <h5 className={mdxStyles().h5} {...props} />
   ),
   h6: (props: React.ComponentProps<"h6">) => (
-    <h6
-      className={css({
-        fontSize: "16px",
-        fontWeight: "bold",
-        color: "leaf.700",
-        textStyle: "heading6",
-        mt: "16px",
-        mb: "6px",
-      })}
-      {...props}
-    />
+    <h6 className={mdxStyles().h6} {...props} />
   ),
   ul: (props: React.ComponentProps<"ul">) => (
-    <ul
-      className={css({
-        pl: "24px",
-        my: "16px",
-        listStyle: "disc inside",
-        textStyle: "body",
-      })}
-      {...props}
-    />
+    <ul className={mdxStyles().ul} {...props} />
   ),
   ol: (props: React.ComponentProps<"ol">) => (
-    <ol
-      className={css({
-        pl: "24px",
-        my: "16px",
-        listStyle: "decimal inside",
-        textStyle: "body",
-      })}
-      {...props}
-    />
+    <ol className={mdxStyles().ol} {...props} />
   ),
   li: (props: React.ComponentProps<"li">) => (
-    <li
-      className={css({
-        mb: "8px",
-        textStyle: "body",
-      })}
-      {...props}
-    />
+    <li className={mdxStyles().li} {...props} />
   ),
   a: (props: React.ComponentProps<"a">) => (
-    <a
-      className={css({
-        color: "blue.600",
-        textDecoration: "underline",
-        textStyle: "body",
-        _hover: { color: "blue.800" },
-      })}
-      {...props}
-    />
+    <a className={mdxStyles().a} {...props} />
   ),
   blockquote: (props: React.ComponentProps<"blockquote">) => (
-    <blockquote
-      className={css({
-        borderLeft: "4px solid #A3C9A8",
-        pl: "16px",
-        color: "gray.700",
-        fontStyle: "italic",
-        my: "16px",
-        textStyle: "body",
-      })}
-      {...props}
-    />
+    <blockquote className={mdxStyles().blockquote} {...props} />
   ),
   code: (props: React.ComponentProps<"code">) => (
-    <code
-      className={css({
-        background: "gray.100",
-        color: "gray.800",
-        px: "4px",
-        py: "2px",
-        borderRadius: "4px",
-        fontSize: "0.95em",
-        textStyle: "body",
-      })}
-      {...props}
-    />
+    <code className={mdxStyles().code} {...props} />
   ),
   pre: (props: React.ComponentProps<"pre">) => (
-    <pre
-      className={css({
-        background: "gray.100",
-        color: "gray.800",
-        px: "16px",
-        py: "12px",
-        borderRadius: "8px",
-        overflowX: "auto",
-        my: "16px",
-        textStyle: "body",
-      })}
-      {...props}
-    />
+    <pre className={mdxStyles().pre} {...props} />
   ),
   img: (props: React.ComponentProps<"img">) => {
     const { src = "", alt = "", ...rest } = props;
     if (typeof src !== "string") return null;
-    // 外部画像かどうかを判定
     const isExternal =
       src.startsWith("http://") ||
       src.startsWith("https://") ||
       src.startsWith("//");
     return (
       <img
+        className={mdxStyles().img}
         src={
           isExternal ? src : "https://wiki-contentdev.yahiro.workers.dev/" + src
         }
         alt={alt}
-        style={{
-          maxWidth: "100%",
-
-          borderRadius: "8px",
-          margin: "16px 0",
-        }}
         {...rest}
       />
     );
   },
   hr: (props: React.ComponentProps<"hr">) => (
-    <hr
-      className={css({
-        border: "none",
-        borderTop: "1px solid #E2E8F0",
-        my: "32px",
-      })}
-      {...props}
-    />
+    <hr className={mdxStyles().hr} {...props} />
   ),
   table: (props: React.ComponentProps<"table">) => (
-    <table
-      className={css({
-        width: "100%",
-        borderCollapse: "collapse",
-        my: "24px",
-        textStyle: "body",
-      })}
-      {...props}
-    />
+    <table className={mdxStyles().table} {...props} />
   ),
   thead: (props: React.ComponentProps<"thead">) => (
-    <thead
-      className={css({
-        background: "gray.50",
-      })}
-      {...props}
-    />
+    <thead className={mdxStyles().thead} {...props} />
   ),
-  tbody: (props: React.ComponentProps<"tbody">) => <tbody {...props} />,
+  tbody: (props: React.ComponentProps<"tbody">) => <tbody {...props} />, // tbodyは特別なスタイルなし
   tr: (props: React.ComponentProps<"tr">) => (
-    <tr
-      className={css({
-        borderBottom: "1px solid #E2E8F0",
-      })}
-      {...props}
-    />
+    <tr className={mdxStyles().tr} {...props} />
   ),
   th: (props: React.ComponentProps<"th">) => (
-    <th
-      className={css({
-        fontWeight: "bold",
-        textAlign: "left",
-        px: "12px",
-        py: "8px",
-        background: "gray.100",
-        textStyle: "body",
-      })}
-      {...props}
-    />
+    <th className={mdxStyles().th} {...props} />
   ),
   td: (props: React.ComponentProps<"td">) => (
-    <td
-      className={css({
-        px: "12px",
-        py: "8px",
-        textStyle: "body",
-      })}
-      {...props}
-    />
+    <td className={mdxStyles().td} {...props} />
   ),
 };
