@@ -111,7 +111,7 @@ export const mdxStyles = sva({
       textStyle: "body",
     },
     code: {
-      background: "gray.100",
+      background: "white",
       color: "gray.800",
       px: "4px",
       py: "2px",
@@ -120,7 +120,7 @@ export const mdxStyles = sva({
       textStyle: "body",
     },
     pre: {
-      background: "gray.100",
+      background: "white",
       color: "gray.800",
       px: "16px",
       py: "12px",
@@ -146,7 +146,7 @@ export const mdxStyles = sva({
       textStyle: "body",
     },
     thead: {
-      background: "gray.50",
+      background: "leaf.600/5",
     },
     tr: {
       borderBottom: "1px solid #E2E8F0",
@@ -156,7 +156,7 @@ export const mdxStyles = sva({
       textAlign: "left",
       px: "12px",
       py: "8px",
-      background: "gray.100",
+      background: "leaf.600/5",
       textStyle: "body",
     },
     td: {

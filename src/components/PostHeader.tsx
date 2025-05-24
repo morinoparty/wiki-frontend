@@ -1,7 +1,6 @@
 import { sva } from "styled-system/css";
 import Link from "next/link";
 import { Tag } from "lucide-react";
-import { get } from "http";
 import { getAllCategories } from "@/lib/getAllCategories";
 
 export const postHeaderStyles = sva({
