@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { sva } from "styled-system/css";
 
 export const mdxStyles = sva({
@@ -100,6 +101,7 @@ export const mdxStyles = sva({
       color: "blue.600",
       textDecoration: "underline",
       textStyle: "body",
+      wordBreak: "break-all",
       _hover: { color: "blue.800" },
     },
     blockquote: {
@@ -198,9 +200,10 @@ export const components = {
   li: (props: React.ComponentProps<"li">) => (
     <li className={mdxStyles().li} {...props} />
   ),
-  a: (props: React.ComponentProps<"a">) => (
-    <a className={mdxStyles().a} {...props} />
-  ),
+  a: (props: React.ComponentProps<"a">) => {
+    const { href = "#", ...rest } = props;
+    return <Link href={href} className={mdxStyles().a} {...rest} />;
+  },
   blockquote: (props: React.ComponentProps<"blockquote">) => (
     <blockquote className={mdxStyles().blockquote} {...props} />
   ),
