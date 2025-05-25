@@ -1,3 +1,5 @@
+"use client";
+
 import {
   MDXEditor,
   MDXEditorMethods,
@@ -15,6 +17,7 @@ import {
   AdmonitionDirectiveDescriptor,
   quotePlugin,
   codeBlockPlugin,
+  thematicBreakPlugin,
 } from "@mdxeditor/editor";
 
 import { FC } from "react";
@@ -51,6 +54,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
           }),
           codeBlockPlugin(),
           quotePlugin(),
+          thematicBreakPlugin(),
           markdownShortcutPlugin(),
 
           imagePlugin({

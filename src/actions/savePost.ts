@@ -5,6 +5,23 @@ import { revalidatePath } from "next/cache";
 import { Octokit } from "octokit";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import matter from "gray-matter";
+
+function toUrlSlug(str: string): string {
+  // encodeURIComponentで日本語もURLセーフに
+  return encodeURIComponent(
+    str
+      .normalize("NFKC")
+      .replace(/[Ａ-Ｚａ-ｚ０-９]/g, (s) =>
+        String.fromCharCode(s.charCodeAt(0) - 0xfee0)
+      ) // 全角英数字→半角
+      .replace(/\s+/g, "-") // 空白→ハイフン
+      .replace(/[\u3000]/g, "-") // 全角スペース→ハイフン
+      .replace(/--+/g, "-") // ハイフン連続→1つ
+      .replace(/^-+|-+$/g, "") // 先頭・末尾ハイフン除去
+      .toLowerCase()
+  );
+}
 
 export async function savePostAction(
   form: WikiPostDetail,
@@ -16,7 +33,7 @@ export async function savePostAction(
     session?.user?.name && session?.user?.id
       ? {
           name: `${session.user.name} (${session.user.id})`,
-          email: "account@morino.party",
+          email: "players@morino.party",
         }
       : undefined;
 
@@ -27,21 +44,19 @@ export async function savePostAction(
   const owner = "morinoparty"; // TODO: 実際の値に置き換え
   const repo = "wiki-contentdev"; // TODO: 実際の値に置き換え
   const branch = "main"; // 例: mainブランチ
-  const filePath = `content/wiki/${form.slug}.json`; // 保存先のパス
 
-  // JSON形式に変換
-  const content = JSON.stringify(
-    {
-      title: form.title,
-      slug: form.slug,
-      category: form.category,
-      description: form.description,
-      image: form.image || "",
-      body: form.body,
-    },
-    null,
-    2
-  );
+  const slug = toUrlSlug(form.slug);
+
+  const filePath = `content/wiki/${slug}.md`; // 保存先のパス
+
+  // Markdown形式に変換
+  const content = matter.stringify(form.body || "", {
+    title: form.title,
+    slug: form.slug,
+    category: form.category,
+    description: form.description,
+    image: form.image || "",
+  });
 
   console.log("content", content);
 
@@ -76,7 +91,7 @@ export async function savePostAction(
       owner,
       repo,
       path: filePath,
-      message: commitMessage || `Add or update post: ${form.title}`,
+      message: commitMessage || `Add or update post: ${form.slug}.md`,
       content: contentEncoded,
       branch,
       sha: fileSha,
@@ -85,8 +100,6 @@ export async function savePostAction(
         author: committer,
       }),
     });
-
-  console.log("commitData", commitData.commit);
 
   // 必要に応じてパスの再検証
   revalidatePath("/dashboard/posts");
