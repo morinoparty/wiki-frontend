@@ -22,6 +22,7 @@ export type WikiCategory = {
   title: string;
   slug: string;
   body: string;
+  hasPosition: boolean;
 };
 
 // 画像ファイル名リストの型定義
