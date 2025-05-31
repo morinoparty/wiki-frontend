@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { css } from "styled-system/css";
-import { Home, Menu, Tag } from "lucide-react";
+import { Home, Menu, Settings2, Tag } from "lucide-react";
 import { UserBox } from "./UserBox";
 import { SearchBox } from "@/components/SearchBox";
 import { NotLoginNote } from "./NotLoginNote";
@@ -167,7 +167,27 @@ const SidebarContent: React.FC = async () => {
         })}
       >
         <AuthConditional fallback={<NotLoginNote />}>
-          <UserBox />
+          <ul
+            className={css({
+              display: "grid",
+              gap: "16px",
+              listStyle: "none",
+              pt: {
+                base: "28px",
+                lgDown: "0",
+              },
+              pb: {
+                base: "inherit",
+
+                mdDown: "32px",
+              },
+            })}
+          >
+            <NavListItem href="/dashboard" icon={<Settings2 />}>
+              管理画面
+            </NavListItem>
+            <UserBox />
+          </ul>
         </AuthConditional>
       </div>
     </>
@@ -369,6 +389,12 @@ const NavListCategory: React.FC<{
           listStyle: "none",
           display: "grid",
           gap: "6px",
+          "&:hover li:not(:hover)": {
+            opacity: 0.5,
+          },
+          "& li": {
+            transition: "opacity 0.2s ease",
+          },
         })}
       >
         {children}

@@ -28,4 +28,10 @@ export default defineConfig({
   jsxFramework: "react", // or 'solid' or 'vue'
 
   presets: [customColorsPreset],
+
+  globalCss: {
+    "html, body": {
+      backgroundColor: "leaf.50",
+    },
+  },
 });

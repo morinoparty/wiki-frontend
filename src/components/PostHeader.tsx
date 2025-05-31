@@ -84,7 +84,7 @@ export async function PostHeader({
 }: PostHeaderProps) {
   const classes = postHeaderStyles();
   const allCategories = await getAllCategories();
-  const categoryData = allCategories.find((cat) => cat.title === category);
+  const categoryData = allCategories.find((cat) => cat.slug === category);
 
   return (
     <header className={classes.container}>

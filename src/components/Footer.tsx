@@ -41,6 +41,12 @@ const footerStyles = sva({
       gap: "8px",
       textAlign: "left",
       color: "leaf.500",
+      "&:hover li:not(:hover)": {
+        opacity: 0.5,
+      },
+      "& li": {
+        transition: "opacity 0.2s ease",
+      },
     },
     copyright: {
       textStyle: "copyright",
