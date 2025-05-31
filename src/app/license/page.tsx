@@ -21,6 +21,75 @@ interface LicenseData {
   licenseFile?: string;
 }
 
+interface LicenseInfo {
+  name: string;
+  description: string;
+  summary: string;
+}
+
+const licenseDescriptions: Record<string, LicenseInfo> = {
+  MIT: {
+    name: "MIT License",
+    description:
+      "最も人気のあるオープンソースライセンスの一つ。非常に寛容で、商用利用、修正、配布、私的使用が自由に行えます。",
+    summary: "寛容なライセンス、商用利用可能",
+  },
+  "Apache-2.0": {
+    name: "Apache License 2.0",
+    description:
+      "Apache Software Foundationによって作成されたライセンス。特許権の明示的な許可と、変更点の明記義務があります。",
+    summary: "特許保護付きの寛容なライセンス",
+  },
+  "BSD-2-Clause": {
+    name: "BSD 2-Clause License",
+    description:
+      "シンプルな2条項BSDライセンス。再配布時の著作権表示とライセンス条文の保持が必要です。",
+    summary: "シンプルで寛容なライセンス",
+  },
+  "BSD-3-Clause": {
+    name: "BSD 3-Clause License",
+    description:
+      "3条項BSDライセンス。著作者の名前を許可なしに宣伝に使用することを禁止する条項が追加されています。",
+    summary: "寛容なライセンス、宣伝制限あり",
+  },
+  ISC: {
+    name: "ISC License",
+    description:
+      "Internet Systems Consortiumライセンス。MITライセンスと機能的に同等で、よりシンプルな文言で書かれています。",
+    summary: "MITと同等のシンプルなライセンス",
+  },
+  "0BSD": {
+    name: "BSD Zero Clause License",
+    description:
+      "最も制限の少ないライセンス。パブリックドメインに近く、著作権表示も不要です。",
+    summary: "制限なし、パブリックドメイン相当",
+  },
+  "MIT*": {
+    name: "MIT License (variant)",
+    description:
+      "MITライセンスのバリエーション。基本的にはMITライセンスと同じ条件です。",
+    summary: "MITライセンスのバリエーション",
+  },
+  "GPL-3.0": {
+    name: "GNU General Public License v3.0",
+    description:
+      "強いコピーレフトライセンス。このライブラリを使用したソフトウェアも同じライセンスで公開する必要があります。",
+    summary: "強いコピーレフト、ソース公開義務",
+  },
+  "LGPL-2.1": {
+    name: "GNU Lesser General Public License v2.1",
+    description:
+      "弱いコピーレフトライセンス。ライブラリとしてリンクする場合は、アプリケーション全体をGPLにする必要はありません。",
+    summary: "弱いコピーレフト、リンク利用可能",
+  },
+  "CC0-1.0": {
+    name: "Creative Commons Zero v1.0",
+    description:
+      "著作権を放棄し、作品をパブリックドメインに捧げるライセンス。一切の制限がありません。",
+    summary: "パブリックドメイン、制限なし",
+  },
+};
+
 const licensePageStyles = sva({
   slots: ["container", "header", "title", "description", "list"],
   base: {
@@ -89,6 +158,8 @@ const licenseCardStyles = sva({
     "header",
     "badge",
     "title",
+    "description",
+    "summary",
     "packageGrid",
     "packageItem",
     "packageInfo",
@@ -97,16 +168,12 @@ const licenseCardStyles = sva({
     "link",
   ],
   base: {
-    section: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "16px",
-    },
+    section: {},
     header: {
       display: "flex",
-      alignItems: "center",
+      alignItems: "flex-start",
       gap: "12px",
-      marginBottom: "8px",
+      marginBottom: "12px",
     },
     title: {
       fontSize: "24px",
@@ -114,6 +181,7 @@ const licenseCardStyles = sva({
       color: "leaf.700",
       textStyle: "heading3",
       wordBreak: "break-all",
+      flex: "1",
     },
     badge: {
       background: "leaf.100",
@@ -122,10 +190,24 @@ const licenseCardStyles = sva({
       borderRadius: "16px",
       fontSize: "14px",
       fontWeight: "medium",
+      flexShrink: "0",
+    },
+    description: {
+      textStyle: "body",
+      color: "leaf.600",
+      marginBottom: "8px",
+      lineHeight: "1.6",
+    },
+    summary: {
+      fontSize: "14px",
+      color: "leaf.500",
+      fontStyle: "italic",
+      marginBottom: "12px",
     },
     packageGrid: {
       display: "grid",
       gap: "8px",
+      pt: "24px",
       gridTemplateColumns: {
         base: "repeat(auto-fit, minmax(300px, 1fr))",
         mdDown: "1fr",
@@ -144,7 +226,7 @@ const licenseCardStyles = sva({
       color: "inherit",
       cursor: "pointer",
       _hover: {
-        borderColor: "leaf.400",
+        borderColor: "leaf.200",
         borderWidth: "2px",
       },
       _active: {
@@ -230,13 +312,20 @@ const LicenseCard: React.FC<{
   packages: Array<{ packageName: string } & LicenseData>;
 }> = ({ licenseName, packages }) => {
   const classes = licenseCardStyles();
+  const licenseInfo = licenseDescriptions[licenseName];
 
   return (
     <section className={classes.section}>
       <div className={classes.header}>
-        <h3 className={classes.title}>{licenseName}</h3>
+        <h3 className={classes.title}>{licenseInfo?.name || licenseName}</h3>
         <span className={classes.badge}>{packages.length}個</span>
       </div>
+
+      {licenseInfo && (
+        <>
+          <p className={classes.description}>{licenseInfo.description}</p>
+        </>
+      )}
 
       <div className={classes.packageGrid}>
         {packages.map(({ packageName, repository, publisher }) => {

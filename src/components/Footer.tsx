@@ -3,7 +3,7 @@ import { sva } from "styled-system/css";
 import { FooterLinkItem } from "./FooterLinkItem";
 
 const footerStyles = sva({
-  slots: ["root", "logo", "description", "list", "copyright"],
+  slots: ["root", "logo", "description", "list", "copyright", "license"],
   base: {
     root: {
       px: {
@@ -52,10 +52,32 @@ const footerStyles = sva({
       textStyle: "copyright",
       textAlign: "left",
       color: "leaf.600",
-      gridColumn: "1 / -1",
+      gridColumn: {
+        base: "1 / 3",
+        lgDown: "1 / -1",
+      },
+      gridRow: {
+        base: "2 / 3",
+        // last row in lgDown
+        lgDown: "5 / 6",
+      },
       mt: {
         base: "0",
         lgDown: "48px",
+      },
+    },
+    license: {
+      textStyle: "body",
+      color: "leaf.600/50",
+      fontSize: "14px",
+      gridColumn: {
+        base: "3 / -1",
+        lgDown: "1 / -1",
+      },
+      alignSelf: "end",
+      transition: "color 0.2s ease",
+      _hover: {
+        color: "leaf.600/70",
       },
     },
   },
@@ -96,6 +118,10 @@ export function Footer() {
         <FooterLinkItem href="https://morino.party/guideline" withIcon>
           行動規約
         </FooterLinkItem>
+      </ul>
+
+      <ul className={styles.license}>
+        <Link href="/license">オープンソースライセンス</Link>
       </ul>
 
       <p className={styles.copyright}>
