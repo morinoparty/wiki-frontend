@@ -38,6 +38,11 @@ export default async function Home() {
               base: "6.389vw",
               lgDown: "100px",
             },
+            display: "grid",
+            gridTemplateColumns: {
+              base: "1fr 1fr",
+              lgDown: "1fr",
+            },
           })}
         >
           <p
@@ -51,6 +56,10 @@ export default async function Home() {
               mb: {
                 base: "28px",
                 lgDown: "24px",
+              },
+
+              gridColumn: {
+                base: "1 / -1",
               },
             })}
           >
@@ -74,10 +83,7 @@ export default async function Home() {
             className={css({
               textStyle: "body",
               color: "leaf.600",
-              width: {
-                base: "50%",
-                lgDown: "100%",
-              },
+              width: "100%",
             })}
           >
             ここはみんなでもりぱに関する情報の共有をする場所です！もりぱにログインしたことがあれば、すぐに使い始めることができます。

@@ -4,7 +4,7 @@ import { WikiCardGrid } from "@/components/WikiCardGrid";
 import { getAllCategories } from "@/lib/getAllCategories";
 import { getAllPosts } from "@/lib/getAllPosts";
 import { WikiCategory, WikiPost } from "@/types/wiki";
-import { Tag } from "lucide-react";
+import { Tag, TentTree } from "lucide-react";
 import { notFound } from "next/navigation";
 import { useId } from "react";
 import { css } from "styled-system/css";
@@ -25,9 +25,7 @@ export default async function Page(props: PageProps) {
   if (!category) return notFound();
 
   const posts = await getAllPosts();
-  const categoryPosts = posts.filter(
-    (post) => post.category === category.title
-  );
+  const categoryPosts = posts.filter((post) => post.category === category.slug);
   if (!categoryPosts) return notFound();
   categoryPosts.sort((a, b) => {
     const aDate = new Date(a.date);
@@ -52,27 +50,37 @@ export default async function Page(props: PageProps) {
   );
 
   return (
-    <div>
+    <div
+      className={css({
+        width: "100%",
+        minHeight: "100vh",
+        display: "grid",
+        gridTemplateRows: "auto 1fr",
+      })}
+    >
       <CategoryHeader {...category} />
       <CategoryPosts posts={pagedPosts} />
-      <div
-        className={css({
-          px: {
-            base: "90px",
-            lgDown: "24px",
-          },
-          pt: {
-            base: "48px",
-            lgDown: "24px",
-          },
-          pb: {
-            base: "200px",
-            lgDown: "100px",
-          },
-        })}
-      >
-        <PaginationWrapper currentPage={page} totalPages={totalPages} />
-      </div>
+
+      {totalPages > 1 && (
+        <div
+          className={css({
+            px: {
+              base: "90px",
+              lgDown: "24px",
+            },
+            pt: {
+              base: "48px",
+              lgDown: "24px",
+            },
+            pb: {
+              base: "200px",
+              lgDown: "100px",
+            },
+          })}
+        >
+          <PaginationWrapper currentPage={page} totalPages={totalPages} />
+        </div>
+      )}
     </div>
   );
 }
@@ -87,49 +95,56 @@ const CategoryHeader: React.FC<WikiCategory> = ({ title, body }) => {
   return (
     <header
       className={css({
-        borderBottom: "1px solid",
-        borderColor: "leaf.100",
+        px: {
+          base: "90px",
+          lgDown: "24px",
+        },
+        mx: "auto",
+        pt: "48px",
+        pb: "24px",
+        gap: {
+          base: "24px",
+          mdDown: "12px 24px",
+        },
+        display: "grid",
+        gridTemplateColumns: {
+          base: "32px 1fr 1fr",
+          mdDown: "32px 1fr",
+        },
+        alignItems: "center",
+        width: "100%",
       })}
     >
-      <div
+      <Tag size={32} strokeWidth={1.25} />
+      <h1
         className={css({
-          px: {
-            base: "90px",
-            lgDown: "24px",
-          },
-          mx: "auto",
-          pt: "48px",
-          pb: "48px",
+          fontSize: "32px",
+          fontWeight: "bold",
+          color: "leaf.700",
+          textStyle: "heading1",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
         })}
       >
-        <h1
-          className={css({
-            fontSize: "32px",
-            fontWeight: "bold",
-            color: "leaf.700",
-            textStyle: "heading1",
-            mb: "16px",
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          })}
-        >
-          <span>
-            <Tag size={24} />
-          </span>
-          {title}
-        </h1>
-        <p
-          className={css({
-            textStyle: "body",
-            color: "leaf.600",
-            width: "100%",
-          })}
-        >
-          {body}
-        </p>
-      </div>
+        {title}
+      </h1>
+      <p
+        className={css({
+          textStyle: "body",
+          color: "leaf.600",
+          width: "100%",
+          minHeight: "100%",
+          alignContent: "center",
+          gridColumn: {
+            base: "3 / -1",
+            mdDown: "2 / 3",
+          },
+        })}
+      >
+        {body}
+      </p>
     </header>
   );
 };
@@ -137,6 +152,40 @@ const CategoryHeader: React.FC<WikiCategory> = ({ title, body }) => {
 const CategoryPosts: React.FC<{
   posts: WikiPost[];
 }> = ({ posts }) => {
+  if (!posts || posts.length === 0) {
+    return (
+      <div
+        className={css({
+          px: {
+            base: "90px",
+            lgDown: "24px",
+          },
+          pt: "48px",
+          pb: "64px",
+          height: "100%",
+          gap: "16px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        })}
+      >
+        <TentTree
+          size={64}
+          strokeWidth={1.25}
+          className={css({ color: "leaf.500" })}
+        />
+        <p
+          className={css({
+            textStyle: "body",
+            textAlign: "center",
+          })}
+        >
+          まだ記事がありません🍂
+        </p>
+      </div>
+    );
+  }
   return (
     <div
       className={css({
