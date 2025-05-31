@@ -7,12 +7,81 @@ import { WikiCategory, WikiPost } from "@/types/wiki";
 import { Tag, TentTree } from "lucide-react";
 import { notFound } from "next/navigation";
 import { useId } from "react";
-import { css } from "styled-system/css";
+import { css, sva } from "styled-system/css";
 
 interface PageProps {
   params: Promise<{ categoryId: string }>;
   searchParams?: Promise<{ page: string }>;
 }
+
+const categoryPostsPageStyles = sva({
+  slots: ["container", "pagination"],
+  base: {
+    container: {
+      width: "100%",
+      minHeight: "100vh",
+      display: "grid",
+      gridTemplateRows: "48px auto 64px 1fr 128px auto 200px",
+      gridTemplateColumns: {
+        base: "90px 1fr 90px",
+        lgDown: "24px 1fr 24px",
+      },
+      gridTemplateAreas: {
+        base: `
+          ". . ."
+          ". header ."
+          ". . ."
+          ". posts ."
+          ". . ."
+          ". pagination ."
+          ". . ."
+        `,
+      },
+      overflow: "hidden",
+      maxWidth: "100vw",
+    },
+    pagination: {
+      gridArea: "pagination",
+    },
+  },
+  variants: {
+    hasPosition: {
+      true: {
+        container: {
+          gridTemplateRows: "48px auto 48px 500px 72px 1fr 128px auto 200px",
+          gridTemplateAreas: {
+            base: `
+              ". . ."
+              ". header ."
+              ". . ."
+              "map map map"
+              ". . ."
+              ". posts ."
+              ". . ."
+              ". pagination ."
+              ". . ."
+            `,
+          },
+        },
+      },
+    },
+    isEmpty: {
+      true: {
+        container: {
+          gridTemplateRows: "48px auto 48px 1fr",
+          gridTemplateAreas: {
+            base: `
+              ". . ."
+              ". header ."
+              ". . ."
+              ". posts ."
+            `,
+          },
+        },
+      },
+    },
+  },
+});
 
 export default async function Page(props: PageProps) {
   const { params, searchParams } = props;
@@ -23,6 +92,7 @@ export default async function Page(props: PageProps) {
   const categories = await getAllCategories();
   const category = categories.find((category) => category.slug === categoryId);
   if (!category) return notFound();
+  const hasPosition = category.hasPosition ?? false;
 
   const posts = await getAllPosts();
   const categoryPosts = posts.filter((post) => post.category === category.slug);
@@ -49,35 +119,28 @@ export default async function Page(props: PageProps) {
     page * PAGE_SIZE
   );
 
+  const classes = categoryPostsPageStyles({
+    hasPosition,
+    isEmpty: pagedPosts.length === 0,
+  });
+
   return (
-    <div
-      className={css({
-        width: "100%",
-        minHeight: "100vh",
-        display: "grid",
-        gridTemplateRows: "auto 1fr",
-      })}
-    >
+    <div className={classes.container}>
       <CategoryHeader {...category} />
+      {hasPosition && pagedPosts.length > 0 && (
+        <iframe
+          src="https://maps.morino.party/?world=minecraft_overworld&x=5140&z=4007"
+          className={css({
+            width: "100%",
+            height: "100%",
+            gridArea: "map",
+          })}
+        />
+      )}
       <CategoryPosts posts={pagedPosts} />
 
       {totalPages > 1 && (
-        <div
-          className={css({
-            px: {
-              base: "90px",
-              lgDown: "24px",
-            },
-            pt: {
-              base: "48px",
-              lgDown: "24px",
-            },
-            pb: {
-              base: "200px",
-              lgDown: "100px",
-            },
-          })}
-        >
+        <div className={classes.pagination}>
           <PaginationWrapper currentPage={page} totalPages={totalPages} />
         </div>
       )}
@@ -95,13 +158,7 @@ const CategoryHeader: React.FC<WikiCategory> = ({ title, body }) => {
   return (
     <header
       className={css({
-        px: {
-          base: "90px",
-          lgDown: "24px",
-        },
         mx: "auto",
-        pt: "48px",
-        pb: "24px",
         gap: {
           base: "24px",
           mdDown: "12px 24px",
@@ -113,6 +170,7 @@ const CategoryHeader: React.FC<WikiCategory> = ({ title, body }) => {
         },
         alignItems: "center",
         width: "100%",
+        gridArea: "header",
       })}
     >
       <Tag size={32} strokeWidth={1.25} />
@@ -160,14 +218,13 @@ const CategoryPosts: React.FC<{
             base: "90px",
             lgDown: "24px",
           },
-          pt: "48px",
-          pb: "64px",
           height: "100%",
           gap: "16px",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          gridArea: "posts",
         })}
       >
         <TentTree
@@ -189,12 +246,7 @@ const CategoryPosts: React.FC<{
   return (
     <div
       className={css({
-        px: {
-          base: "90px",
-          lgDown: "24px",
-        },
-        pt: "48px",
-        pb: "64px",
+        gridArea: "posts",
       })}
     >
       <WikiCardGrid>

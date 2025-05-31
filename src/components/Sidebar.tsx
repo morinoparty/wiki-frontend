@@ -70,6 +70,14 @@ export async function Sidebar() {
           base: "none",
           mdDown: "1px",
         },
+
+        "& > a": {
+          display: {
+            base: "block",
+            lgDown: "none",
+            mdDown: "flex",
+          },
+        },
       })}
     >
       <SidebarLogo />

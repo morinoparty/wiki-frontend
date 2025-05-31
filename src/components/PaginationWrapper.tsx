@@ -23,7 +23,10 @@ const PaginationLink = (
   return (
     <IconButton
       asChild={!props.disabled}
-      size={"lg"}
+      size={{
+        base: "md",
+        mdDown: "sm",
+      }}
       {...rest}
       className={cx(
         css({
@@ -55,6 +58,7 @@ export const PaginationWrapper = ({
       pageSize={1}
       defaultPage={currentPage}
       page={currentPage}
+      siblingCount={0}
     >
       <ButtonGroup variant="ghost" size="sm">
         <PaginationLink

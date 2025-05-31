@@ -9,7 +9,8 @@ const layoutStyles = sva({
       display: "grid",
       gridTemplateColumns: {
         base: "300px 1fr",
-        lgDown: "1fr",
+        lgDown: "89px 1fr",
+        mdDown: "1fr",
       },
       gridTemplateRows: "auto 1fr",
       gridTemplateAreas: {

@@ -51,3 +51,5 @@ public/search-index.json
 .wrangler/Users/yahiro/Documents/working/wiki-frontend/.env.local
 
 .wrangler
+
+/src/app/license/data.json
