@@ -1,12 +1,29 @@
-import { css } from "styled-system/css";
+import { getAllCategories } from "@/lib/getAllCategories";
+import { getAllPosts } from "@/lib/getAllPosts";
+import { PostCreationClient } from "./PostCreationClient";
+import { ModalDialogWrapper } from "@/components/ModalDialogWrapper";
 
 export default async function Home() {
+  const categories = await getAllCategories();
+  const posts = await getAllPosts();
+
+  // slugをデコードして正規化
+  const existingSlugs = posts.map((post) => {
+    try {
+      // URLエンコードされたslugをデコード
+      return decodeURIComponent(post.slug);
+    } catch {
+      // デコードに失敗した場合はそのまま返す
+      return post.slug;
+    }
+  });
+
   return (
-    <div
-      className={css({
-        px: "90px",
-        pt: "48px",
-      })}
-    ></div>
+    <ModalDialogWrapper isPage>
+      <PostCreationClient
+        categories={categories}
+        existingSlugs={existingSlugs}
+      />
+    </ModalDialogWrapper>
   );
 }

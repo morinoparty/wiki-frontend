@@ -1,10 +1,10 @@
 import { LoginModal } from "@/components/LoginModal";
-import { LoginModalWrapper } from "@/components/LoginModalWrapper";
+import { ModalDialogWrapper } from "@/components/ModalDialogWrapper";
 
 export default async function Home() {
   return (
-    <LoginModalWrapper>
+    <ModalDialogWrapper>
       <LoginModal />
-    </LoginModalWrapper>
+    </ModalDialogWrapper>
   );
 }

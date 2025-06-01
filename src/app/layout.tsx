@@ -14,11 +14,11 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  auth,
+  modal,
   children,
 }: Readonly<{
   children: React.ReactNode;
-  auth: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   return (
     <html lang="ja" suppressHydrationWarning>
@@ -37,7 +37,7 @@ export default function RootLayout({
       </head>
       <body>
         <Provider>
-          {auth}
+          {modal}
           <Layout sidebar={<Sidebar />}>{children}</Layout>
         </Provider>
       </body>

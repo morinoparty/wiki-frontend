@@ -1,18 +1,10 @@
 import { LoginModal } from "@/components/LoginModal";
-import { css } from "styled-system/css";
+import { ModalDialogWrapper } from "@/components/ModalDialogWrapper";
 
 export default async function Home() {
   return (
-    <div
-      className={css({
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        bgColor: "leaf.100",
-      })}
-    >
+    <ModalDialogWrapper isPage>
       <LoginModal />
-    </div>
+    </ModalDialogWrapper>
   );
 }

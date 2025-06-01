@@ -10,7 +10,10 @@ export async function getPostBySlug(
   slug: string
 ): Promise<WikiPostDetail | null> {
   const res = await fetch(
-    `https://wiki-contentdev.yahiro.workers.dev/wiki/${encodeURIComponent(slug)}.md`
+    `https://wiki-contentdev.yahiro.workers.dev/wiki/${encodeURIComponent(slug)}.md`,
+    {
+      cache: "force-cache",
+    }
   );
   if (!res.ok) {
     // 404などの場合はnullを返す
