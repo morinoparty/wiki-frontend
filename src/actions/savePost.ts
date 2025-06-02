@@ -49,22 +49,14 @@ export async function savePostAction(
 
   const filePath = `content/wiki/${slug}.md`; // 保存先のパス
 
-  // Markdown形式に変換
-  const content = matter.stringify(form.body || "", {
-    title: form.title,
-    slug: form.slug,
-    category: form.category,
-    description: form.description,
-    image: form.image || "",
-  });
-
-  console.log("content", content);
-
-  // Base64エンコード
-  const contentEncoded = Buffer.from(content, "utf-8").toString("base64");
-
   // ファイルの最新SHA（既存の場合）を取得
   let fileSha: string | undefined = undefined;
+  let existingVersion = 1;
+  let existingCreatedAt: string | undefined = undefined;
+  let existingCreatedBy: string | undefined = undefined;
+  let existingDocumentOwner: string | undefined = undefined;
+  let existingIsLocked = false;
+
   try {
     const { data: fileData } = await octokit.rest.repos.getContent({
       owner,
@@ -72,7 +64,20 @@ export async function savePostAction(
       path: filePath,
       ref: branch,
     });
-    if (!Array.isArray(fileData) && fileData.sha) fileSha = fileData.sha;
+    if (!Array.isArray(fileData) && fileData.type === "file" && fileData.sha) {
+      fileSha = fileData.sha;
+
+      // 既存ファイルの内容を取得してメタデータを抽出
+      const existingContent = Buffer.from(fileData.content, "base64").toString(
+        "utf-8"
+      );
+      const existingMatter = matter(existingContent);
+      existingVersion = (existingMatter.data.version || 0) + 1;
+      existingCreatedAt = existingMatter.data.createdAt;
+      existingCreatedBy = existingMatter.data.createdBy;
+      existingDocumentOwner = existingMatter.data.documentOwner;
+      existingIsLocked = existingMatter.data.isLocked || false;
+    }
   } catch (e) {
     // ファイルが存在しない場合は404になるので無視
     if (
@@ -84,6 +89,51 @@ export async function savePostAction(
       throw e;
     }
   }
+
+  // ロックチェック：既存ファイルがロックされている場合、documentOwnerのみが編集可能
+  const currentUserId = session?.user?.id;
+  if (
+    existingIsLocked &&
+    existingDocumentOwner &&
+    currentUserId !== existingDocumentOwner
+  ) {
+    throw new Error(
+      `このドキュメントはロックされています。編集権限があるのは所有者（${existingDocumentOwner}）のみです。`
+    );
+  }
+
+  // Markdown形式に変換
+  const now = new Date().toISOString();
+  const content = matter.stringify(form.body || "", {
+    title: form.title,
+    slug: form.slug,
+    category: form.category,
+    description: form.description,
+    image: form.image || "",
+    // 時間関連
+    createdAt: form.createdAt || existingCreatedAt || now,
+    updatedAt: now,
+    // 作成者・所有者情報
+    createdBy: form.createdBy || existingCreatedBy || session?.user?.id,
+    documentOwner:
+      form.documentOwner || existingDocumentOwner || session?.user?.id,
+    lastModifiedBy: session?.user?.id,
+    // 公開状態・権限
+    status: form.status || "draft",
+    visibility: form.visibility || "public",
+    // その他メタデータ
+    version: form.version || existingVersion,
+    priority: form.priority,
+    // ロック機能
+    isLocked: form.isLocked || false,
+    lockedAt: form.isLocked ? form.lockedAt || now : undefined,
+    lockedBy: form.isLocked ? form.lockedBy || session?.user?.id : undefined,
+  });
+
+  console.log("content", content);
+
+  // Base64エンコード
+  const contentEncoded = Buffer.from(content, "utf-8").toString("base64");
 
   // ファイルを作成または更新
   const { data: commitData } =

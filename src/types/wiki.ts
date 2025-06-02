@@ -6,6 +6,23 @@ export type WikiPost = {
   date: string;
   category: string;
   image?: string;
+  // 時間関連
+  createdAt?: string;
+  updatedAt?: string;
+  // 作成者・所有者情報
+  createdBy?: string;
+  documentOwner?: string;
+  lastModifiedBy?: string;
+  // 公開状態・権限
+  status?: "draft" | "published" | "archived";
+  visibility?: "public" | "private" | "restricted";
+  // その他メタデータ
+  version?: number;
+  priority?: "low" | "medium" | "high";
+  // ロック機能
+  isLocked?: boolean;
+  lockedAt?: string;
+  lockedBy?: string;
 };
 
 // 詳細取得時（bodyあり）
