@@ -6,7 +6,7 @@ import { PostHeaderEdit } from "@/components/PostHeaderEdit";
 // import { MilkdownCrepeEditor } from "@/components/Editor";
 import { css } from "styled-system/css";
 import { useTransition } from "react";
-import { savePostAction } from "@/actions/savePost";
+import { updatePost } from "@/actions/update-post";
 import { WikiPostDetail } from "@/types/wiki";
 import { EditorNav } from "@/components/EditorNav";
 import { Button } from "@chakra-ui/react";
@@ -34,23 +34,37 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
   };
   const handleSave = () => {
     startTransition(async () => {
-      await savePostAction(form).then((res) => {
-        if (res.success === false) {
-          console.error("Error saving post:", res);
-          toaster.error({
-            title: "保存に失敗しました",
-            description: "もう一度お試しください。",
-          });
-          return;
+      const result = await updatePost(
+        {
+          slug: form.slug,
+          title: form.title,
+          body: form.body,
+          category: form.category,
+          description: form.description,
+          image: form.image,
+          visibility: form.visibility,
+          status: form.status,
+        },
+        {
+          commitMessage: `Update post: ${form.title}`,
         }
-        console.log("Post saved successfully:", res);
-        toaster.success({
-          title: "保存しました",
-          description: "記事が正常に保存されました。",
+      );
+
+      if (!result.success) {
+        console.error("Error saving post:", result.error);
+        toaster.error({
+          title: "保存に失敗しました",
+          description: result.error || "もう一度お試しください。",
         });
-        // 成功時の処理
-        // 例: リダイレクトや通知を表示
+        return;
+      }
+
+      console.log("Post saved successfully:", result.data);
+      toaster.success({
+        title: "保存しました",
+        description: "記事が正常に保存されました。",
       });
+
       setIsDirty(false); // 保存後にダーティフラグをリセット
     });
   };
