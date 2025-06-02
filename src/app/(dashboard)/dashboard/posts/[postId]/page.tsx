@@ -13,6 +13,7 @@ export default async function Page(props: PageProps) {
   if (!postId) return notFound();
 
   const result = await getPost(postId);
+
   if (!result.success || !result.data) return notFound();
 
   return <PostEditorClient post={result.data} />;

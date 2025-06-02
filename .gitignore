@@ -52,4 +52,4 @@ public/search-index.json
 
 .wrangler
 
-/src/app/license/data.json
+/src/app/(normal)/license/data.json

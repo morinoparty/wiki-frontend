@@ -49,7 +49,9 @@ export class GitHubService {
   /**
    * メタデータからundefined値を除外
    */
-  private static cleanMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
+  private static cleanMetadata(
+    metadata: Record<string, unknown>
+  ): Record<string, unknown> {
     const cleaned: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(metadata)) {
       if (value !== undefined) {
@@ -116,25 +118,28 @@ export class GitHubService {
   ): Promise<{ success: boolean; error?: string; commitId?: string }> {
     try {
       const filePath = this.getFilePath(post.slug);
-      const content = matter.stringify(post.body || "", this.cleanMetadata({
-        title: post.title,
-        slug: post.slug,
-        category: post.category,
-        description: post.description,
-        image: post.image || "",
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        createdBy: post.createdBy,
-        documentOwner: post.documentOwner,
-        lastModifiedBy: post.lastModifiedBy,
-        status: post.status,
-        visibility: post.visibility,
-        version: post.version,
-        priority: post.priority,
-        isLocked: post.isLocked,
-        lockedAt: post.lockedAt,
-        lockedBy: post.lockedBy,
-      }));
+      const content = matter.stringify(
+        post.body || "",
+        this.cleanMetadata({
+          title: post.title,
+          slug: post.slug,
+          category: post.category,
+          description: post.description,
+          image: post.image || "",
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+          createdBy: post.createdBy,
+          documentOwner: post.documentOwner,
+          lastModifiedBy: post.lastModifiedBy,
+          status: post.status,
+          visibility: post.visibility,
+          version: post.version,
+          priority: post.priority,
+          isLocked: post.isLocked,
+          lockedAt: post.lockedAt,
+          lockedBy: post.lockedBy,
+        })
+      );
 
       const contentEncoded = Buffer.from(content, "utf-8").toString("base64");
       const committer = this.getCommitter(session);
@@ -189,25 +194,28 @@ export class GitHubService {
         return { success: false, error: "ファイルが見つかりません" };
       }
 
-      const content = matter.stringify(post.body || "", this.cleanMetadata({
-        title: post.title,
-        slug: post.slug,
-        category: post.category,
-        description: post.description,
-        image: post.image || "",
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        createdBy: post.createdBy,
-        documentOwner: post.documentOwner,
-        lastModifiedBy: post.lastModifiedBy,
-        status: post.status,
-        visibility: post.visibility,
-        version: post.version,
-        priority: post.priority,
-        isLocked: post.isLocked,
-        lockedAt: post.lockedAt,
-        lockedBy: post.lockedBy,
-      }));
+      const content = matter.stringify(
+        post.body || "",
+        this.cleanMetadata({
+          title: post.title,
+          slug: post.slug,
+          category: post.category,
+          description: post.description,
+          image: post.image || "",
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+          createdBy: post.createdBy,
+          documentOwner: post.documentOwner,
+          lastModifiedBy: post.lastModifiedBy,
+          status: post.status,
+          visibility: post.visibility,
+          version: post.version,
+          priority: post.priority,
+          isLocked: post.isLocked,
+          lockedAt: post.lockedAt,
+          lockedBy: post.lockedBy,
+        })
+      );
 
       const contentEncoded = Buffer.from(content, "utf-8").toString("base64");
       const committer = this.getCommitter(session);

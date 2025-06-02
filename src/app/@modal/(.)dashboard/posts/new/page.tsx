@@ -1,7 +1,7 @@
 import { getAllCategories } from "@/lib/getAllCategories";
 import { getAllPosts } from "@/lib/getAllPosts";
 import { ModalDialogWrapper } from "@/components/ModalDialogWrapper";
-import { PostCreationClient } from "@/app/dashboard/posts/new/PostCreationClient";
+import { PostCreationClient } from "@/app/(dashboard)/dashboard/posts/new/PostCreationClient";
 
 export default async function Home() {
   const categories = await getAllCategories();

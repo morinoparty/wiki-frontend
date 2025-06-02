@@ -71,7 +71,7 @@ export async function getPost(
         post,
         "read"
       );
-      if (!hasPermission) {
+      if (!hasPermission && post.visibility !== undefined) {
         return { success: false, error: "この記事を閲覧する権限がありません" };
       }
     } else {

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Provider } from "@/components/ui/provider";
-import Layout from "@/components/Layout";
-import { Sidebar } from "@/components/Sidebar";
 
 export const metadata: Metadata = {
   title: {
@@ -17,8 +15,8 @@ export default function RootLayout({
   modal,
   children,
 }: Readonly<{
-  children: React.ReactNode;
   modal: React.ReactNode;
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="ja" suppressHydrationWarning>
@@ -38,7 +36,7 @@ export default function RootLayout({
       <body>
         <Provider>
           {modal}
-          <Layout sidebar={<Sidebar />}>{children}</Layout>
+          {children}
         </Provider>
       </body>
     </html>
