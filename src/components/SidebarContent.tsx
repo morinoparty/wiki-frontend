@@ -1,6 +1,6 @@
 import { getAllCategories } from "@/lib/getAllCategories";
 import { ChevronLeft, Columns2, Home, SquarePen, Tag } from "lucide-react";
-import { css, sva } from "styled-system/css";
+import { css, cx, sva } from "styled-system/css";
 import {
   SidebarNavListItem,
   SidebarNavListCategory,
@@ -12,7 +12,9 @@ import Link from "next/link";
 const sidebarContentStyles = sva({
   slots: ["nav", "list"],
   base: {
-    nav: {},
+    nav: {
+      height: "100%",
+    },
     list: {
       listStyle: "none",
       pt: {
@@ -60,24 +62,40 @@ export const SidebarContentDashboard: React.FC = async () => {
 
   return (
     <nav className={contentClasses.nav}>
-      <ul className={contentClasses.list}>
-        <li
-          className={css({
-            ml: "-12px",
-          })}
+      <ul
+        className={cx(
+          contentClasses.list,
+          css({
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            height: "100%",
+          })
+        )}
+      >
+        <div>
+          <div
+            className={css({
+              ml: "-12px",
+            })}
+          >
+            <IconButton variant="ghost" asChild>
+              <Link href="/">
+                <ChevronLeft />
+              </Link>
+            </IconButton>
+          </div>
+
+          <SidebarNavListItem href="/dashboard" icon={<Columns2 />}>
+            ダッシュボード
+          </SidebarNavListItem>
+        </div>
+
+        <SidebarNavListItem
+          href="/dashboard/posts/new"
+          icon={<SquarePen />}
+          asButton
         >
-          <IconButton variant="ghost" asChild>
-            <Link href="/">
-              <ChevronLeft />
-            </Link>
-          </IconButton>
-        </li>
-
-        <SidebarNavListItem href="/dashboard" icon={<Columns2 />}>
-          ダッシュボード
-        </SidebarNavListItem>
-
-        <SidebarNavListItem href="/dashboard/posts/new" icon={<SquarePen />}>
           新規作成
         </SidebarNavListItem>
       </ul>

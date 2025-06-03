@@ -4,7 +4,9 @@ import { sva } from "styled-system/css";
 export const sidebarNavStyles = sva({
   slots: ["item", "link", "categoryList", "categoryItem", "categoryLink"],
   base: {
-    item: {},
+    item: {
+      position: "relative",
+    },
     link: {
       display: "flex",
       alignItems: "center",
@@ -38,14 +40,47 @@ export const sidebarNavStyles = sva({
       opacity: 0.7,
     },
   },
+  variants: {
+    asButton: {
+      true: {
+        item: {
+          _before: {
+            content: '""',
+            position: "absolute",
+            left: "-8px",
+            top: "0",
+            width: "calc(100% + 16px)",
+            height: "100%",
+            bgColor: "leaf.600",
+            zIndex: "-1",
+            borderRadius: "16px",
+            transition: "background-color 0.2s ease",
+          },
+          _hover: {
+            _before: {
+              bgColor: "leaf.700",
+            },
+          },
+        },
+        link: {
+          color: "white",
+          padding: "14px 28px 14px 12px",
+          justifyContent: "center",
+        },
+      },
+    },
+  },
 });
 
 export const SidebarNavListItem: React.FC<{
   href: string;
   icon: React.ReactNode;
   children: React.ReactNode;
-}> = ({ href, icon, children }) => {
-  const navClasses = sidebarNavStyles();
+  asButton?: boolean;
+}> = ({ href, icon, children, asButton }) => {
+  const navClasses = sidebarNavStyles({
+    asButton: asButton,
+  });
 
   return (
     <li className={navClasses.item}>

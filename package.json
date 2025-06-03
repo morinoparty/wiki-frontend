@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "prepare": "panda codegen",
-    "dev": "pnpm generate:license && next dev --turbopack",
+    "dev": "next dev --turbopack",
     "build": "pnpm generate:license && pnpm index && next build",
     "start": "next start",
     "lint": "next lint",

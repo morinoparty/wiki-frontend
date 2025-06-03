@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { sva } from "styled-system/css";
-import { Menu, Settings2 } from "lucide-react";
+import { Settings2 } from "lucide-react";
 import { UserBox } from "./UserBox";
 import { SearchBox } from "@/components/SearchBox";
 import { NotLoginNote } from "./NotLoginNote";
 import { AuthConditional } from "./AuthConditional";
-import { CloseButton, Drawer, IconButton, Portal } from "@chakra-ui/react";
 import { SidebarNavListItem } from "./SidebarNavStyles";
 import { HideOnPath } from "./HideOnPath";
+import { SidebarDrawer } from "./SIdebarDrawer";
 
 const sidebarStyles = sva({
   slots: ["root", "logoContainer", "drawerContainer", "contentContainer"],
@@ -15,7 +15,7 @@ const sidebarStyles = sva({
     root: {
       p: {
         base: "48px 32px 24px 42px",
-        lgDown: "24px",
+        lgDown: "24px 16px",
         mdDown: "0 24px 0 24px",
       },
       position: {
@@ -44,7 +44,7 @@ const sidebarStyles = sva({
       },
       height: {
         base: "100vh",
-        lgDown: "inherit",
+        lgDown: "100vh",
         mdDown: "70px",
       },
       maxHeight: {
@@ -55,11 +55,13 @@ const sidebarStyles = sva({
       display: "grid",
       gridTemplateRows: {
         base: "auto 1fr",
-        lgDown: "auto",
+        lgDown: "auto 1fr auto",
+        mdDown: "auto",
       },
       gridTemplateColumns: {
         base: "inherit",
-        lgDown: "1fr auto",
+        lgDown: "auto",
+        mdDown: "1fr auto",
       },
       bg: "leaf.50",
       borderTopColor: "leaf.200",
@@ -67,10 +69,11 @@ const sidebarStyles = sva({
         base: "none",
         mdDown: "1px",
       },
+      alignItems: "center",
       "& > a": {
         display: {
           base: "block",
-          lgDown: "none",
+          lgDown: "block",
           mdDown: "flex",
         },
       },
@@ -94,10 +97,15 @@ const sidebarStyles = sva({
       },
       justifyContent: {
         base: "start",
-        lgDown: "end",
+        lgDown: "center",
         mdDown: "center",
       },
       alignItems: "center",
+      gridRow: {
+        base: "inherit",
+        lgDown: "3 / 4",
+        mdDown: "inherit",
+      },
     },
     contentContainer: {
       display: {
@@ -107,6 +115,9 @@ const sidebarStyles = sva({
       gridTemplateRows: {
         base: "auto 1fr auto",
         mdDown: "1fr auto",
+      },
+      height: {
+        base: "100%",
       },
     },
   },
@@ -147,69 +158,8 @@ const sidebarContentStyles = sva({
   },
 });
 
-const drawerStyles = sva({
-  slots: ["content", "container", "logoContainer"],
-  base: {
-    content: {
-      bg: "leaf.50",
-      maxHeight: { base: undefined, mdDown: "calc(100vh - 128px)" },
-      height: {
-        base: "100vh",
-        mdDown: "fit-content",
-      },
-      borderRadius: {
-        base: "inherit",
-        lgDown: "inherit",
-        mdDown: "24px 24px 0px 0px",
-      },
-    },
-    container: {
-      minHeight: {
-        base: "100vh",
-        lgDown: "100vh",
-        mdDown: "initial",
-      },
-      p: {
-        base: "24px",
-        lgDown: "38px",
-        mdDown: "24px",
-      },
-      pb: {
-        base: "inherit",
-        lgDown: "38px",
-        mdDown: "21px",
-      },
-      display: "grid",
-      gridTemplateRows: {
-        base: "auto auto 1fr",
-        mdDown: "1fr auto",
-      },
-      gridTemplateColumns: {
-        base: "inherit",
-      },
-      gap: "32px",
-    },
-    logoContainer: {
-      display: "flex",
-      alignItems: {
-        base: "center",
-      },
-      justifyContent: {
-        base: "center",
-        lgDown: "end",
-        mdDown: "start",
-      },
-      order: {
-        base: "0",
-        lgDown: "0",
-        mdDown: "1",
-      },
-    },
-  },
-});
-
 const logoStyles = sva({
-  slots: ["link", "image"],
+  slots: ["link", "image", "imageDrawer"],
   base: {
     link: {
       display: "flex",
@@ -222,6 +172,40 @@ const logoStyles = sva({
         mdDown: "22px",
       },
       width: "auto",
+      display: {
+        base: "block",
+        lgDown: "none",
+        mdDown: "block",
+      },
+    },
+    imageDrawer: {
+      display: {
+        base: "none",
+        lgDown: "block",
+        mdDown: "none",
+      },
+      w: "100%",
+      aspectRatio: "1 / 1",
+    },
+  },
+  variants: {
+    isSidebar: {
+      true: {
+        image: {
+          display: {
+            base: "block",
+            lgDown: "block",
+            mdDown: "block",
+          },
+        },
+        imageDrawer: {
+          display: {
+            base: "none",
+            lgDown: "none",
+            mdDown: "none",
+          },
+        },
+      },
     },
   },
 });
@@ -258,7 +242,7 @@ const SidebarSearchBox: React.FC = () => {
   );
 };
 
-const SidebarAuthenticatedSection: React.FC = () => {
+export const SidebarAuthenticatedSection: React.FC = () => {
   const contentClasses = sidebarContentStyles();
 
   return (
@@ -277,83 +261,23 @@ const SidebarAuthenticatedSection: React.FC = () => {
   );
 };
 
-const SidebarDrawer: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
-  const drawerClasses = drawerStyles();
-
-  return (
-    <div>
-      <Drawer.Root
-        placement={{
-          base: "end",
-          lgDown: "start",
-          mdDown: "bottom",
-        }}
-        size={{
-          base: "xs",
-          lgDown: "xs",
-          mdDown: "full",
-        }}
-      >
-        <Drawer.Trigger asChild>
-          <IconButton variant="ghost" aria-label="メニュー">
-            <Menu />
-          </IconButton>
-        </Drawer.Trigger>
-        <Portal>
-          <Drawer.Backdrop />
-          <Drawer.Positioner>
-            <Drawer.Content className={drawerClasses.content}>
-              <div className={drawerClasses.container}>
-                <div className={drawerClasses.logoContainer}>
-                  <SidebarLogo />
-                </div>
-
-                {children}
-              </div>
-
-              <Drawer.CloseTrigger
-                top={{
-                  base: "24px",
-                  lgDown: "24px",
-                  mdDown: "initial",
-                }}
-                right={{
-                  base: "24px",
-                  lgDown: "initial",
-                  mdDown: "24px",
-                }}
-                left={{
-                  base: "initial",
-                  lgDown: "24px",
-                  mdDown: "initial",
-                }}
-                bottom={{
-                  base: "initial",
-                  lgDown: "initial",
-                  mdDown: "15px",
-                }}
-                asChild
-              >
-                <CloseButton size="sm" />
-              </Drawer.CloseTrigger>
-            </Drawer.Content>
-          </Drawer.Positioner>
-        </Portal>
-      </Drawer.Root>
-    </div>
-  );
-};
-
-const SidebarLogo: React.FC = () => {
-  const logoClasses = logoStyles();
+export const SidebarLogo: React.FC<{
+  isSidebar?: boolean;
+}> = ({ isSidebar }) => {
+  const logoClasses = logoStyles({
+    isSidebar: isSidebar ?? false,
+  });
 
   return (
     <Link href="/" className={logoClasses.link}>
       <img
         src="/assets/logo.svg"
         className={logoClasses.image}
+        alt="もりのパーティWikiのロゴ"
+      />
+      <img
+        src="/assets/logo-small.svg"
+        className={logoClasses.imageDrawer}
         alt="もりのパーティWikiのロゴ"
       />
     </Link>
