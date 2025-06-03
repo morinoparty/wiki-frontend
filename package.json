@@ -13,7 +13,7 @@
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "index": "pnpm dlx tsx src/generate-search-index.ts",
-    "generate:license": "pnpm dlx license-checker-rseidelsohn --json --out ./src/app/license/data.json"
+    "generate:license": "pnpm dlx license-checker-rseidelsohn --json --out ./src/app/(normal)/license/data.json"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.19.0",
