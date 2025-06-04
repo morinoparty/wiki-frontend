@@ -6,10 +6,7 @@ export async function getAllPosts(
 ): Promise<WikiPost[]> {
   try {
     const res = await fetch(
-      "https://wiki-contentdev.yahiro.workers.dev/wiki.json",
-      {
-        cache: "force-cache",
-      }
+      "https://wiki-contentdev.yahiro.workers.dev/wiki.json"
     );
 
     if (!res.ok) {
