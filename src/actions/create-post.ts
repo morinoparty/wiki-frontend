@@ -6,6 +6,7 @@ import { GitHubService } from "./services/github-service";
 import { ValidationService } from "./services/validation-service";
 import { AuthService } from "./services/auth-service";
 import { PermissionService } from "./services/permission-service";
+import { getAllCategories } from "@/lib/getAllCategories";
 
 /**
  * 新しい記事を作成する
@@ -42,7 +43,30 @@ export async function createPost(
       return { success: false, error: "このスラッグは既に使用されています" };
     }
 
-    // 5. 記事データの準備
+    // 5. カテゴリの座標要件チェック
+    const categories = await getAllCategories();
+    const category = categories.find((cat) => cat.slug === input.category);
+    if (!category) {
+      return { success: false, error: "指定されたカテゴリが見つかりません" };
+    }
+
+    // hasPositionがtrueの場合、座標情報が必須
+    if (category.hasPosition) {
+      if (input.x === undefined || input.y === undefined) {
+        return {
+          success: false,
+          error: "このカテゴリでは座標情報（X座標、Y座標）の入力が必要です",
+        };
+      }
+      if (!Number.isInteger(input.x) || !Number.isInteger(input.y)) {
+        return {
+          success: false,
+          error: "座標は整数で入力してください",
+        };
+      }
+    }
+
+    // 6. 記事データの準備
     const now = new Date().toISOString();
     const postData: WikiPostDetail = {
       ...input,
@@ -57,9 +81,14 @@ export async function createPost(
       visibility: input.visibility || "public",
       version: 1,
       isLocked: false,
+      // hasPositionがtrueの場合のみ座標情報を含める
+      ...(category.hasPosition && {
+        x: input.x,
+        y: input.y,
+      }),
     };
 
-    // 6. GitHubに保存
+    // 7. GitHubに保存
     const commitResult = await GitHubService.createPost(
       postData,
       context.commitMessage || `Create post: ${input.title}`,

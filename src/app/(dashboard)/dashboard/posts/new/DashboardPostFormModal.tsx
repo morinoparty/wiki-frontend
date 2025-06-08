@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/Button";
 import { ModalDialogContainer } from "@/components/ModalDialogContainer";
+import { WikiCategory } from "@/types/wiki";
 import { useState, useEffect, useCallback } from "react";
 import { sva } from "styled-system/css";
 
@@ -179,6 +180,8 @@ interface PostFormData {
   title: string;
   url: string;
   description: string;
+  x?: number;
+  y?: number;
 }
 
 type SlugCheckStatus =
@@ -190,10 +193,11 @@ type SlugCheckStatus =
 
 export const DashboardPostFormModal: React.FC<{
   selectedCategory: string;
+  categories: WikiCategory[];
   existingSlugs: string[];
   onBack: () => void;
   onSubmit: (data: PostFormData) => void;
-}> = ({ existingSlugs, onSubmit }) => {
+}> = ({ selectedCategory, categories, existingSlugs, onSubmit }) => {
   const [formData, setFormData] = useState<PostFormData>({
     title: "",
     url: "",
@@ -204,6 +208,12 @@ export const DashboardPostFormModal: React.FC<{
     useState<SlugCheckStatus>("idle");
 
   const styles = postFormModalStyles();
+
+  // 選択されたカテゴリの情報を取得
+  const currentCategory = categories.find(
+    (cat) => cat.slug === selectedCategory
+  );
+  const requiresPosition = currentCategory?.hasPosition ?? false;
 
   // Slugの重複チェック
   const checkSlugAvailability = useCallback(
@@ -250,12 +260,28 @@ export const DashboardPostFormModal: React.FC<{
   const isFormValid =
     formData.title.trim() !== "" &&
     formData.url.trim() !== "" &&
-    slugCheckStatus === "available";
+    slugCheckStatus === "available" &&
+    // 座標が必要な場合は座標も入力必須
+    (!requiresPosition ||
+      (formData.x !== undefined &&
+        formData.y !== undefined &&
+        Number.isInteger(formData.x) &&
+        Number.isInteger(formData.y)));
 
-  const handleInputChange = (field: keyof PostFormData, value: string) => {
+  const handleInputChange = (
+    field: keyof PostFormData,
+    value: string | number
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
+    }));
+  };
+
+  const handleCoordinateChange = (field: "x" | "y", value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value === "" ? undefined : parseInt(value, 10),
     }));
   };
 
@@ -352,6 +378,47 @@ export const DashboardPostFormModal: React.FC<{
             />
           </div>
         </div>
+
+        {/* Coordinate Fields - Only show if the category requires position */}
+        {requiresPosition && (
+          <>
+            <div className={styles.formGroup}>
+              <div className={styles.labelRow}>
+                <label className={styles.label}>X座標</label>
+                <span className={styles.required}>*</span>
+              </div>
+              <div className={styles.inputGroup}>
+                <input
+                  type="number"
+                  value={formData.x ?? ""}
+                  onChange={(e) => {
+                    handleCoordinateChange("x", e.target.value);
+                  }}
+                  placeholder="例: 1000"
+                  className={styles.input}
+                />
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <div className={styles.labelRow}>
+                <label className={styles.label}>Y座標</label>
+                <span className={styles.required}>*</span>
+              </div>
+              <div className={styles.inputGroup}>
+                <input
+                  type="number"
+                  value={formData.y ?? ""}
+                  onChange={(e) => {
+                    handleCoordinateChange("y", e.target.value);
+                  }}
+                  placeholder="例: 2000"
+                  className={styles.input}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Bottom navigation */}

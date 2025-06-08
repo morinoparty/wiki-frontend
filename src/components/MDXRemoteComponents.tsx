@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { sva } from "styled-system/css";
+import cloudflareLoader from "../../image-loader";
 
 export const mdxStyles = sva({
   slots: [
@@ -213,20 +215,39 @@ export const components = {
   pre: (props: React.ComponentProps<"pre">) => (
     <pre className={mdxStyles().pre} {...props} />
   ),
-  img: (props: React.ComponentProps<"img">) => {
-    const { src = "", alt = "", ...rest } = props;
+  img: (props: React.ComponentProps<typeof Image>) => {
+    const { src = "", alt = "", width, height, ...rest } = props;
     if (typeof src !== "string") return null;
     const isExternal =
       src.startsWith("http://") ||
       src.startsWith("https://") ||
       src.startsWith("//");
+
+    // Convert width/height to numbers if they're strings, or use default values
+    const imageWidth =
+      typeof width === "string"
+        ? parseInt(width, 10)
+        : typeof width === "number"
+          ? width
+          : 800;
+    const imageHeight =
+      typeof height === "string"
+        ? parseInt(height, 10)
+        : typeof height === "number"
+          ? height
+          : 600;
+
     return (
-      <img
+      <Image
         className={mdxStyles().img}
         src={
-          isExternal ? src : "https://wiki-contentdev.yahiro.workers.dev/" + src
+          isExternal ? src : "https://wiki-contentdev.yahiro.workers.dev" + src
         }
         alt={alt}
+        width={imageWidth}
+        height={imageHeight}
+        loading="lazy"
+        loader={cloudflareLoader}
         {...rest}
       />
     );

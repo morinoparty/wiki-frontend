@@ -6,6 +6,9 @@ export type WikiPost = {
   date: string;
   category: string;
   image?: string;
+  // 座標情報（hasPositionがtrueのカテゴリで使用）
+  x?: number;
+  y?: number;
   // 時間関連
   createdAt?: string;
   updatedAt?: string;

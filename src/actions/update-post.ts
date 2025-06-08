@@ -6,6 +6,7 @@ import { GitHubService } from "./services/github-service";
 import { ValidationService } from "./services/validation-service";
 import { AuthService } from "./services/auth-service";
 import { PermissionService } from "./services/permission-service";
+import { getAllCategories } from "@/lib/getAllCategories";
 
 /**
  * 既存の記事を更新する
@@ -48,7 +49,32 @@ export async function updatePost(
       };
     }
 
-    // 5. 更新データの準備
+    // 5. カテゴリの座標要件チェック（カテゴリが更新される場合）
+    if (input.category && input.category !== existingPost.category) {
+      const categories = await getAllCategories();
+      const newCategory = categories.find((cat) => cat.slug === input.category);
+      if (!newCategory) {
+        return { success: false, error: "指定されたカテゴリが見つかりません" };
+      }
+
+      // hasPositionがtrueの場合、座標情報が必須
+      if (newCategory.hasPosition) {
+        if (input.x === undefined || input.y === undefined) {
+          return {
+            success: false,
+            error: "このカテゴリでは座標情報（X座標、Y座標）の入力が必要です",
+          };
+        }
+        if (!Number.isInteger(input.x) || !Number.isInteger(input.y)) {
+          return {
+            success: false,
+            error: "座標は整数で入力してください",
+          };
+        }
+      }
+    }
+
+    // 6. 更新データの準備
     const now = new Date().toISOString();
     const updatedPost: WikiPostDetail = {
       ...existingPost,
@@ -58,7 +84,7 @@ export async function updatePost(
       version: (existingPost.version || 1) + 1,
     };
 
-    // 6. GitHubに保存
+    // 7. GitHubに保存
     const commitResult = await GitHubService.updatePost(
       updatedPost,
       context.commitMessage || `Update post: ${updatedPost.title}`,

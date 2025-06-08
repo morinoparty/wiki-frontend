@@ -23,6 +23,8 @@ export function PostCreationClient({
     url: string;
     description: string;
     category: string;
+    x?: number;
+    y?: number;
   }) => {
     try {
       const createPostInput: CreatePostInput = {
@@ -31,6 +33,9 @@ export function PostCreationClient({
         body: data.description || "",
         category: data.category,
         description: data.description || "",
+        // 座標情報が存在する場合のみ追加
+        ...(data.x !== undefined && { x: data.x }),
+        ...(data.y !== undefined && { y: data.y }),
       };
 
       const result = await createPost(createPostInput, {

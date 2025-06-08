@@ -159,6 +159,7 @@ export const DashboardPostAddModal: React.FC<{
     return (
       <DashboardPostFormModal
         selectedCategory={selectedCategory}
+        categories={categories}
         existingSlugs={existingSlugs}
         onBack={handleBack}
         onSubmit={handleSubmit}
