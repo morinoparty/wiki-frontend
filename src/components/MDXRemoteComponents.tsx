@@ -1,7 +1,7 @@
+import cloudflareLoader from "@/lib/image-loader";
 import Image from "next/image";
 import Link from "next/link";
 import { sva } from "styled-system/css";
-import cloudflareLoader from "../../image-loader";
 
 export const mdxStyles = sva({
   slots: [

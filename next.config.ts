@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     loader: "custom",
-    path: "./image-loader.ts",
+    path: "./src/lib/image-loader.ts",
   },
   experimental: {
     optimizePackageImports: ["@chakra-ui/react"],

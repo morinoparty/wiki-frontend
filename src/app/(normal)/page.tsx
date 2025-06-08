@@ -2,6 +2,8 @@ import { Cta } from "@/components/Cta";
 import WikiCard from "@/components/WikiCard";
 import { WikiCardGrid } from "@/components/WikiCardGrid";
 import { getAllPosts } from "@/lib/getAllPosts";
+import cloudflareLoader from "@/lib/image-loader";
+import Image from "next/image";
 import { css } from "styled-system/css";
 
 export default async function Home() {
@@ -14,13 +16,23 @@ export default async function Home() {
     <div className={css({})}>
       <div
         className={css({
+          position: "relative",
           width: "100%",
           minHeight: "420px",
-          backgroundImage: "url('/assets/top-header.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
         })}
-      ></div>
+      >
+        <Image
+          src="/assets/top-header.png"
+          alt="もりのパーティWikiのヘッダー画像"
+          fill
+          className={css({
+            objectFit: "cover",
+            objectPosition: "center",
+          })}
+          priority
+          loader={cloudflareLoader}
+        />
+      </div>
 
       <div
         className={css({
