@@ -63,66 +63,62 @@ export function PostHeaderEdit({
   };
 
   return (
-    <header className={classes.container}>
-      <div
-        className={classes.image}
-        style={
-          image
-            ? {
-                backgroundImage: `url(${
-                  "https://wiki-contentdev.yahiro.workers.dev/" + image
-                })`,
-                position: "relative",
-              }
-            : {
-                background: "#f5f5f5",
-                minHeight: "420px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                position: "relative",
-              }
-        }
-      >
-        {!image && (
-          <span className={css({ color: "gray.400", fontSize: "lg" })}>
-            画像なし
-          </span>
-        )}
-        <IconButton
-          aria-label="画像をアップロード"
-          onClick={handleImageIconClick}
-          className={css({
-            position: "absolute",
-            right: "24px",
-            bottom: "24px",
-            background: "rgba(255,255,255,0.8)",
-            border: "none",
-            borderRadius: "full",
-            p: "2",
-            cursor: disabled ? "not-allowed" : "pointer",
-            transition: "background 0.2s",
-            _hover: { background: "leaf.100" },
-            zIndex: 2,
-            display: "flex",
-            alignItems: "center",
-            color: "leaf.600",
-          })}
-          disabled={disabled}
+    <header
+      className={cx(
+        classes.container,
+        css({
+          bg: "white",
+          borderBottom: "0px solid",
+          pt: "53px",
+        })
+      )}
+    >
+      {image && (
+        <div
+          className={classes.image}
+          style={{
+            backgroundImage: `url(${
+              "https://wiki-contentdev.yahiro.workers.dev/" + image
+            })`,
+            position: "relative",
+          }}
         >
-          <ImagePlus size={24} />
-        </IconButton>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          style={{ display: "none" }}
-          onChange={handleImageChange}
-          disabled={disabled}
-        />
-      </div>
-      <div className={classes.info}>
-        <div className={classes.category}>
+          <IconButton
+            aria-label="画像をアップロード"
+            onClick={handleImageIconClick}
+            className={css({
+              position: "absolute",
+              right: "24px",
+              bottom: "24px",
+              background: "rgba(255,255,255,0.8)",
+              border: "none",
+              borderRadius: "full",
+              p: "2",
+              cursor: disabled ? "not-allowed" : "pointer",
+              transition: "background 0.2s",
+              _hover: { background: "leaf.100" },
+              zIndex: 2,
+              display: "flex",
+              alignItems: "center",
+              color: "leaf.600",
+            })}
+            disabled={disabled}
+          >
+            <ImagePlus size={24} />
+          </IconButton>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={handleImageChange}
+            disabled={disabled}
+          />
+        </div>
+      )}
+
+      <div className={cx(classes.info, css({ pt: "96px", pb: "16px" }))}>
+        <div className={cx(classes.category, css({ mb: "24px !important" }))}>
           <Tag width={16} />
           <Editable.Root
             value={category}

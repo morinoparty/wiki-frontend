@@ -73,7 +73,8 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
     <div
       className={css({
         position: "relative",
-        pb: "200px",
+        bg: "white",
+        minHeight: "100vh",
       })}
     >
       <EditorNav title="ページの編集">
@@ -94,6 +95,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
         description={form.description}
         onChange={handleHeaderChange}
       />
+
       <div className={css({})}>
         <Suspense fallback={<div>Loading...</div>}>
           <EditorComp
