@@ -19,9 +19,11 @@ import {
   codeBlockPlugin,
   thematicBreakPlugin,
 } from "@mdxeditor/editor";
+import HighlightToggle from "./toolbar/HighlightToggle";
 
 import { FC } from "react";
 import { css } from "styled-system/css";
+import { uploadImage } from "@/actions/upload-image";
 
 interface EditorProps {
   markdown: string;
@@ -58,18 +60,19 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
           markdownShortcutPlugin(),
 
           imagePlugin({
-            imageUploadHandler: () => {
-              return Promise.resolve("https://picsum.photos/200/300");
+            imageUploadHandler: async (file) => {
+              const result = await uploadImage(file);
+              if (!result.success || !result.data) {
+                throw new Error(result.error || "Upload failed");
+              }
+              return result.data.url;
             },
             imagePreviewHandler: (url) => {
+              if (url.startsWith("http")) return Promise.resolve(url);
               return Promise.resolve(
                 "https://wiki-contentdev.yahiro.workers.dev/" + url
               );
             },
-            imageAutocompleteSuggestions: [
-              "https://picsum.photos/200/300",
-              "https://picsum.photos/200",
-            ],
           }),
           toolbarPlugin({
             toolbarClassName: css({
@@ -163,6 +166,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
                     })}
                   >
                     <BoldItalicUnderlineToggles />
+                    <HighlightToggle />
                   </li>
                 </ul>
                 <ul>
@@ -306,6 +310,12 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
             borderRadius: "4px",
             fontSize: "0.95em",
             textStyle: "body",
+          },
+          "& mark": {
+            background: "yellow.200",
+            color: "inherit",
+            px: "2px",
+            borderRadius: "4px",
           },
           "& pre": {
             background: "gray.100",

@@ -1,51 +1,73 @@
 # MoripaWiki
 
-MoripaWiki は Next.js 15 をベースとした Wiki アプリケーションです。Chakra UI と Panda CSS を利用しており、OpenNext を通じて Cloudflare Workers 上で動作します。
+MoripaWiki は Next.js 15 で構築された Wiki アプリケーションです。Chakra UI と Panda CSS を組み合わせ、OpenNext を介して Cloudflare Workers 上で動作します。
 
 ## ディレクトリ構成
 
-- `src/actions/` – 投稿作成や更新などを行う Server Actions API
-- `src/app/` – App Router で構築されたページ群。ダッシュボードや一般ページを含む
-- `src/components/` – 再利用可能な React コンポーネント (Button, LoginModal, PostBody など)
-- `src/lib/` – 認証や記事取得などのクライアント向けユーティリティ
-- `src/theme/` – Chakra と Panda CSS のテーマ関連ファイル
-- `tokens/` – Panda CSS 用のカラープリセット
+- `src/actions/` – サーバーサイド API を Server Actions として実装
+- `src/app/` – App Router によるページ群
+- `src/components/` – 再利用可能な UI コンポーネント
+- `src/lib/` – 認証やデータ取得のユーティリティ
+- `src/theme/` – Chakra/Panda のテーマ定義
+- `tokens/` – Panda CSS 用カラープリセット
 
-## 主要機能
+## CMS の概要
 
-- **Server Actions**: `src/actions` で実装された API 層。GitHub をバックエンドとして利用し、投稿の作成・更新、履歴取得、権限チェックなどを提供します
-- **認証**: `src/lib/auth.ts` で NextAuth を設定し、MineAuth との OAuth 連携を行います
-- **Cloudflare へのデプロイ**: `open-next.config.ts` と `wrangler.jsonc` で Worker 環境へのデプロイ設定が行われています
-- **テーマシステム**: Chakra UI を拡張し、Panda CSS と連携してスタイリングを管理します
+GitHub リポジトリが CMS となり、以下のディレクトリの内容がそのまま静的ファイルとして配信されます。
 
-## 重要な注意点
+- `/content/wiki/` – 記事 Markdown
+- `/content/categories/` – カテゴリ定義
+- `/content/img/` – 画像アセット
+- `/content/users/` – ユーザー情報
 
-- `src/actions/README.md` に `GITHUB_TOKEN` や `ADMIN_USERS` など必須の環境変数一覧が記載されています
+Markdown をコミットすると `wiki-contentdev.yahiro.workers.dev/wiki/[slug].md` で取得可能です。画像も同様に `/content/img` へコミットすれば展開されます。記事の作成・更新は `src/actions` から GitHub へコミットする仕組みで行われ、履歴やレビューも GitHub 上で管理されます。
 
-## 新規参加者向けガイド
+## Actions API
 
-1. **環境変数の設定**
-   `.env.local` に GitHub アクセスや認証に必要な変数を定義します (`GITHUB_TOKEN`, `ADMIN_USERS`, `MAIN_SERVER_URL`, `CLIENT_ID`, `AUTH_URL`, `AUTH_SECRET` など)
-2. **依存関係のインストール**
-   `pnpm install` を実行してパッケージを取得します
-3. **開発サーバーの起動**
-   `pnpm dev` で開発用サーバーを起動できます。`prepare` スクリプトで Panda のコード生成が走ります
-4. **コードベースの把握**
-   `src/actions/services/github-service.ts` や `src/components`、`src/app` を確認し、API と UI の構造を理解しましょう
-5. **デプロイ確認**
-   `pnpm deploy` で OpenNext を用いたビルドと Cloudflare へのデプロイを行えます
-6. **テーマシステムの理解**
-   `src/theme` 以下のトークンやレシピを読み、デザインシステムの仕組みを把握してください
+`src/actions` には記事管理用の Server Actions がまとまっています。主な機能は次のとおりです。
 
-これらを参考に、コードベースの全体像をつかみながら開発を進めてください。
+- **Core**: `createPost` `updatePost` `deletePost` `lockPost` `unlockPost` `changePostStatus` `transferPostOwnership`
+- **Query**: `getAllPosts` `getPost` `getPostsByCategory` `searchPosts` `getUserPosts`
+- **Batch**: `batchDeletePosts` `batchChangePostsStatus` `duplicatePost`
+- **History**: `getPostHistory` `restorePostVersion` `getPostDiff`
+- **Stats**: `getSystemStats` `getUserStats` `healthCheck`
+
+どの関数も `ApiResult<T>` 型を返し、`success` と `error`、必要に応じて `data` や `commitId` を含みます。詳細な使用例や拡張方法、権限制御の仕組みは [`src/actions/README.md`](src/actions/README.md) を参照してください。
+
+## 必要な環境変数
+
+`.env.local` に下記を設定する必要があります。
+
+```
+GITHUB_TOKEN=your_token
+ADMIN_USERS=user1,user2
+MAIN_SERVER_URL=https://auth.example.com
+CLIENT_ID=your_client_id
+AUTH_URL=https://your.app/auth
+AUTH_SECRET=your_auth_secret
+```
+
+## 開発手順
+
+1. **依存関係のインストール** – `pnpm install`
+2. **開発サーバー起動** – `pnpm dev` (初回は `panda codegen` が実行されます)
+3. **コード確認** – `src/actions/services/github-service.ts` を中心に Server Actions の実装を把握し、`src/app` や `src/components` を閲覧します
+4. **デプロイ** – `pnpm deploy` で OpenNext ビルド後、wrangler を使って Cloudflare にデプロイ
 
 ## コンポーネント実装ガイド
 
-1. **新規ファイルの作成**
-   `src/components` 配下にコンポーネント名のファイルを作成し、`export` して再利用できる形にします。
-2. **スタイル定義**
-   CSS を記述する際は PandaCSS の `sva` 関数でスタイルオブジェクトを定義します。`src/theme` のトークンを使い、可読性を高めてください。
-3. **構造の分離**
-   レイアウト用のコンポーネントと表示用のコンポーネントは分け、必要に応じてフックやユーティリティにロジックを切り出します。
-4. **共通規則**
-   スタイルは極力コンポーネント内部で完結させ、グローバル CSS の利用は避けます。Panda の Recipe や Token を活用し、一貫した UI を保ちます。
+1. `src/components` 配下にコンポーネントファイルを作成し、必ず `export` する
+2. スタイルは PandaCSS の `sva` 関数を用いて記述し、`src/theme` のトークンを参照する
+3. ロジックはカスタムフックやユーティリティに切り出し、表示コンポーネントはシンプルに保つ
+4. グローバル CSS は極力使わず、Panda の Recipe/Token を活用して一貫したデザインを維持する
+
+新規参加者はまず `src/actions/README.md` を読み、API の利用方法と拡張方法を把握することを推奨します。React Server Components を主体に実装し、API Route でのロジックは必要最小限に留めてください。
+
+## 新規参加者向けガイド
+
+- `src` ディレクトリ内の各フォルダを確認し、アプリ全体の構造を把握します。
+- CMS は GitHub 上の `/content` 配下ファイルで管理され、コミットがそのまま Cloudflare にデプロイされます。
+- 環境変数を `.env.local` に設定したら `pnpm install` → `pnpm dev` で開発を始めます。
+- `src/actions/README.md` で Server Actions の詳細や GitHubService の実装を確認します。
+- デザインは PandaCSS の `sva` とトークン/レシピを活用してください。
+- デプロイは `pnpm deploy` 実行後、wrangler で Cloudflare Workers へ公開します。

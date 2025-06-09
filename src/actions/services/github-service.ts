@@ -2,6 +2,8 @@ import { Octokit } from "octokit";
 import { WikiPostDetail } from "@/types/wiki";
 import matter from "gray-matter";
 import { Session } from "next-auth";
+import { randomUUID } from "crypto";
+import path from "path";
 
 export class GitHubService {
   private static octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
@@ -535,6 +537,48 @@ export class GitHubService {
           error instanceof Error
             ? error.message
             : "記事一覧の取得に失敗しました",
+      };
+    }
+  }
+
+  /**
+   * 画像ファイルをcontent/img配下にアップロード
+   */
+  static async uploadImage(
+    file: File,
+    session: Session | null
+  ): Promise<{ success: boolean; error?: string; url?: string; commitId?: string }> {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const ext = path.extname(file.name);
+      const filename = `${randomUUID()}${ext}`;
+      const filePath = `content/img/${filename}`;
+      const committer = this.getCommitter(session);
+
+      const { data } = await this.octokit.rest.repos.createOrUpdateFileContents({
+        owner: this.owner,
+        repo: this.repo,
+        path: filePath,
+        message: `Upload image: ${file.name}`,
+        content: buffer.toString("base64"),
+        branch: this.branch,
+        ...(committer && {
+          committer,
+          author: committer,
+        }),
+      });
+
+      return {
+        success: true,
+        url: `/img/${filename}`,
+        commitId: data.commit.sha,
+      };
+    } catch (error) {
+      console.error("GitHub image upload error:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "画像アップロードに失敗しました",
       };
     }
   }

@@ -5,6 +5,7 @@ import { Tag, ImagePlus } from "lucide-react";
 import { postHeaderStyles } from "./PostHeader";
 import { css, cx } from "styled-system/css";
 import { useRef } from "react";
+import { uploadImage } from "@/actions/upload-image";
 
 interface PostHeaderEditProps {
   image?: string;
@@ -47,19 +48,17 @@ export function PostHeaderEdit({
     if (!disabled) fileInputRef.current?.click();
   };
   // 画像選択時の処理（親でonChange拡張する場合はここで渡す）
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && onChange) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        onChange({
-          title,
-          description,
-          category,
-          image: reader.result as string,
-        });
-      };
-      reader.readAsDataURL(file);
+      const result = await uploadImage(file);
+      if (!result.success || !result.data) return;
+      onChange({
+        title,
+        description,
+        category,
+        image: result.data.url,
+      });
     }
   };
 
