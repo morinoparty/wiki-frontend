@@ -71,4 +71,3 @@ AUTH_SECRET=your_auth_secret
 - `src/actions/README.md` で Server Actions の詳細や GitHubService の実装を確認します。
 - デザインは PandaCSS の `sva` とトークン/レシピを活用してください。
 - デプロイは `pnpm deploy` 実行後、wrangler で Cloudflare Workers へ公開します。
-
