@@ -60,16 +60,18 @@ export default function WikiCard({ post }: { post: WikiPost }) {
     // 全てを小文字に変換
     post.slug.toLowerCase();
 
+  // post.imageの../を削除して、URLを生成
+  const imageUrl = post.image
+    ? "https://wiki-contentdev.yahiro.workers.dev/" +
+      post.image.replace(/^\.\.\//, "")
+    : "/assets/placeholder.svg";
+
   return (
     <Link href={`/${link}`}>
       <article className={styles.card}>
         <Image
           className={styles.image}
-          src={
-            post.image
-              ? "https://wiki-contentdev.yahiro.workers.dev/" + post.image
-              : "/assets/placeholder.svg"
-          }
+          src={imageUrl}
           alt={post.title}
           width={800}
           height={600}
