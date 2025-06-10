@@ -1,5 +1,12 @@
 import { getAllCategories } from "@/lib/getAllCategories";
-import { ChevronLeft, Columns2, Home, SquarePen, Tag } from "lucide-react";
+import {
+  ChevronLeft,
+  Columns2,
+  File,
+  Home,
+  SquarePen,
+  Tag,
+} from "lucide-react";
 import { css, cx, sva } from "styled-system/css";
 import {
   SidebarNavListItem,
@@ -88,6 +95,9 @@ export const SidebarContentDashboard: React.FC = async () => {
 
           <SidebarNavListItem href="/dashboard" icon={<Columns2 />}>
             ダッシュボード
+          </SidebarNavListItem>
+          <SidebarNavListItem href="/dashboard/posts" icon={<File />}>
+            投稿一覧
           </SidebarNavListItem>
         </div>
 
