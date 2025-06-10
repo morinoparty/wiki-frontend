@@ -18,34 +18,350 @@ import {
   quotePlugin,
   codeBlockPlugin,
   thematicBreakPlugin,
+  usePublisher,
+  insertMarkdown$,
+  insertImage$,
 } from "@mdxeditor/editor";
+import type { FC } from "react";
+import HighlightToggle from "./toolbar/HighlightToggle";
+import { ImageUploadModal } from "./ImageUploadModal";
 
-import { FC } from "react";
-import { css } from "styled-system/css";
+import { useState, useEffect } from "react";
+import { Image } from "lucide-react";
+import { uploadImage } from "@/actions/upload-image";
+import { toaster } from "@/components/ui/toaster";
+
+import "@mdxeditor/editor/style.css";
+import "./mdx-editor-custom.css";
+
+// 日本語翻訳オブジェクト
+const JAPANESE_TRANSLATIONS = {
+  frontmatterEditor: {
+    title: "ドキュメントのフロントマターを編集",
+    key: "キー",
+    value: "値",
+    addEntry: "エントリを追加",
+  },
+  dialogControls: {
+    save: "保存",
+    cancel: "キャンセル",
+  },
+  uploadImage: {
+    dialogTitle: "画像をアップロード",
+    uploadInstructions: "デバイスから画像をアップロード:",
+    addViaUrlInstructions: "またはURLから画像を追加:",
+    autoCompletePlaceholder: "画像のsrcを選択または貼り付け",
+    alt: "代替テキスト:",
+    title: "タイトル:",
+  },
+  imageEditor: {
+    deleteImage: "画像を削除",
+    editImage: "画像を編集",
+  },
+  createLink: {
+    url: "URL",
+    urlPlaceholder: "URLを選択または貼り付け",
+    title: "タイトル",
+    saveTooltip: "URLを設定",
+    cancelTooltip: "変更をキャンセル",
+  },
+  linkPreview: {
+    open: "{{url}}を新しいウィンドウで開く",
+    edit: "リンクURLを編集",
+    copyToClipboard: "クリップボードにコピー",
+    copied: "コピーしました！",
+    remove: "リンクを削除",
+  },
+  table: {
+    deleteTable: "テーブルを削除",
+    columnMenu: "列メニュー",
+    textAlignment: "テキストの配置",
+    alignLeft: "左揃え",
+    alignCenter: "中央揃え",
+    alignRight: "右揃え",
+    insertColumnLeft: "この列の左に列を挿入",
+    insertColumnRight: "この列の右に列を挿入",
+    deleteColumn: "この列を削除",
+    rowMenu: "行メニュー",
+    insertRowAbove: "この行の上に行を挿入",
+    insertRowBelow: "この行の下に行を挿入",
+    deleteRow: "この行を削除",
+  },
+  toolbar: {
+    blockTypes: {
+      paragraph: "段落",
+      quote: "引用",
+      heading: "見出し{{level}}",
+    },
+    blockTypeSelect: {
+      selectBlockTypeTooltip: "ブロックタイプを選択",
+      placeholder: "ブロックタイプ",
+    },
+    toggleGroup: "トグルグループ",
+    removeBold: "太字を解除",
+    bold: "太字",
+    removeItalic: "斜体を解除",
+    italic: "斜体",
+    underline: "下線を解除",
+    removeUnderline: "下線",
+    removeInlineCode: "コード書式を解除",
+    inlineCode: "インラインコード書式",
+    link: "リンクを作成",
+    richText: "リッチテキスト",
+    diffMode: "差分モード",
+    source: "ソースモード",
+    admonition: "注記を挿入",
+    codeBlock: "コードブロックを挿入",
+    editFrontmatter: "フロントマターを編集",
+    insertFrontmatter: "フロントマターを挿入",
+    image: "画像を挿入",
+    insertSandpack: "Sandpackを挿入",
+    table: "テーブルを挿入",
+    thematicBreak: "区切り線を挿入",
+    bulletedList: "箇条書きリスト",
+    numberedList: "番号付きリスト",
+    checkList: "チェックリスト",
+    deleteSandpack: "このコードブロックを削除",
+    undo: "元に戻す {{shortcut}}",
+    redo: "やり直し {{shortcut}}",
+  },
+  admonitions: {
+    note: "注記",
+    tip: "ヒント",
+    danger: "危険",
+    info: "情報",
+    caution: "注意",
+    changeType: "注記タイプを選択",
+    placeholder: "注記タイプ",
+  },
+  codeBlock: {
+    language: "コードブロック言語",
+    selectLanguage: "コードブロック言語を選択",
+  },
+  contentArea: {
+    editableMarkdown: "編集可能なマークダウン",
+  },
+};
+
+// 翻訳関数（i18next互換）
+const translateToJapanese = (
+  key: string,
+  defaultValue?: string,
+  interpolations?: Record<string, string>
+): string => {
+  // ドット記法でネストされたオブジェクトを取得
+  const keys = key.split(".");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let translation: any = JAPANESE_TRANSLATIONS;
+
+  for (const k of keys) {
+    if (translation && typeof translation === "object" && k in translation) {
+      translation = translation[k];
+    } else {
+      translation = undefined;
+      break;
+    }
+  }
+
+  let result = translation || defaultValue || key;
+
+  // 補間処理（{{variable}}を置換）
+  if (typeof result === "string" && interpolations) {
+    Object.entries(interpolations).forEach(([variable, value]) => {
+      result = result.replace(new RegExp(`{{${variable}}}`, "g"), value);
+    });
+  }
+
+  return result;
+};
+
+// 定数
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const TOAST_DURATION = {
+  DEFAULT: 3000,
+  ERROR: 5000,
+};
 
 interface EditorProps {
   markdown: string;
-  editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
+  editorRef?: React.RefObject<MDXEditorMethods | null>;
   onChange: (markdown: string) => void;
 }
+
+/**
+ * ファイルのバリデーションを行う
+ * @param file 検証するファイル
+ * @returns 検証結果（trueなら問題なし）
+ */
+const validateFile = (file: File): boolean => {
+  if (file.size > MAX_FILE_SIZE) {
+    toaster.error({
+      title: "エラー",
+      description: "ファイルサイズは5MB以下にしてください",
+      duration: TOAST_DURATION.ERROR,
+      meta: { closable: true },
+    });
+    return false;
+  }
+  return true;
+};
+
+/**
+ * ImageInsertComponent - MDXEditor内部で画像挿入機能を提供するコンポーネント
+ */
+const ImageInsertComponent = () => {
+  // MDXEditorの信号システムを使用
+  const insertMarkdown = usePublisher(insertMarkdown$);
+  const insertImage = usePublisher(insertImage$);
+
+  // グローバルに画像挿入と編集機能を提供
+  useEffect(() => {
+    // window オブジェクトに画像挿入関数を登録
+    const windowWithMethods = window as unknown as {
+      mdxEditorInsertImage?: (url: string, alt?: string) => void;
+      mdxEditorOpenImageModal?: () => void;
+    };
+
+    // 画像挿入関数
+    windowWithMethods.mdxEditorInsertImage = (
+      imageUrl: string,
+      altText?: string
+    ) => {
+      console.log("=== Window経由での画像挿入 ===");
+      console.log("imageUrl:", imageUrl);
+      console.log("altText:", altText);
+
+      try {
+        // アプローチ1: insertImage$ を使用（推奨）
+        console.log("insertImage$ を試行中...");
+        insertImage({ src: imageUrl, altText: altText || "画像" });
+        console.log("✅ insertImage$ 成功");
+      } catch (error) {
+        console.error("❌ insertImage$ エラー:", error);
+
+        // アプローチ2: insertMarkdown$ でフォールバック
+        try {
+          console.log("insertMarkdown$ フォールバックを試行中...");
+          const markdownImage = `![${altText || "画像"}](${imageUrl})`;
+          insertMarkdown(markdownImage);
+          console.log("✅ insertMarkdown$ フォールバック成功");
+        } catch (fallbackError) {
+          console.error(
+            "❌ insertMarkdown$ フォールバックもエラー:",
+            fallbackError
+          );
+        }
+      }
+    };
+
+    // 画像モーダルを開く関数（外部から呼び出し可能）
+    windowWithMethods.mdxEditorOpenImageModal = () => {
+      console.log("=== Window経由でモーダルを開く ===");
+      (
+        window as unknown as { setIsImageModalOpen?: (open: boolean) => void }
+      ).setIsImageModalOpen?.(true);
+    };
+
+    // クリーンアップ
+    return () => {
+      delete windowWithMethods.mdxEditorInsertImage;
+      delete windowWithMethods.mdxEditorOpenImageModal;
+    };
+  }, [insertMarkdown, insertImage]);
+
+  return null; // このコンポーネントはUIを持たない
+};
 
 /**
  * Extend this Component further with the necessary plugins or props you need.
  * proxying the ref is necessary. Next.js dynamically imported components don't support refs.
  */
 const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
-  console.log("Editor rendered", { markdown });
+  console.log("=== Editor レンダリング ===");
+  console.log("markdown:", markdown?.substring(0, 100) + "...");
+  console.log("editorRef:", editorRef);
+  console.log("onChange:", onChange);
+
+  // 画像アップロードモーダルの状態
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  // 編集中の画像情報
+  const [editingImage, setEditingImage] = useState<{
+    src: string;
+    alt: string;
+  } | null>(null);
+
+  // windowオブジェクトにモーダル開閉機能を提供
+  useEffect(() => {
+    (
+      window as unknown as { setIsImageModalOpen?: (open: boolean) => void }
+    ).setIsImageModalOpen = setIsImageModalOpen;
+    (
+      window as unknown as {
+        setEditingImage?: (image: { src: string; alt: string } | null) => void;
+      }
+    ).setEditingImage = setEditingImage;
+
+    return () => {
+      delete (
+        window as unknown as { setIsImageModalOpen?: (open: boolean) => void }
+      ).setIsImageModalOpen;
+      delete (
+        window as unknown as {
+          setEditingImage?: (
+            image: { src: string; alt: string } | null
+          ) => void;
+        }
+      ).setEditingImage;
+    };
+  }, []);
+
+  /**
+   * モーダルから画像を挿入する処理
+   * windowオブジェクト経由でMDXEditor内部の機能を呼び出す
+   */
+  const handleImageInsert = (imageUrl: string, altText?: string) => {
+    console.log("=== 外部画像挿入処理開始 ===");
+    console.log("imageUrl:", imageUrl);
+    console.log("altText:", altText);
+
+    // Window経由でMDXEditor内部の機能を呼び出し
+    const windowWithInsert = window as unknown as {
+      mdxEditorInsertImage?: (url: string, alt?: string) => void;
+    };
+    if (windowWithInsert.mdxEditorInsertImage) {
+      console.log("✅ Window経由で画像挿入を実行");
+      windowWithInsert.mdxEditorInsertImage(imageUrl, altText);
+    } else {
+      console.error("❌ MDXEditor画像挿入機能が利用できません");
+      // 最終フォールバック: onChangeを直接使用
+      const markdownImage = `![${altText || "画像"}](${imageUrl})`;
+      const newMarkdown = markdown + "\n\n" + markdownImage + "\n";
+      onChange(newMarkdown);
+      console.log("⚠️ フォールバック: onChange経由で画像挿入完了");
+    }
+
+    console.log("=== 外部画像挿入処理終了 ===");
+  };
 
   return (
     <>
       <MDXEditor
-        onChange={onChange}
+        onChange={(newMarkdown) => {
+          console.log(
+            "MDXEditor onChange called with:",
+            newMarkdown?.substring(0, 100) + "..."
+          );
+          onChange(newMarkdown);
+        }}
         ref={editorRef}
         markdown={markdown}
         onError={(e) => console.error("Editor error", e)}
         suppressHtmlProcessing={true}
+        translation={translateToJapanese}
         plugins={[
-          headingsPlugin(),
+          headingsPlugin({
+            allowedHeadingLevels: [1, 2, 3, 4],
+          }),
           linkPlugin(),
           tablePlugin(),
           listsPlugin(),
@@ -58,90 +374,81 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
           markdownShortcutPlugin(),
 
           imagePlugin({
-            imageUploadHandler: () => {
-              return Promise.resolve("https://picsum.photos/200/300");
+            // アップロードハンドラー（MDXEditor内部でドラッグ&ドロップなどに使用）
+            imageUploadHandler: async (file: File) => {
+              console.log("=== MDXEditor内部imageUploadHandler 呼び出し ===");
+              console.log("file:", file.name, file.size);
+
+              if (!validateFile(file)) {
+                throw new Error("ファイルバリデーションに失敗しました");
+              }
+
+              try {
+                const result = await uploadImage(file);
+                if (!result.success || !result.data) {
+                  throw new Error(result.error || "アップロードに失敗しました");
+                }
+
+                console.log(
+                  "✅ MDXEditor内部アップロード成功:",
+                  result.data.url
+                );
+                return result.data.url;
+              } catch (error) {
+                console.error("❌ MDXEditor内部アップロードエラー:", error);
+                throw error;
+              }
             },
-            imagePreviewHandler: (url) => {
-              return Promise.resolve(
-                "https://wiki-contentdev.yahiro.workers.dev/" + url
-              );
+
+            // プレビューハンドラー（画像表示用）
+            imagePreviewHandler: async (url: string) => {
+              console.log("🖼️ imagePreviewHandler called with:", url);
+
+              // base64の場合はそのまま返す（プレビュー用）
+              if (url.startsWith("data:")) {
+                console.log("✅ Returning base64 for preview");
+                return url;
+              }
+
+              // 完全なURLの場合はそのまま返す
+              if (url.startsWith("https://") || url.startsWith("http://")) {
+                console.log("✅ Returning full URL:", url);
+                return url;
+              }
+
+              // 相対パスの場合は完全なURLを構築
+              const fullUrl = `https://wiki-contentdev.yahiro.workers.dev/${url}`;
+              console.log("✅ Constructed full URL:", fullUrl);
+              return fullUrl;
             },
-            imageAutocompleteSuggestions: [
-              "https://picsum.photos/200/300",
-              "https://picsum.photos/200",
-            ],
+
+            // デフォルトの画像設定ボタンを無効にして、カスタムツールバーを使用
+            disableImageSettingsButton: true,
+
+            // リサイズ無効化とオートコンプリート設定
+            disableImageResize: true,
+            imageAutocompleteSuggestions: [],
           }),
           toolbarPlugin({
-            toolbarClassName: css({
-              position: "sticky",
-              top: "64px",
-              width: "100%",
-              bg: "white",
-              padding: "16px",
-              py: "8px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexDirection: "row",
-              gap: "12px",
-              borderBottom: "1px solid",
-              borderColor: "leaf.100",
-              "& > ul > div ": {
-                display: "flex",
-                height: "36px",
-
-                "& > div": {
-                  height: "36px",
-                  px: "6px",
-                  py: "6px",
-                },
-              },
-            }),
             toolbarContents: () => (
               <>
-                <ul
-                  className={css({
-                    display: "flex",
-                    gap: "12px",
-                    listStyle: "none",
-                    margin: 0,
-                    padding: 0,
-                  })}
-                >
-                  <li
-                    className={css({
-                      "& button": {
-                        background: "transparent",
-                        cursor: "pointer",
-                        gap: "4px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        height: "36px",
-                        pl: "18px",
-                        pr: "8px",
-                        bg: "leaf.50/50",
-                        textStyle: "body",
-                        borderRadius: "8px",
-                        border: "0.5px solid",
-                        borderColor: "leaf.100",
-                        transition: "all 0.4s",
-                        "&:hover": {
-                          textDecoration: "underline",
-                        },
-                      },
-                    })}
-                  >
+                {/* ImageInsertComponent を追加 */}
+                <ImageInsertComponent />
+
+                <ul className="toolbar-section">
+                  <li>
                     <BlockTypeSelect />
                   </li>
-                  <li
-                    className={css({
-                      "& div": {
-                        display: "flex",
-                        gap: "2px",
-                      },
-
-                      "& button": {
+                  <li>
+                    <BoldItalicUnderlineToggles />
+                    <HighlightToggle />
+                    <button
+                      onClick={() => {
+                        console.log("画像ボタンクリック - モーダルを開く");
+                        setIsImageModalOpen(true);
+                      }}
+                      type="button"
+                      style={{
                         border: "none",
                         background: "transparent",
                         cursor: "pointer",
@@ -152,48 +459,14 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
                         height: "36px",
                         borderRadius: "8px",
                         transition: "all 0.4s",
-                        "&:hover": {
-                          bg: "leaf.50/50",
-                          textDecoration: "underline",
-                        },
-                        "&:active": {
-                          bg: "leaf.50",
-                        },
-                      },
-                    })}
-                  >
-                    <BoldItalicUnderlineToggles />
+                      }}
+                    >
+                      <Image size={16} aria-label="画像を挿入" />
+                    </button>
                   </li>
                 </ul>
-                <ul>
-                  <li
-                    className={css({
-                      "& div": {
-                        display: "flex",
-                        gap: "2px",
-                      },
-
-                      "& button": {
-                        border: "none",
-                        background: "transparent",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "36px",
-                        height: "36px",
-                        borderRadius: "8px",
-                        transition: "all 0.4s",
-                        "&:hover": {
-                          bg: "leaf.50/50",
-                          textDecoration: "underline",
-                        },
-                        "&:active": {
-                          bg: "leaf.50",
-                        },
-                      },
-                    })}
-                  >
+                <ul className="toolbar-section">
+                  <li>
                     <UndoRedo />
                   </li>
                 </ul>
@@ -202,157 +475,19 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
           }),
           markdownShortcutPlugin(),
         ]}
-        className={css({
-          bg: "white",
-        })}
-        contentEditableClassName={css({
-          px: { base: "92px", lgDown: "24px" },
-          pt: "48px",
-          pb: "300px",
-          outline: "none",
-          maxWidth: "980px",
-          margin: "0 auto",
-          // mdxStylesからインポートする方法を色々試したが、スタイルを適応できなかったため、ベタがきしている
-          "& p": {
-            textStyle: "body",
-            color: "leaf.700",
-            lineHeight: "1.85",
-            my: "24px",
-            _first: { mt: "0" },
-          },
-          "& h1": {
-            fontSize: "32px",
-            fontWeight: "bold",
-            color: "leaf.700",
-            textStyle: "heading1",
-            mt: "56px",
-            mb: "32px",
-          },
-          "& h2": {
-            fontSize: "28px",
-            fontWeight: "bold",
-            color: "leaf.700",
-            textStyle: "heading2",
-            mt: "56px",
-            mb: "32px",
-          },
-          "& h3": {
-            fontSize: "24px",
-            fontWeight: "bold",
-            color: "leaf.700",
-            textStyle: "body",
-            mt: "48px",
-            mb: "12px",
-          },
-          "& h4": {
-            fontSize: "20px",
-            fontWeight: "bold",
-            color: "leaf.700",
-            textStyle: "heading4",
-            mt: "24px",
-            mb: "10px",
-          },
-          "& h5": {
-            fontSize: "18px",
-            fontWeight: "bold",
-            color: "leaf.700",
-            textStyle: "heading5",
-            mt: "18px",
-            mb: "8px",
-          },
-          "& h6": {
-            fontSize: "16px",
-            fontWeight: "bold",
-            color: "leaf.700",
-            textStyle: "heading6",
-            mt: "16px",
-            mb: "6px",
-          },
-          "& ul": {
-            pl: "24px",
-            my: "16px",
-            listStyle: "disc inside",
-            textStyle: "body",
-          },
-          "& ol": {
-            pl: "24px",
-            my: "16px",
-            listStyle: "decimal inside",
-            textStyle: "body",
-          },
-          "& li": {
-            mb: "8px",
-            textStyle: "body",
-          },
-          "& a": {
-            color: "blue.600",
-            textDecoration: "underline",
-            textStyle: "body",
-            _hover: { color: "blue.800" },
-          },
-          "& blockquote": {
-            borderLeft: "4px solid #A3C9A8",
-            pl: "16px",
-            color: "gray.700",
-            fontStyle: "italic",
-            my: "16px",
-            textStyle: "body",
-          },
-          "& code": {
-            background: "gray.100",
-            color: "gray.800",
-            px: "4px",
-            py: "2px",
-            borderRadius: "4px",
-            fontSize: "0.95em",
-            textStyle: "body",
-          },
-          "& pre": {
-            background: "gray.100",
-            color: "gray.800",
-            px: "16px",
-            py: "12px",
-            borderRadius: "8px",
-            overflowX: "auto",
-            my: "16px",
-            textStyle: "body",
-          },
-          "& img": {
-            maxWidth: "100%",
-            borderRadius: "8px",
-            margin: "16px 0",
-          },
-          "& hr": {
-            border: "none",
-            borderTop: "1px solid #E2E8F0",
-            my: "32px",
-          },
-          "& table": {
-            width: "100%",
-            borderCollapse: "collapse",
-            my: "24px",
-            textStyle: "body",
-          },
-          "& thead": {
-            background: "gray.50",
-          },
-          "& tr": {
-            borderBottom: "1px solid #E2E8F0",
-          },
-          "& th": {
-            fontWeight: "bold",
-            textAlign: "left",
-            px: "12px",
-            py: "8px",
-            background: "gray.100",
-            textStyle: "body",
-          },
-          "& td": {
-            px: "12px",
-            py: "8px",
-            textStyle: "body",
-          },
-        })}
+        className="mdx-editor"
+        contentEditableClassName="prose"
+      />
+
+      {/* 画像アップロードモーダル */}
+      <ImageUploadModal
+        isOpen={isImageModalOpen}
+        onClose={() => {
+          setIsImageModalOpen(false);
+          setEditingImage(null);
+        }}
+        onImageInsert={handleImageInsert}
+        editingImage={editingImage}
       />
     </>
   );

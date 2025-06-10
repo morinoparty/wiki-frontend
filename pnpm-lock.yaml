@@ -17,6 +17,9 @@ importers:
       '@mdxeditor/editor':
         specifier: ^3.32.3
         version: 3.32.3(@codemirror/language@6.11.0)(@lezer/highlight@1.2.1)(@types/react-dom@19.1.5(@types/react@19.1.4))(@types/react@19.1.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(yjs@13.6.27)
+      '@mdxeditor/gurx':
+        specifier: ^1.2.3
+        version: 1.2.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@opennextjs/cloudflare':
         specifier: ^1.0.2
         version: 1.0.2(wrangler@4.15.2)

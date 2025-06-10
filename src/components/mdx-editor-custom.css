@@ -1,0 +1,622 @@
+/* MDXEditor Custom Styles - Project Design System Integration */
+
+/* Reset default MDXEditor styles using correct class names */
+.mdxeditor {
+  border: none !important;
+  background: white !important;
+  font-family:
+    "Satoshi-Variable",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    sans-serif !important;
+  font-size: 16px !important;
+  color: #2d634b !important; /* leaf.700 */
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Toolbar styles - z-indexを調整 */
+.mdxeditor-toolbar {
+  position: fixed !important;
+  top: 64px !important;
+  width: calc(100% - 300px) !important;
+  padding: 16px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-direction: row !important;
+  gap: 12px !important;
+  border-top: 0px solid !important;
+  border-bottom: 1px solid !important;
+  border-color: #cdebdf !important; /* leaf.100 */
+  border-radius: 0 !important;
+  background: white !important;
+  z-index: 50 !important; /* ドロップダウンより低く設定 */
+}
+
+.mdxeditor-toolbar > ul > div {
+  display: flex !important;
+  height: 36px !important;
+}
+
+.mdxeditor-toolbar > ul > div > div {
+  height: 36px !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+}
+
+/* Toolbar sections - 元のTSX構造を再現 */
+.mdxeditor-toolbar .toolbar-section {
+  display: flex !important;
+  gap: 12px !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* BlockTypeSelect スタイル - z-index問題を修正 */
+.mdxeditor-toolbar .toolbar-section:first-child li:first-child {
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+.mdxeditor-toolbar .toolbar-section:first-child li:first-child button {
+  background: rgba(234, 242, 239, 0.5) !important; /* leaf.50/50 */
+  cursor: pointer !important;
+  gap: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 36px !important;
+  padding-left: 16px !important;
+  padding-right: 12px !important;
+  min-width: 120px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #2d634b !important; /* leaf.700 */
+  border-radius: 8px !important;
+  border: 1px solid #cdebdf !important; /* leaf.100 */
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  z-index: 101 !important;
+}
+
+.mdxeditor-toolbar .toolbar-section:first-child li:first-child button:hover {
+  background: #eaf2ef !important; /* leaf.50 */
+  border-color: #b5deca !important; /* leaf.200 */
+}
+
+.mdxeditor-toolbar .toolbar-section:first-child li:first-child button:focus {
+  outline: none !important;
+  border-color: #347e5e !important; /* leaf.600 */
+}
+
+/* MDXEditor BlockTypeSelect dropdown - 正しいクラス名を使用 */
+.mdxeditor-popup-container {
+  z-index: 9999 !important;
+}
+
+.mdxeditor-select-content {
+  background: white !important;
+  border: 1px solid #cdebdf !important; /* leaf.100 */
+  border-radius: 8px !important;
+  /* box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; */
+  padding: 4px !important;
+  min-width: 160px !important;
+  z-index: 9999 !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+}
+
+.mdxeditor-select-content [role="option"] {
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  color: #2d634b !important; /* leaf.700 */
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 2px 0 !important;
+  background: transparent !important;
+}
+
+.mdxeditor-select-content [role="option"]:hover,
+.mdxeditor-select-content [role="option"][data-highlighted="true"] {
+  background: #eaf2ef !important; /* leaf.50 */
+  color: #347e5e !important; /* leaf.600 */
+}
+
+.mdxeditor-select-content [role="option"][data-state="checked"] {
+  background: #347e5e !important; /* leaf.600 */
+  color: white !important;
+}
+
+/* 重複した矢印を削除 */
+.mdxeditor-toolbar .toolbar-section:first-child li:first-child button::after {
+  display: none !important;
+}
+
+/* BoldItalicUnderlineToggles, HighlightToggle, InsertImage スタイル */
+.mdx-editor .toolbar-section:first-child li:nth-child(2) {
+  display: flex !important;
+}
+
+.mdx-editor .toolbar-section:first-child li:nth-child(2) > div {
+  display: flex !important;
+  gap: 2px !important;
+}
+
+.mdx-editor .toolbar-section:first-child li:nth-child(2) button {
+  border: none !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  transition: all 0.4s !important;
+}
+
+.mdx-editor .toolbar-section:first-child li:nth-child(2) button:hover {
+  background: rgba(234, 242, 239, 0.5) !important; /* leaf.50/50 */
+  text-decoration: underline !important;
+}
+
+.mdx-editor .toolbar-section:first-child li:nth-child(2) button:active {
+  background: #eaf2ef !important; /* leaf.50 */
+}
+
+/* UndoRedo スタイル */
+.mdx-editor .toolbar-section:last-child li > div {
+  display: flex !important;
+  gap: 2px !important;
+}
+
+.mdx-editor .toolbar-section:last-child button {
+  border: none !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  transition: all 0.4s !important;
+}
+
+.mdx-editor .toolbar-section:last-child button:hover {
+  background: rgba(234, 242, 239, 0.5) !important; /* leaf.50/50 */
+  text-decoration: underline !important;
+}
+
+.mdx-editor .toolbar-section:last-child button:active {
+  background: #eaf2ef !important; /* leaf.50 */
+}
+
+/* 全般的なMDXEditor popup z-index修正 */
+.mdxeditor-popup-container,
+.mdxeditor-select-content,
+[data-radix-popper-content-wrapper],
+[data-radix-portal] {
+  z-index: 9999 !important;
+}
+
+/* Select dropdown styles */
+.mdx-editor .mdx-toolbar select {
+  background: rgba(234, 242, 239, 0.5) !important; /* leaf.50/50 */
+  border: 1px solid #cdebdf !important; /* leaf.100 */
+  border-radius: 8px !important;
+  color: #2d634b !important; /* leaf.700 */
+  font-family:
+    "Satoshi-Variable",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding: 8px 12px !important;
+  height: 36px !important;
+  min-width: 120px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  z-index: 101 !important;
+}
+
+.mdx-editor .mdx-toolbar select:hover {
+  background: #eaf2ef !important; /* leaf.50 */
+  border-color: #b5deca !important; /* leaf.200 */
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important; */
+}
+
+.mdx-editor .mdx-toolbar select:focus {
+  outline: none !important;
+  border-color: #347e5e !important; /* leaf.600 */
+  /* box-shadow: 0 0 0 3px rgba(52, 126, 94, 0.1) !important; */
+}
+
+/* Content area styles - 元のTSXスタイルを移植 */
+.mdxeditor-root-contenteditable .prose {
+  background: white !important;
+  padding-left: 92px !important;
+  padding-right: 92px !important;
+  padding-top: 48px !important;
+  padding-bottom: 300px !important;
+  outline: none !important;
+  max-width: 980px !important;
+  margin: 0 auto !important;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 1024px) {
+  .mdxeditor-root-contenteditable,
+  .prose {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+}
+
+/* Focus styles */
+.mdx-editor .mdx-content-editable:focus {
+  outline: none !important;
+}
+
+/* Typography styles - 元のTSXスタイルを移植 */
+.prose p {
+  font-size: 16px !important; /* textStyle: body */
+  color: #2d634b !important; /* leaf.700 */
+  line-height: 1.85 !important;
+  margin: 24px 0 !important;
+}
+
+.prose p:first-child {
+  margin-top: 0 !important;
+}
+
+.prose h1 {
+  font-size: 32px !important;
+  font-weight: bold !important;
+  color: #2d634b !important; /* leaf.700 */
+  margin-top: 56px !important;
+  margin-bottom: 32px !important;
+}
+
+.prose h2 {
+  font-size: 28px !important;
+  font-weight: bold !important;
+  color: #2d634b !important; /* leaf.700 */
+  margin-top: 56px !important;
+  margin-bottom: 32px !important;
+}
+
+.prose h3 {
+  font-size: 24px !important;
+  font-weight: bold !important;
+  color: #2d634b !important; /* leaf.700 */
+  margin-top: 48px !important;
+  margin-bottom: 12px !important;
+}
+
+.prose h4 {
+  font-size: 20px !important;
+  font-weight: bold !important;
+  color: #2d634b !important; /* leaf.700 */
+  margin-top: 24px !important;
+  margin-bottom: 10px !important;
+}
+
+.prose h5 {
+  font-size: 18px !important;
+  font-weight: bold !important;
+  color: #2d634b !important; /* leaf.700 */
+  margin-top: 18px !important;
+  margin-bottom: 8px !important;
+}
+
+.prose h6 {
+  font-size: 16px !important;
+  font-weight: bold !important;
+  color: #2d634b !important; /* leaf.700 */
+  margin-top: 16px !important;
+  margin-bottom: 6px !important;
+}
+
+/* List styles - 元のTSXスタイルを移植 */
+.prose ul {
+  padding-left: 24px !important;
+  margin: 16px 0 !important;
+  list-style: disc inside !important;
+  font-size: 16px !important; /* textStyle: body */
+}
+
+.prose ol {
+  padding-left: 24px !important;
+  margin: 16px 0 !important;
+  list-style: decimal inside !important;
+  font-size: 16px !important; /* textStyle: body */
+}
+
+.prose li {
+  margin-bottom: 8px !important;
+  font-size: 16px !important; /* textStyle: body */
+}
+
+/* Blockquote styles - 元のTSXスタイルを移植 */
+.prose blockquote {
+  border-left: 4px solid #a3c9a8 !important;
+  padding-left: 16px !important;
+  color: #6b7280 !important; /* gray.700 */
+  font-style: italic !important;
+  margin: 16px 0 !important;
+  font-size: 16px !important; /* textStyle: body */
+}
+
+/* Code styles - 元のTSXスタイルを移植 */
+.prose code {
+  background: #f3f4f6 !important; /* gray.100 */
+  color: #1f2937 !important; /* gray.800 */
+  padding: 4px !important;
+  border-radius: 4px !important;
+  font-size: 0.95em !important;
+  font-size: 16px !important; /* textStyle: body */
+}
+
+.prose pre {
+  background: #f3f4f6 !important; /* gray.100 */
+  color: #1f2937 !important; /* gray.800 */
+  padding: 16px !important;
+  border-radius: 8px !important;
+  overflow-x: auto !important;
+  margin: 16px 0 !important;
+  font-size: 16px !important; /* textStyle: body */
+}
+
+.prose mark {
+  background: #fef3c7 !important; /* yellow.200 */
+  color: inherit !important;
+  padding: 2px !important;
+  border-radius: 4px !important;
+}
+
+/* Link styles - 元のTSXスタイルを移植 */
+.prose a {
+  color: #2563eb !important; /* blue.600 */
+  text-decoration: underline !important;
+  font-size: 16px !important; /* textStyle: body */
+}
+
+.prose a:hover {
+  color: #1e40af !important; /* blue.800 */
+}
+
+/* Image styles - 元のTSXスタイルを移植 */
+.prose img {
+  max-width: 100% !important;
+  border-radius: 8px !important;
+  margin: 16px 0 !important;
+  display: block !important;
+  height: auto !important;
+}
+
+/* 画像の位置修正 - 最優先 */
+.prose img {
+  position: static !important;
+  transform: none !important;
+  float: none !important;
+  clear: both !important;
+}
+
+/* 画像の拡大・リサイズツールを非表示（編集ボタンは表示） */
+.mdxeditor [data-testid="image-resize-handle"],
+.mdxeditor .image-resize-handle {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* 画像編集ツールバーは表示するが、不要なボタンのみ非表示 */
+.mdxeditor .image-toolbar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid #cdebdf !important; /* leaf.100 */
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  padding: 4px !important;
+  z-index: 1000 !important;
+}
+
+/* 編集ボタン（歯車アイコン）は表示 */
+.mdxeditor .image-edit-button,
+.mdxeditor [data-testid="image-edit-button"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  border: none !important;
+  background: transparent !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  color: #347e5e !important; /* leaf.600 */
+  transition: all 0.2s ease !important;
+}
+
+.mdxeditor .image-edit-button:hover,
+.mdxeditor [data-testid="image-edit-button"]:hover {
+  background: #eaf2ef !important; /* leaf.50 */
+  color: #2d634b !important; /* leaf.700 */
+}
+
+/* 画像選択時のスタイル改善 */
+.prose img:focus,
+.prose img.selected {
+  outline: 2px solid #347e5e !important; /* leaf.600 */
+  outline-offset: 2px !important;
+  border-radius: 4px !important;
+}
+
+/* HR styles - 元のTSXスタイルを移植 */
+.prose hr {
+  border: none !important;
+  border-top: 1px solid #e2e8f0 !important;
+  margin: 32px 0 !important;
+}
+
+/* Table styles - 元のTSXスタイルを移植 */
+.prose table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 24px 0 !important;
+  font-size: 16px !important; /* textStyle: body */
+}
+
+.prose thead {
+  background: #f9fafb !important; /* gray.50 */
+}
+
+.prose tr {
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.prose th {
+  font-weight: bold !important;
+  text-align: left !important;
+  padding: 12px !important;
+  background: #f3f4f6 !important; /* gray.100 */
+  font-size: 16px !important; /* textStyle: body */
+}
+
+.prose td {
+  padding: 12px !important;
+  font-size: 16px !important; /* textStyle: body */
+}
+
+/* HR styles */
+.mdx-editor .mdx-content-editable hr {
+  border: none !important;
+  border-top: 1px solid var(--mdx-color-border) !important;
+  margin: var(--mdx-spacing-2xl) 0 !important;
+}
+
+/* Selection styles */
+.mdx-editor .mdx-content-editable ::selection {
+  background: var(--mdx-color-primary-lighter) !important;
+  color: var(--mdx-color-text) !important;
+}
+
+/* Placeholder styles */
+.mdx-editor .mdx-content-editable:empty::before {
+  content: attr(data-placeholder) !important;
+  color: var(--mdx-color-text-muted) !important;
+  font-style: italic !important;
+  pointer-events: none !important;
+}
+
+/* Dialog and modal styles */
+.mdx-editor .mdx-dialog {
+  background: var(--mdx-color-surface) !important;
+  border: 1px solid var(--mdx-color-border) !important;
+  border-radius: var(--mdx-border-radius-lg) !important;
+  box-shadow: var(--mdx-shadow-md) !important;
+  color: var(--mdx-color-text) !important;
+  font-family: var(--mdx-font-family) !important;
+}
+
+.mdx-editor .mdx-dialog input,
+.mdx-editor .mdx-dialog textarea {
+  background: var(--mdx-color-surface) !important;
+  border: 1px solid var(--mdx-color-border) !important;
+  border-radius: var(--mdx-border-radius-sm) !important;
+  color: var(--mdx-color-text) !important;
+  font-family: var(--mdx-font-family) !important;
+  padding: var(--mdx-spacing-sm) var(--mdx-spacing-md) !important;
+  transition: var(--mdx-transition) !important;
+}
+
+.mdx-editor .mdx-dialog input:focus,
+.mdx-editor .mdx-dialog textarea:focus {
+  outline: none !important;
+  border-color: var(--mdx-color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(52, 126, 94, 0.1) !important;
+}
+
+/* Scrollbar styles */
+.mdx-editor .mdx-content-editable::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.mdx-editor .mdx-content-editable::-webkit-scrollbar-track {
+  background: var(--mdx-color-surface-variant) !important;
+  border-radius: var(--mdx-border-radius-sm) !important;
+}
+
+.mdx-editor .mdx-content-editable::-webkit-scrollbar-thumb {
+  background: var(--mdx-color-border-hover) !important;
+  border-radius: var(--mdx-border-radius-sm) !important;
+}
+
+.mdx-editor .mdx-content-editable::-webkit-scrollbar-thumb:hover {
+  background: var(--mdx-color-primary-light) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mdx-editor .mdx-content-editable {
+    padding: var(--mdx-spacing-lg) !important;
+  }
+
+  .mdx-editor .mdx-toolbar {
+    padding: var(--mdx-spacing-xs) var(--mdx-spacing-sm) !important;
+    gap: var(--mdx-spacing-xs) !important;
+  }
+
+  .mdx-editor .mdx-toolbar button {
+    padding: var(--mdx-spacing-xs) var(--mdx-spacing-sm) !important;
+    font-size: 13px !important;
+    height: 32px !important;
+  }
+}
+
+/* Animation styles */
+@keyframes mdx-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mdx-editor .mdx-toolbar {
+  animation: mdx-fade-in 0.2s ease-out !important;
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+  .mdx-editor {
+    --mdx-color-surface: #1a1a1a;
+    --mdx-color-surface-variant: #2a2a2a;
+    --mdx-color-text: #e5e5e5;
+    --mdx-color-text-muted: #a0a0a0;
+    --mdx-color-border: #3a3a3a;
+    --mdx-color-border-hover: #4a4a4a;
+  }
+}

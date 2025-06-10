@@ -19,6 +19,7 @@
     "@chakra-ui/react": "^3.19.0",
     "@emotion/react": "^11.14.0",
     "@mdxeditor/editor": "^3.32.3",
+    "@mdxeditor/gurx": "^1.2.3",
     "@opennextjs/cloudflare": "^1.0.2",
     "flexsearch": "^0.8.167",
     "gray-matter": "^4.0.3",

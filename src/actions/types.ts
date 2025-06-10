@@ -52,9 +52,8 @@ export const CreatePostInputSchema = z.object({
     .union([
       z
         .string()
-        .url("画像URLの形式が正しくありません")
         .regex(
-          /\.(jpg|jpeg|png|gif|svg|webp)$/i,
+          /^(https?:\/\/|\/)[a-zA-Z0-9\-\._~:\/\?#\[\]@!\$&'\(\)\*\+,;=]+\.(jpg|jpeg|png|gif|svg|webp)$/i,
           "画像ファイルの形式が正しくありません（jpg, jpeg, png, gif, svg, webpのみ対応）"
         ),
       z.string().max(0), // 空文字を許容
@@ -96,9 +95,8 @@ export const UpdatePostInputSchema = CreatePostInputSchema.partial().extend({
     .union([
       z
         .string()
-        .url("画像URLの形式が正しくありません")
         .regex(
-          /\.(jpg|jpeg|png|gif|svg|webp)$/i,
+          /^(https?:\/\/|\/)[a-zA-Z0-9\-\._~:\/\?#\[\]@!\$&'\(\)\*\+,;=]+\.(jpg|jpeg|png|gif|svg|webp)$/i,
           "画像ファイルの形式が正しくありません（jpg, jpeg, png, gif, svg, webpのみ対応）"
         ),
       z.string().max(0), // 空文字を許容

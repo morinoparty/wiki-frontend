@@ -9,7 +9,7 @@ const editorNavStyles = sva({
     nav: {
       position: "sticky",
       top: 0,
-      zIndex: 10000000,
+      zIndex: 10,
       width: "100%",
       height: "64px",
       display: "grid",
