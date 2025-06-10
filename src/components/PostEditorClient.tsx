@@ -1,7 +1,7 @@
 "use client";
 import { toaster } from "@/components/ui/toaster";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { PostHeaderEdit } from "@/components/PostHeaderEdit";
 // import { MilkdownCrepeEditor } from "@/components/Editor";
 import { css } from "styled-system/css";
@@ -11,6 +11,7 @@ import { WikiPostDetail } from "@/types/wiki";
 import { EditorNav } from "@/components/EditorNav";
 import { Button } from "@chakra-ui/react";
 import dynamic from "next/dynamic";
+import type { MDXEditorMethods } from "@mdxeditor/editor";
 
 interface PostEditorClientProps {
   post: WikiPostDetail;
@@ -22,6 +23,26 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
   const [form, setForm] = useState(post);
   const [isPending, startTransition] = useTransition();
   const [isDirty, setIsDirty] = useState(false);
+  const editorRef = useRef<MDXEditorMethods | null>(null);
+  
+  // デバッグ用：editorRefの状態を監視
+  useEffect(() => {
+    console.log("=== PostEditorClient useEffect ===");
+    console.log("editorRef:", editorRef);
+    console.log("editorRef.current:", editorRef.current);
+    
+    const interval = setInterval(() => {
+      if (editorRef.current) {
+        console.log("✅ PostEditorClient: Editor ref is ready!");
+        console.log("Available methods:", Object.keys(editorRef.current));
+        clearInterval(interval);
+      } else {
+        console.log("⏳ PostEditorClient: Editor ref not ready yet...");
+      }
+    }, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // 変更検知用
   useEffect(() => {
@@ -100,6 +121,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
         <Suspense fallback={<div>Loading...</div>}>
           <EditorComp
             markdown={form.body}
+            editorRef={editorRef}
             onChange={(body) => setForm((prev) => ({ ...prev, body }))}
           />
         </Suspense>
