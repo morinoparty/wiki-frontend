@@ -34,6 +34,147 @@ import { toaster } from "@/components/ui/toaster";
 import "@mdxeditor/editor/style.css";
 import "./mdx-editor-custom.css";
 
+// 日本語翻訳オブジェクト
+const JAPANESE_TRANSLATIONS = {
+  frontmatterEditor: {
+    title: "ドキュメントのフロントマターを編集",
+    key: "キー",
+    value: "値",
+    addEntry: "エントリを追加",
+  },
+  dialogControls: {
+    save: "保存",
+    cancel: "キャンセル",
+  },
+  uploadImage: {
+    dialogTitle: "画像をアップロード",
+    uploadInstructions: "デバイスから画像をアップロード:",
+    addViaUrlInstructions: "またはURLから画像を追加:",
+    autoCompletePlaceholder: "画像のsrcを選択または貼り付け",
+    alt: "代替テキスト:",
+    title: "タイトル:",
+  },
+  imageEditor: {
+    deleteImage: "画像を削除",
+    editImage: "画像を編集",
+  },
+  createLink: {
+    url: "URL",
+    urlPlaceholder: "URLを選択または貼り付け",
+    title: "タイトル",
+    saveTooltip: "URLを設定",
+    cancelTooltip: "変更をキャンセル",
+  },
+  linkPreview: {
+    open: "{{url}}を新しいウィンドウで開く",
+    edit: "リンクURLを編集",
+    copyToClipboard: "クリップボードにコピー",
+    copied: "コピーしました！",
+    remove: "リンクを削除",
+  },
+  table: {
+    deleteTable: "テーブルを削除",
+    columnMenu: "列メニュー",
+    textAlignment: "テキストの配置",
+    alignLeft: "左揃え",
+    alignCenter: "中央揃え",
+    alignRight: "右揃え",
+    insertColumnLeft: "この列の左に列を挿入",
+    insertColumnRight: "この列の右に列を挿入",
+    deleteColumn: "この列を削除",
+    rowMenu: "行メニュー",
+    insertRowAbove: "この行の上に行を挿入",
+    insertRowBelow: "この行の下に行を挿入",
+    deleteRow: "この行を削除",
+  },
+  toolbar: {
+    blockTypes: {
+      paragraph: "段落",
+      quote: "引用",
+      heading: "見出し{{level}}",
+    },
+    blockTypeSelect: {
+      selectBlockTypeTooltip: "ブロックタイプを選択",
+      placeholder: "ブロックタイプ",
+    },
+    toggleGroup: "トグルグループ",
+    removeBold: "太字を解除",
+    bold: "太字",
+    removeItalic: "斜体を解除",
+    italic: "斜体",
+    underline: "下線を解除",
+    removeUnderline: "下線",
+    removeInlineCode: "コード書式を解除",
+    inlineCode: "インラインコード書式",
+    link: "リンクを作成",
+    richText: "リッチテキスト",
+    diffMode: "差分モード",
+    source: "ソースモード",
+    admonition: "注記を挿入",
+    codeBlock: "コードブロックを挿入",
+    editFrontmatter: "フロントマターを編集",
+    insertFrontmatter: "フロントマターを挿入",
+    image: "画像を挿入",
+    insertSandpack: "Sandpackを挿入",
+    table: "テーブルを挿入",
+    thematicBreak: "区切り線を挿入",
+    bulletedList: "箇条書きリスト",
+    numberedList: "番号付きリスト",
+    checkList: "チェックリスト",
+    deleteSandpack: "このコードブロックを削除",
+    undo: "元に戻す {{shortcut}}",
+    redo: "やり直し {{shortcut}}",
+  },
+  admonitions: {
+    note: "注記",
+    tip: "ヒント",
+    danger: "危険",
+    info: "情報",
+    caution: "注意",
+    changeType: "注記タイプを選択",
+    placeholder: "注記タイプ",
+  },
+  codeBlock: {
+    language: "コードブロック言語",
+    selectLanguage: "コードブロック言語を選択",
+  },
+  contentArea: {
+    editableMarkdown: "編集可能なマークダウン",
+  },
+};
+
+// 翻訳関数（i18next互換）
+const translateToJapanese = (
+  key: string,
+  defaultValue?: string,
+  interpolations?: Record<string, string>
+): string => {
+  // ドット記法でネストされたオブジェクトを取得
+  const keys = key.split(".");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let translation: any = JAPANESE_TRANSLATIONS;
+
+  for (const k of keys) {
+    if (translation && typeof translation === "object" && k in translation) {
+      translation = translation[k];
+    } else {
+      translation = undefined;
+      break;
+    }
+  }
+
+  let result = translation || defaultValue || key;
+
+  // 補間処理（{{variable}}を置換）
+  if (typeof result === "string" && interpolations) {
+    Object.entries(interpolations).forEach(([variable, value]) => {
+      result = result.replace(new RegExp(`{{${variable}}}`, "g"), value);
+    });
+  }
+
+  return result;
+};
+
 // 定数
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const TOAST_DURATION = {
@@ -216,6 +357,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
         markdown={markdown}
         onError={(e) => console.error("Editor error", e)}
         suppressHtmlProcessing={true}
+        translation={translateToJapanese}
         plugins={[
           headingsPlugin({
             allowedHeadingLevels: [1, 2, 3, 4],
