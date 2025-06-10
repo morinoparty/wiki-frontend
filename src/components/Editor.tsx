@@ -24,7 +24,10 @@ import {
 } from "@mdxeditor/editor";
 import type { FC } from "react";
 import HighlightToggle from "./toolbar/HighlightToggle";
+import TableInsert from "./toolbar/TableInsert";
+import LinkInsert from "./toolbar/LinkInsert";
 import { ImageUploadModal } from "./ImageUploadModal";
+import { LinkInsertModal } from "./LinkInsertModal";
 
 import { useState, useEffect } from "react";
 import { Image } from "lucide-react";
@@ -220,6 +223,7 @@ const ImageInsertComponent = () => {
     const windowWithMethods = window as unknown as {
       mdxEditorInsertImage?: (url: string, alt?: string) => void;
       mdxEditorOpenImageModal?: () => void;
+      mdxEditorInsertMarkdown?: (markdown: string) => void;
     };
 
     // 画像挿入関数
@@ -262,10 +266,23 @@ const ImageInsertComponent = () => {
       ).setIsImageModalOpen?.(true);
     };
 
+    // Markdown挿入関数（リンク挿入用）
+    windowWithMethods.mdxEditorInsertMarkdown = (markdownText: string) => {
+      console.log("=== Window経由でMarkdown挿入 ===");
+      console.log("markdownText:", markdownText);
+      try {
+        insertMarkdown(markdownText);
+        console.log("✅ insertMarkdown$ 成功");
+      } catch (error) {
+        console.error("❌ insertMarkdown$ エラー:", error);
+      }
+    };
+
     // クリーンアップ
     return () => {
       delete windowWithMethods.mdxEditorInsertImage;
       delete windowWithMethods.mdxEditorOpenImageModal;
+      delete windowWithMethods.mdxEditorInsertMarkdown;
     };
   }, [insertMarkdown, insertImage]);
 
@@ -289,6 +306,10 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
     src: string;
     alt: string;
   } | null>(null);
+  
+  // リンク挿入モーダルの状態
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [selectedTextForLink, setSelectedTextForLink] = useState("");
 
   // windowオブジェクトにモーダル開閉機能を提供
   useEffect(() => {
@@ -341,6 +362,45 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
     }
 
     console.log("=== 外部画像挿入処理終了 ===");
+  };
+
+  /**
+   * リンクモーダルを開く処理
+   */
+  const handleOpenLinkModal = (selectedText: string) => {
+    console.log("=== リンクモーダルを開く ===");
+    console.log("選択テキスト:", selectedText);
+    setSelectedTextForLink(selectedText);
+    setIsLinkModalOpen(true);
+  };
+
+  /**
+   * リンクを挿入する処理
+   */
+  const handleLinkInsert = (url: string, text: string) => {
+    console.log("=== リンク挿入処理開始 ===");
+    console.log("url:", url);
+    console.log("text:", text);
+
+    // Window経由でMDXEditor内部の機能を呼び出し
+    const windowWithInsert = window as unknown as {
+      mdxEditorInsertMarkdown?: (markdown: string) => void;
+    };
+
+    const linkMarkdown = `[${text}](${url})`;
+    
+    // まずwindow経由で試行
+    if (windowWithInsert.mdxEditorInsertMarkdown) {
+      console.log("✅ Window経由でリンク挿入を実行");
+      windowWithInsert.mdxEditorInsertMarkdown(linkMarkdown);
+    } else {
+      // フォールバック: onChange経由
+      console.log("⚠️ フォールバック: onChange経由でリンク挿入");
+      const newMarkdown = markdown + "\n\n" + linkMarkdown + "\n";
+      onChange(newMarkdown);
+    }
+
+    console.log("=== リンク挿入処理終了 ===");
   };
 
   return (
@@ -442,6 +502,8 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
                   <li>
                     <BoldItalicUnderlineToggles />
                     <HighlightToggle />
+                    <LinkInsert onOpenModal={handleOpenLinkModal} />
+                    <TableInsert />
                     <button
                       onClick={() => {
                         console.log("画像ボタンクリック - モーダルを開く");
@@ -488,6 +550,17 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
         }}
         onImageInsert={handleImageInsert}
         editingImage={editingImage}
+      />
+
+      {/* リンク挿入モーダル */}
+      <LinkInsertModal
+        isOpen={isLinkModalOpen}
+        onClose={() => {
+          setIsLinkModalOpen(false);
+          setSelectedTextForLink("");
+        }}
+        onLinkInsert={handleLinkInsert}
+        selectedText={selectedTextForLink}
       />
     </>
   );
