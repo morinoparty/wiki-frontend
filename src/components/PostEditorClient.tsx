@@ -1,7 +1,7 @@
 "use client";
 import { toaster } from "@/components/ui/toaster";
 
-import { useState, useEffect, Suspense, useRef } from "react";
+import { useState, useEffect, Suspense, useRef, useCallback } from "react";
 import { PostHeaderEdit } from "@/components/PostHeaderEdit";
 // import { MilkdownCrepeEditor } from "@/components/Editor";
 import { css } from "styled-system/css";
@@ -53,6 +53,11 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
   const handleHeaderChange = (fields: Partial<WikiPostDetail>) => {
     setForm((prev) => ({ ...prev, ...fields }));
   };
+
+  // Editor onChange callback - wrap in useCallback to prevent re-renders
+  const handleEditorChange = useCallback((body: string) => {
+    setForm((prev) => ({ ...prev, body }));
+  }, []);
   const handleSave = () => {
     startTransition(async () => {
       const result = await updatePost(
@@ -122,7 +127,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
           <EditorComp
             markdown={form.body}
             editorRef={editorRef}
-            onChange={(body) => setForm((prev) => ({ ...prev, body }))}
+            onChange={handleEditorChange}
           />
         </Suspense>
       </div>

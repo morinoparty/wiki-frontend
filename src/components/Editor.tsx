@@ -306,7 +306,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
     src: string;
     alt: string;
   } | null>(null);
-  
+
   // リンク挿入モーダルの状態
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [selectedTextForLink, setSelectedTextForLink] = useState("");
@@ -388,7 +388,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
     };
 
     const linkMarkdown = `[${text}](${url})`;
-    
+
     // まずwindow経由で試行
     if (windowWithInsert.mdxEditorInsertMarkdown) {
       console.log("✅ Window経由でリンク挿入を実行");
