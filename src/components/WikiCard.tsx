@@ -73,7 +73,7 @@ export default function WikiCard({ post }: { post: WikiPost }) {
           className={styles.image}
           src={imageUrl}
           alt={post.title}
-          width={800}
+          width={400}
           height={600}
           loading="lazy"
           loader={cloudflareLoader}

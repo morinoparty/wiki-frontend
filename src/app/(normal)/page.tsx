@@ -24,9 +24,12 @@ export default async function Home() {
         <Image
           src="/assets/top-header.png"
           alt="もりのパーティWikiのヘッダー画像"
-          fill
+          width={1920}
+          height={420}
           className={css({
             objectFit: "cover",
+            maxWidth: "100%",
+            height: "420px",
             objectPosition: "center",
           })}
           priority
