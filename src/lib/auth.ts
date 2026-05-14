@@ -46,7 +46,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async () => {
             image: `https://crafthead.net/avatar/${profile.id}`,
           };
         },
-        clientId: process.env.CLIENT_ID as string,
+        clientId: process.env.019e2648-25db-7551-9dbc-963004f24734 as string,
         client: {
           token_endpoint_auth_method: "none",
         },
@@ -91,7 +91,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async () => {
               },
               body: new URLSearchParams({
                 grant_type: "refresh_token",
-                client_id: process.env.CLIENT_ID as string,
+                client_id: process.env.019e2648-25db-7551-9dbc-963004f24734 as string,
                 redirect_uri: process.env.AUTH_URL as string,
                 refresh_token: token.refresh_token as string, // 型アサーションを使用してstring型として扱う
               }),
