@@ -1,39 +1,18 @@
 import type { WikiPost, GetAllPostsOptions } from "@/types/wiki";
+import { getHagakiClient } from "./hagaki";
 
-// assets/content/wiki ディレクトリ内の全JSONファイルをまとめて取得する関数
+/**
+ * 配信中の記事一覧 (`/article.json`) を取得する。
+ *
+ * ネットワークエラー時は空配列を返し、ページ全体が落ちないようにする。
+ */
 export async function getAllPosts(
   options?: GetAllPostsOptions
 ): Promise<WikiPost[]> {
   try {
-    const res = await fetch(
-      "https://wiki-contentdev.yahiro.workers.dev/wiki.json"
+    const posts = await getHagakiClient().posts.list(
+      options ?? { sortBy: "updated", order: "desc" }
     );
-
-    if (!res.ok) {
-      console.error(`HTTP Error: ${res.status} ${res.statusText}`);
-      throw new Error(`Failed to fetch posts: ${res.status} ${res.statusText}`);
-    }
-
-    const posts = (await res.json()) as WikiPost[];
-    console.log(`Successfully fetched ${posts.length} posts`);
-
-    if (options?.sortBy) {
-      const { sortBy, order = "desc" } = options;
-      posts.sort((a, b) => {
-        if (sortBy === "date") {
-          // ISO8601日付文字列の比較
-          return order === "asc"
-            ? new Date(a.date).getTime() - new Date(b.date).getTime()
-            : new Date(b.date).getTime() - new Date(a.date).getTime();
-        } else if (sortBy === "title") {
-          return order === "asc"
-            ? a.title.localeCompare(b.title)
-            : b.title.localeCompare(a.title);
-        }
-        return 0;
-      });
-    }
-
     return posts;
   } catch (error) {
     console.error("Error fetching posts:", error);
@@ -44,7 +23,6 @@ export async function getAllPosts(
       return [];
     }
 
-    // その他のエラーは再スローする
     throw error;
   }
 }

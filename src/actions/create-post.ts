@@ -71,7 +71,10 @@ export async function createPost(
     const postData: WikiPostDetail = {
       ...input,
       body: input.body,
-      date: now, // WikiPostに必要なdateプロパティ
+      uuid: input.uuid ?? crypto.randomUUID(),
+      thumbnail: input.thumbnail ?? null,
+      created: null,
+      updated: null,
       createdAt: now,
       updatedAt: now,
       createdBy: session.user.id,

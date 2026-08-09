@@ -1,5 +1,17 @@
 import Link from "next/link";
 import { sva } from "styled-system/css";
+import {
+  ContentImage,
+  type HagakiImageProps,
+} from "./ContentImage";
+import { CONTENT_BASE_URL } from "@/lib/hagaki";
+
+/**
+ * 本文中の hagaki `<Image />` に対応するカスタム要素名。
+ * remark 側 (MarkdownParser) がこの名前で hast 要素を作り、ここで
+ * `hagaki/react` の `<Image>` に繋ぐ。
+ */
+export const HAGAKI_IMAGE_TAG = "hagaki-image";
 
 export const mdxStyles = sva({
   slots: [
@@ -238,9 +250,7 @@ export const components = {
     return (
       <img
         className={mdxStyles().img}
-        src={
-          isExternal ? src : "https://wiki-contentdev.yahiro.workers.dev" + src
-        }
+        src={isExternal ? src : CONTENT_BASE_URL + src}
         alt={alt}
         width={imageWidth}
         height={imageHeight}
@@ -249,6 +259,11 @@ export const components = {
       />
     );
   },
+  // hagaki の `<Image imageId="…" />` (MarkdownParser が変換したカスタム要素)。
+  // articleId と URL 解決は <HagakiImageConfig> が供給する。
+  [HAGAKI_IMAGE_TAG]: (props: HagakiImageProps) => (
+    <ContentImage {...props} className={mdxStyles().img} />
+  ),
   hr: (props: React.ComponentProps<"hr">) => (
     <hr className={mdxStyles().hr} {...props} />
   ),

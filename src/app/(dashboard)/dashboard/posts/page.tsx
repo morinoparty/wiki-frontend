@@ -1,5 +1,6 @@
 import { Button } from "@/components/Button";
 import { getAllPosts } from "@/lib/getAllPosts";
+import { articleImageUrl } from "@/lib/hagaki";
 import { Edit } from "lucide-react";
 import Link from "next/link";
 import { css } from "styled-system/css";
@@ -79,8 +80,8 @@ export default async function Home() {
           >
             <img
               src={
-                post.image
-                  ? "https://wiki-contentdev.yahiro.workers.dev/" + post.image
+                post.thumbnail
+                  ? articleImageUrl(post.uuid, post.thumbnail.imageId)
                   : "/assets/placeholder.svg"
               }
               alt={post.title}

@@ -1,20 +1,10 @@
 import type { WikiCategory } from "@/types/wiki";
+import { getHagakiClient } from "./hagaki";
 
-// カテゴリ一覧を取得する関数
+/**
+ * カテゴリ一覧 (`/categories.json`) を取得する。
+ * hagaki 側で hasPosition 優先 → slug 昇順にソート済み。
+ */
 export async function getAllCategories(): Promise<WikiCategory[]> {
-  const res = await fetch(
-    "https://wiki-contentdev.yahiro.workers.dev/categories.json"
-  );
-  if (!res.ok) {
-    throw new Error("Failed to fetch categories");
-  }
-  const categories = (await res.json()) as WikiCategory[];
-  // hasPositionがtrueのものを上に、falseを下に。hasPositionが同じ場合はslugでa→zソート
-  categories.sort((a, b) => {
-    if (a.hasPosition !== b.hasPosition) {
-      return a.hasPosition ? -1 : 1;
-    }
-    return a.slug.localeCompare(b.slug);
-  });
-  return categories;
+  return getHagakiClient().categories.list();
 }

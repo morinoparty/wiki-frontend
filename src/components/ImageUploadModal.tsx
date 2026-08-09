@@ -15,13 +15,15 @@ const TOAST_DURATION = {
 };
 
 interface ImageUploadModalProps {
+  /** 編集中の記事の uuid。画像は記事の assets 配下に保存される。 */
+  articleId: string;
   isOpen: boolean;
   onClose: () => void;
   onImageInsert: (imageUrl: string, altText?: string) => void;
   editingImage?: { src: string; alt: string } | null;
 }
 
-export function ImageUploadModal({ isOpen, onClose, onImageInsert, editingImage }: ImageUploadModalProps) {
+export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, editingImage }: ImageUploadModalProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -180,7 +182,7 @@ export function ImageUploadModal({ isOpen, onClose, onImageInsert, editingImage 
         });
       }, 100);
 
-      const result = await uploadImage(selectedFile);
+      const result = await uploadImage(selectedFile, articleId);
 
       clearInterval(progressInterval);
       setUploadProgress(100);

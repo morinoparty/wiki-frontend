@@ -6,7 +6,7 @@ import { css } from "styled-system/css";
 
 export default async function Home() {
   const posts = await getAllPosts({
-    sortBy: "date",
+    sortBy: "updated",
     order: "desc",
   });
 

@@ -6,6 +6,10 @@ import { ReactNode } from "react";
 import { getCommitWithChecks } from "@/lib/getCommitWithChecks";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { WIKI_REPO } from "@/lib/hagaki";
+
+/** wiki-content の deploy workflow (.github/workflows/deploy.yml) のジョブ名。 */
+const DEPLOY_CHECK_NAME = "deploy";
 
 const commitCardStyles = sva({
   slots: ["card", "iconBox", "title", "desc", "inner", "icon"],
@@ -79,8 +83,8 @@ export default async function Home({ params }: PageProps) {
   const { commitId } = await params;
 
   // GitHubリポジトリ情報
-  const owner = "morinoparty";
-  const repo = "wiki-contentdev";
+  const owner = WIKI_REPO.owner;
+  const repo = WIKI_REPO.repo;
 
   let commitData = null;
   let checksData = null;
@@ -187,17 +191,17 @@ export default async function Home({ params }: PageProps) {
             )
           }
         />
-        {/* Workers Builds: wiki-contentdev のチェックランを抽出し、カードを分岐表示 */}
+        {/* コンテンツのデプロイ (GitHub Actions) のチェックランを抽出し、カードを分岐表示 */}
         {((): React.ReactNode => {
           if (checksData && Array.isArray(checksData.check_runs)) {
             const buildRuns = checksData.check_runs.filter(
-              (run) => run.name === "Workers Builds: wiki-contentdev"
+              (run) => run.name === DEPLOY_CHECK_NAME
             );
             if (buildRuns.length === 0) {
               return (
                 <CommitCard
                   icon={<GithubIcon />}
-                  title="Workers Builds: wiki-contentdev"
+                  title={DEPLOY_CHECK_NAME}
                   description={<>CIチェック情報がありません</>}
                 />
               );
@@ -300,7 +304,7 @@ export default async function Home({ params }: PageProps) {
           return (
             <CommitCard
               icon={<GithubIcon />}
-              title={"Workers Builds: wiki-contentdev"}
+              title={DEPLOY_CHECK_NAME}
               description={<>CIチェック情報がありません</>}
             />
           );

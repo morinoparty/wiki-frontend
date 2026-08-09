@@ -63,17 +63,18 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
     startTransition(async () => {
       const result = await updatePost(
         {
+          uuid: post.uuid,
           slug: form.slug,
           title: form.title,
           body: form.body,
           category: form.category,
           description: form.description,
-          image: form.image,
+          thumbnail: form.thumbnail,
           visibility: form.visibility,
           status: form.status,
         },
         {
-          commitMessage: `Update post: ${form.title}`,
+          commitMessage: `📝 Update post: ${form.slug}`,
         }
       );
 
@@ -116,7 +117,8 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
       </EditorNav>
 
       <PostHeaderEdit
-        image={form.image}
+        articleId={post.uuid}
+        image={form.thumbnail?.imageId}
         category={form.category}
         title={form.title}
         description={form.description}
@@ -129,6 +131,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
             markdown={form.body}
             editorRef={editorRef}
             onChange={handleEditorChange}
+            articleId={post.uuid}
           />
         </Suspense>
       </div>

@@ -1,6 +1,7 @@
 import { sva } from "styled-system/css";
 import Link from "next/link";
 import { WikiPost } from "@/types/wiki";
+import { articleImageUrl } from "@/lib/hagaki";
 
 const wikiCardStyles = sva({
   slots: [
@@ -58,10 +59,8 @@ export default function WikiCard({ post }: { post: WikiPost }) {
     // 全てを小文字に変換
     post.slug.toLowerCase();
 
-  // post.imageの../を削除して、URLを生成
-  const imageUrl = post.image
-    ? "https://wiki-contentdev.yahiro.workers.dev/" +
-      post.image.replace(/^\.\.\//, "")
+  const imageUrl = post.thumbnail
+    ? articleImageUrl(post.uuid, post.thumbnail.imageId)
     : "/assets/placeholder.svg";
 
   return (
