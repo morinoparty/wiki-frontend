@@ -1,6 +1,6 @@
 import { getSession } from "@/lib/auth";
 import { UserBoxMenu } from "@/components/UserBoxMenu";
-import { IconButton } from "@chakra-ui/react";
+import { IconButton } from "@/components/IconButton";
 import { Ellipsis } from "lucide-react";
 import Link from "next/link";
 import { css } from "styled-system/css";
@@ -43,13 +43,7 @@ export const UserBox: React.FC = async () => {
         </Link>
       </p>
       <UserBoxMenu>
-        <IconButton
-          variant={"ghost"}
-          aria-label="More options"
-          size="sm"
-          borderRadius={"50%"}
-          color={"leaf.600"}
-        >
+        <IconButton aria-label="More options" size="sm" shape="circle">
           <Ellipsis />
         </IconButton>
       </UserBoxMenu>

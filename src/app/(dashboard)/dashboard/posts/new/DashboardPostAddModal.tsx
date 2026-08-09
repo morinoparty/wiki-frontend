@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/Button";
-import { ModalDialogContainer } from "@/components/ModalDialogContainer";
+import { ModalDialog } from "@morinoparty/chlorophyll-react/components";
 import { WikiCategory } from "@/types/wiki";
 import { useState } from "react";
 import { sva } from "styled-system/css";
@@ -168,7 +168,7 @@ export const DashboardPostAddModal: React.FC<{
   }
 
   return (
-    <ModalDialogContainer>
+    <ModalDialog.Container>
       <div className={styles.title}>
         <p className={styles.subtitle}>Wikiの新規作成 1/2</p>
         <h2 className={styles.heading}>カテゴリを選びましょう</h2>
@@ -205,6 +205,6 @@ export const DashboardPostAddModal: React.FC<{
           </Button>
         </div>
       </div>
-    </ModalDialogContainer>
+    </ModalDialog.Container>
   );
 };

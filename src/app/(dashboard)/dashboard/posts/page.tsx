@@ -140,10 +140,10 @@ export default async function Home() {
                 className={css({
                   px: "12px",
                   color: "leaf.600",
+                  _hover: {
+                    backgroundColor: "leaf.50",
+                  },
                 })}
-                _hover={{
-                  backgroundColor: "leaf.50",
-                }}
                 asChild
               >
                 <Link href={`/dashboard/posts/${post.slug.toLowerCase()}`}>

@@ -1,16 +1,17 @@
 "use client";
 
-import { ChakraProvider } from "@chakra-ui/react";
-import { ColorModeProvider, type ColorModeProviderProps } from "./color-mode";
-import { ThemeProvider } from "next-themes";
-import { system } from "@/theme";
+import { ThemeProvider, type ThemeProviderProps } from "next-themes";
 
-export function Provider(props: ColorModeProviderProps) {
+// chlorophyll はランタイムの Provider を必要としない(トークンは Panda が CSS に焼く)ため、
+// ここに残るのはカラーモードを class に反映する next-themes だけ。
+// 旧実装は ThemeProvider を二重に重ねていたが、内側の設定しか効かないので 1 つに畳んでいる。
+export function Provider(props: ThemeProviderProps) {
   return (
-    <ThemeProvider enableSystem={false}>
-      <ChakraProvider value={system}>
-        <ColorModeProvider {...props} />
-      </ChakraProvider>
-    </ThemeProvider>
+    <ThemeProvider
+      attribute="class"
+      enableSystem={false}
+      disableTransitionOnChange
+      {...props}
+    />
   );
 }

@@ -7,7 +7,7 @@ import { NotLoginNote } from "./NotLoginNote";
 import { AuthConditional } from "./AuthConditional";
 import { SidebarNavListItem } from "./SidebarNavStyles";
 import { HideOnPath } from "./HideOnPath";
-import { SidebarDrawer } from "./SIdebarDrawer";
+import { SidebarDrawer } from "./sidebar-drawer";
 
 const sidebarStyles = sva({
   slots: ["root", "logoContainer", "drawerContainer", "contentContainer"],

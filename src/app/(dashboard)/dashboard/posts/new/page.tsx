@@ -1,7 +1,8 @@
 import { getAllCategories } from "@/lib/getAllCategories";
 import { getAllPosts } from "@/lib/getAllPosts";
 import { PostCreationClient } from "./PostCreationClient";
-import { ModalDialogWrapper } from "@/components/ModalDialogWrapper";
+import { ModalDialogRoot } from "@/components/ModalDialogRoot";
+import { css } from "styled-system/css";
 
 export default async function Home() {
   const categories = await getAllCategories();
@@ -19,11 +20,11 @@ export default async function Home() {
   });
 
   return (
-    <ModalDialogWrapper isPage>
+    <ModalDialogRoot isPage className={css({ bg: "leaf.100" })}>
       <PostCreationClient
         categories={categories}
         existingSlugs={existingSlugs}
       />
-    </ModalDialogWrapper>
+    </ModalDialogRoot>
   );
 }

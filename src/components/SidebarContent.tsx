@@ -13,7 +13,7 @@ import {
   SidebarNavListCategory,
   SidebarNavListCategoryItem,
 } from "./SidebarNavStyles";
-import { IconButton } from "@chakra-ui/react";
+import { IconButton } from "@/components/IconButton";
 import Link from "next/link";
 
 const sidebarContentStyles = sva({
@@ -86,7 +86,7 @@ export const SidebarContentDashboard: React.FC = async () => {
               ml: "-12px",
             })}
           >
-            <IconButton variant="ghost" asChild>
+            <IconButton asChild>
               <Link href="/">
                 <ChevronLeft />
               </Link>

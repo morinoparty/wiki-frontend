@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Portal } from "@chakra-ui/react";
+import { Menu, Portal } from "@morinoparty/chlorophyll-react/components";
 import { startTransition } from "react";
 import { signOutFromMineAuth } from "@/actions/auth-actions";
 
@@ -23,7 +23,6 @@ export const UserBoxMenu: React.FC<{
           <Menu.Content>
             <Menu.Item
               value="logout"
-              color={"leaf.600"}
               onClick={() => {
                 startTransition(() => {
                   void signOutFromMineAuth();
