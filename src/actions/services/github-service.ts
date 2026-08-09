@@ -1,9 +1,10 @@
 import { Octokit } from "octokit";
-import { makeCommitter, type Committer } from "hagaki";
+import type { Committer } from "hagaki";
+import { committerFromBetterAuth } from "hagaki/auth/better-auth";
 import { getHagakiClient, WIKI_REPO } from "@/lib/hagaki";
 import { WikiPostDetail } from "@/types/wiki";
 import matter from "gray-matter";
-import { Session } from "next-auth";
+import type { AppSession } from "@/lib/auth";
 import { randomUUID } from "crypto";
 import path from "path";
 
@@ -59,20 +60,27 @@ export class GitHubService {
   /**
    * コミッター情報を生成
    *
-   * hagaki の `makeCommitter` は既定の nameFormat が `"<name> (<id>)"` を生成するため、
-   * 従来の手組みと同一の結果になる。session.user.email は空文字が入るケースがあり、
-   * `email ?? defaultEmail` の nullish 判定では空文字が採用されてしまうため渡さない。
+   * hagaki の `committerFromBetterAuth` は既定の nameFormat が `"<name> (<id>)"`
+   * を生成するため、従来の手組みと同一の結果になる。
+   * MineAuth が返す `email` は noreply アドレスで commit には使いたくないうえ、
+   * 空文字が入ると `email ?? defaultEmail` の nullish 判定をすり抜けるため、
+   * email は明示的に null にして常に `players@morino.party` を使わせる。
    * name / id が揃わない場合は undefined を返し、GitHub にトークン所有者を使わせる。
    */
-  private static getCommitter(session: Session | null): Committer | undefined {
+  private static getCommitter(session: AppSession): Committer | undefined {
     if (!session?.user?.name || !session?.user?.id) {
       return undefined;
     }
-    return makeCommitter({
-      name: session.user.name,
-      id: session.user.id,
-      defaultEmail: "players@morino.party",
-    });
+    return committerFromBetterAuth(
+      {
+        user: {
+          id: session.user.id,
+          name: session.user.name,
+          email: null,
+        },
+      },
+      { defaultEmail: "players@morino.party" }
+    );
   }
 
   /**
@@ -171,7 +179,7 @@ export class GitHubService {
   static async createPost(
     post: WikiPostDetail,
     commitMessage: string,
-    session: Session | null
+    session: AppSession
   ): Promise<{ success: boolean; error?: string; commitId?: string }> {
     try {
       const filePath = this.getFilePath(post.slug);
@@ -201,7 +209,7 @@ export class GitHubService {
   static async updatePost(
     post: WikiPostDetail,
     commitMessage: string,
-    session: Session | null
+    session: AppSession
   ): Promise<{ success: boolean; error?: string; commitId?: string }> {
     try {
       const filePath = this.getFilePath(post.slug);
@@ -244,7 +252,7 @@ export class GitHubService {
   static async deletePost(
     slug: string,
     commitMessage: string,
-    session: Session | null
+    session: AppSession
   ): Promise<{ success: boolean; error?: string; commitId?: string }> {
     try {
       const filePath = this.getFilePath(slug);
@@ -526,7 +534,7 @@ export class GitHubService {
    */
   static async uploadImage(
     file: File,
-    session: Session | null
+    session: AppSession
   ): Promise<{ success: boolean; error?: string; url?: string; commitId?: string }> {
     try {
       const arrayBuffer = await file.arrayBuffer();

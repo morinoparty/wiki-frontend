@@ -1,15 +1,12 @@
 import { css } from "styled-system/css";
 import { Button } from "@/components/Button";
-import { signIn } from "@/lib/auth";
+import { signInWithMineAuth } from "@/actions/auth-actions";
 import Link from "next/link";
 
 export const NotLoginNote = () => {
   return (
     <form
-      action={async () => {
-        "use server";
-        await signIn("MineAuth", { redirectTo: "/" });
-      }}
+      action={signInWithMineAuth}
       className={css({
         background: "#fff",
         borderRadius: "18px",

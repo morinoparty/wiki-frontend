@@ -102,6 +102,5 @@ GITHUB_TOKEN - GitHub API access token
 ADMIN_USERS - Comma-separated list of admin user IDs
 MAIN_SERVER_URL - Authentication server URL
 CLIENT_ID - OAuth client ID
-AUTH_URL - Application auth URL
-AUTH_SECRET - NextAuth.js secret
+AUTH_SECRET - Better Auth signing secret
 ```
