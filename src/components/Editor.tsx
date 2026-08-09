@@ -1,5 +1,10 @@
 "use client";
 
+// `@lexical/code` は prismjs の **グローバル** `Prism` を前提にしている。
+// ESM バンドル (vite/vinext) では import しないと定義されず、コードブロックの
+// ハイライトで `ReferenceError: Prism is not defined` になる。
+import "prismjs";
+
 import {
   MDXEditor,
   MDXEditorMethods,
@@ -17,6 +22,7 @@ import {
   AdmonitionDirectiveDescriptor,
   quotePlugin,
   codeBlockPlugin,
+  codeMirrorPlugin,
   thematicBreakPlugin,
   usePublisher,
   insertMarkdown$,
@@ -431,7 +437,20 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange, articleId }) =
           directivesPlugin({
             directiveDescriptors: [AdmonitionDirectiveDescriptor],
           }),
-          codeBlockPlugin(),
+          // descriptor が無いと ``` のコードブロックで
+          // "Parsing of the following markdown structure failed" になる
+          codeBlockPlugin({ defaultCodeBlockLanguage: "" }),
+          codeMirrorPlugin({
+            codeBlockLanguages: {
+              "": "Plain text",
+              js: "JavaScript",
+              ts: "TypeScript",
+              json: "JSON",
+              yaml: "YAML",
+              bash: "Shell",
+              mcfunction: "Minecraft",
+            },
+          }),
           quotePlugin(),
           thematicBreakPlugin(),
           markdownShortcutPlugin(),

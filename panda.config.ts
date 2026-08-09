@@ -1,6 +1,5 @@
 import { createPreset, stone } from "@morinoparty/chlorophyll-react/preset";
 import { defineConfig } from "@pandacss/dev";
-import customColorsPreset from "./src/tokens/custom-colors-preset";
 import { textStyles } from "./text-styles";
 
 export default defineConfig({
@@ -28,6 +27,15 @@ export default defineConfig({
   theme: {
     extend: {
       textStyles,
+      // アプリ側のブレークポイント。chlorophyll の既定 (sm: 480px) より
+      // sm を広く取っている
+      breakpoints: {
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1280px",
+        "2xl": "1536px",
+      },
     },
   },
 
@@ -39,9 +47,6 @@ export default defineConfig({
   presets: [
     "@pandacss/preset-base",
     createPreset({ brandColor: "mori", grayColor: stone, radius: "xl" }),
-    // Keep last so the app specific leaf/sea/red/yellow palette and the
-    // breakpoint overrides win over the design system defaults.
-    customColorsPreset,
   ],
 
   globalCss: {

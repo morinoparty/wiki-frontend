@@ -168,10 +168,10 @@ const postFormModalStyles = sva({
       mt: "4px",
     },
     slugError: {
-      color: "red.500",
+      color: "red.11",
     },
     slugSuccess: {
-      color: "green.500",
+      color: "colorPalette.fg",
     },
   },
 });

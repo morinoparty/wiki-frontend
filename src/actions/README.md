@@ -1,222 +1,62 @@
-# Wiki Actions API
+# Wiki Actions
 
-強固で拡張可能な記事管理APIシステムです。
+記事管理の Server Actions。**ストレージまわりは自前で持たず [hagaki](https://github.com/Nlkomaru/hagaki) に委譲する**。
+このレイヤーが持つのは、hagaki が扱わないアプリ固有の関心 — 認証・権限・
+入力バリデーション・ダッシュボード向けのメタデータ — だけ。
 
-## 概要
+- コンテンツフォーマットと配信 URL: [hagaki のコンテンツフォーマット](https://github.com/Nlkomaru/hagaki/blob/main/sample/README.md)
+- client の API 一覧 (posts / files / categories / commits): [hagaki README の Client API](https://github.com/Nlkomaru/hagaki#client-api)
+- 実際の client 生成: [`src/lib/hagaki.ts`](../lib/hagaki.ts)
 
-このAPIは、日記/Wiki記事の作成、更新、削除、権限管理、履歴管理などの機能を提供します。GitHub をバックエンドストレージとして使用し、Next.js Server Actions として実装されています。
+## レイヤー構成
 
-## 主要機能
+| 層 | 役割 |
+|---|---|
+| `src/actions/*.ts` | Server Actions。認証 → バリデーション → 権限 → hagaki 呼び出し → `ApiResult<T>` |
+| `services/github-service.ts` | hagaki client の薄いラッパ。パス組み立てとコミッター生成 |
+| `services/auth-service.ts` | better-auth セッションの取得とロール判定 |
+| `services/permission-service.ts` | admin / editor / viewer と記事の可視性による許可判定 |
+| `services/validation-service.ts` | Zod スキーマ (`types.ts`) による入力検証 |
 
-### Core API Functions
+## Actions
 
-- **createPost**: 新しい記事を作成
-- **updatePost**: 既存の記事を更新
-- **deletePost**: 記事を削除
-- **lockPost/unlockPost**: 記事のロック/ロック解除
-- **changePostStatus**: ステータス変更（draft/published/archived）
-- **transferPostOwnership**: 所有者変更
+- **Core**: `createPost` `updatePost` `deletePost` `lockPost` `unlockPost` `changePostStatus` `transferPostOwnership`
+- **Query**: `getAllPosts` `getPost` `getPostsByCategory` `searchPosts` `getUserPosts`
+- **Batch**: `batchDeletePosts` `batchChangePostsStatus` `duplicatePost`
+- **History**: `getPostHistory` `restorePostVersion` `getPostDiff`
+- **Stats**: `getSystemStats` `getUserStats` `healthCheck`
 
-### Query Functions
+すべて `ApiResult<T>` を返す。
 
-- **getAllPosts**: 権限フィルタリング付きで全記事を取得
-- **getPost**: 単一記事の取得（権限チェック付き）
-- **getPostsByCategory**: カテゴリ別記事取得
-- **searchPosts**: 記事検索
-- **getUserPosts**: ユーザーの記事一覧
-
-### Batch Operations
-
-- **batchDeletePosts**: 複数記事の一括削除
-- **batchChangePostsStatus**: 複数記事のステータス一括変更
-- **duplicatePost**: 記事の複製
-
-### History & Versioning
-
-- **getPostHistory**: 記事の変更履歴取得
-- **restorePostVersion**: 特定バージョンへの復元
-- **getPostDiff**: バージョン間の差分取得
-
-### Statistics & Monitoring
-
-- **getSystemStats**: システム統計情報
-- **getUserStats**: ユーザー統計情報
-- **healthCheck**: システムヘルスチェック
+```ts
+type ApiResult<T> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+  commitId?: string; // 書き込み系のみ
+};
+```
 
 ## 使用例
 
-### 記事の作成
-
-\`\`\`typescript
-import { createPost } from "@/actions";
-
-const result = await createPost({
-title: "新しい記事",
-slug: "new-article",
-body: "記事の内容...",
-category: "技術",
-description: "記事の説明",
-status: "draft",
-visibility: "public"
-});
-
-if (result.success) {
-console.log("記事が作成されました:", result.data);
-console.log("コミットID:", result.commitId);
-} else {
-console.error("エラー:", result.error);
-}
-\`\`\`
-
-### 記事の更新
-
-\`\`\`typescript
+```ts
 import { updatePost } from "@/actions";
 
-const result = await updatePost({
-slug: "existing-article",
-title: "更新されたタイトル",
-body: "更新された内容..."
-}, {
-commitMessage: "記事を更新しました"
-});
-\`\`\`
-
-### 記事のロック
-
-\`\`\`typescript
-import { lockPost, unlockPost } from "@/actions";
-
-// ロック
-await lockPost({
-slug: "important-article",
-reason: "重要な編集中のため"
-});
-
-// ロック解除
-await unlockPost({
-slug: "important-article",
-reason: "編集完了"
-});
-\`\`\`
-
-### 一括操作
-
-\`\`\`typescript
-import { batchChangePostsStatus } from "@/actions";
-
-const result = await batchChangePostsStatus(
-["article1", "article2", "article3"],
-"published",
-{ commitMessage: "記事を一括公開" }
+const result = await updatePost(
+  { uuid: post.uuid, slug: post.slug, title: "更新後のタイトル", body },
+  { commitMessage: "📝 Update post: hello-world" },
 );
 
-console.log("成功:", result.data?.successful);
-console.log("失敗:", result.data?.failed);
-\`\`\`
+if (!result.success) console.error(result.error);
+```
 
-### 権限チェック
+記事の同一性は **uuid** で持つ (slug は変わりうる)。パスは常に
+`content/article/<uuid>/index.mdx`、画像は同ディレクトリの
+`assets/<imageId>.avif`。
 
-\`\`\`typescript
-import { PermissionService } from "@/actions";
+## 注意
 
-const hasPermission = await PermissionService.checkPostPermission(
-userId,
-post,
-"write"
-);
-
-if (hasPermission) {
-// 編集可能
-}
-\`\`\`
-
-### 統計情報の取得
-
-\`\`\`typescript
-import { getSystemStats, getUserStats } from "@/actions";
-
-// システム統計
-const systemStats = await getSystemStats();
-if (systemStats.success) {
-console.log("総記事数:", systemStats.data?.totalPosts);
-console.log("公開済み:", systemStats.data?.publishedPosts);
-}
-
-// ユーザー統計
-const userStats = await getUserStats();
-if (userStats.success) {
-console.log("ユーザーの記事数:", userStats.data?.totalPosts);
-}
-\`\`\`
-
-## アーキテクチャ
-
-### Service Layer
-
-- **GitHubService**: GitHub API との連携
-- **AuthService**: 認証・ユーザー管理
-- **ValidationService**: 入力データの検証
-- **PermissionService**: 権限管理
-
-### Type System
-
-全ての関数は型安全な \`ApiResult<T>\` を返します：
-
-\`\`\`typescript
-type ApiResult<T = void> = {
-success: boolean;
-data?: T;
-error?: string;
-commitId?: string;
-};
-\`\`\`
-
-### Permission System
-
-階層的な権限システム：
-
-- **admin**: 全ての操作が可能
-- **editor**: 記事の作成・編集が可能
-- **viewer**: 読み取りのみ
-
-記事レベルでの細かな権限制御：
-
-- **public**: 誰でも閲覧可能
-- **private**: 作成者・所有者のみ
-- **restricted**: 所有者のみ
-
-## 環境変数
-
-\`\`\`env
-GITHUB_TOKEN=your_github_token
-ADMIN_USERS=user1,user2,user3
-\`\`\`
-
-## エラーハンドリング
-
-全ての関数は統一されたエラー形式を使用：
-
-\`\`\`typescript
-if (!result.success) {
-console.error("操作に失敗しました:", result.error);
-// エラー処理
-}
-\`\`\`
-
-## 拡張性
-
-新しい機能は以下の手順で追加できます：
-
-1. \`types.ts\` に新しい型を定義
-2. 該当するサービスクラスにメソッドを追加
-3. 新しいアクション関数を作成
-4. \`index.ts\` でエクスポート
-
-## セキュリティ
-
-- 全ての操作で認証チェック
-- 細かな権限制御
-- 入力データの検証
-- ロック機能による競合防止
-- 操作履歴の記録
+- 記事画像は AVIF 固定。変換はブラウザ側 (`hagaki/image` の `processImage`) の
+  責務で、サーバー側は `validateAvifUpload` で形式とサイズだけ弾く。
+- slug から uuid への解決は配信中の `slug-index.json` を引く。まだデプロイ
+  されていない新規記事は slug では引けない。
