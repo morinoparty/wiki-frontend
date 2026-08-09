@@ -1,7 +1,6 @@
 import { sva } from "styled-system/css";
 import Link from "next/link";
 import { WikiPost } from "@/types/wiki";
-import { CdnImage } from "@/components/CdnImage";
 
 const wikiCardStyles = sva({
   slots: [
@@ -68,7 +67,7 @@ export default function WikiCard({ post }: { post: WikiPost }) {
   return (
     <Link href={`/${link}`}>
       <article className={styles.card}>
-        <CdnImage
+        <img
           className={styles.image}
           src={imageUrl}
           alt={post.title}

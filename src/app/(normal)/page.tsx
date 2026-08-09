@@ -2,7 +2,6 @@ import { Cta } from "@/components/Cta";
 import WikiCard from "@/components/WikiCard";
 import { WikiCardGrid } from "@/components/WikiCardGrid";
 import { getAllPosts } from "@/lib/getAllPosts";
-import { CdnImage } from "@/components/CdnImage";
 import { css } from "styled-system/css";
 
 export default async function Home() {
@@ -20,7 +19,7 @@ export default async function Home() {
           minHeight: "420px",
         })}
       >
-        <CdnImage
+        <img
           src="/assets/top-header.png"
           alt="もりのパーティWikiのヘッダー画像"
           width={1920}
@@ -31,7 +30,8 @@ export default async function Home() {
             height: "420px",
             objectPosition: "center",
           })}
-          priority
+          loading="eager"
+          fetchPriority="high"
         />
       </div>
 

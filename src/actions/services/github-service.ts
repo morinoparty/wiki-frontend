@@ -1,4 +1,5 @@
 import { Octokit } from "octokit";
+import { getSecret } from "@/lib/secrets";
 import type { Committer } from "hagaki";
 import { committerFromBetterAuth } from "hagaki/auth/better-auth";
 import { getHagakiClient, WIKI_REPO } from "@/lib/hagaki";
@@ -16,18 +17,20 @@ import path from "path";
  * compareCommits) は hagaki に対応 API が無いため Octokit を直接使う。
  */
 export class GitHubService {
-  private static _octokit: Octokit | null = null;
+  private static _octokit: Promise<Octokit> | null = null;
   private static owner = WIKI_REPO.owner;
   private static repo = WIKI_REPO.repo;
   private static branch = WIKI_REPO.branch;
 
   /**
    * 読み取り用の Octokit。モジュール初期化時ではなく初回アクセス時に
-   * GITHUB_TOKEN を読むことで、Workers のリクエスト単位の env に追従する。
+   * GITHUB_TOKEN (Workers では Secrets Store バインディング) を解決する。
    */
-  private static get octokit(): Octokit {
+  private static getOctokit(): Promise<Octokit> {
     if (!this._octokit) {
-      this._octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+      this._octokit = getSecret("GITHUB_TOKEN").then(
+        (token) => new Octokit({ auth: token }),
+      );
     }
     return this._octokit;
   }
@@ -132,7 +135,7 @@ export class GitHubService {
   static async checkPostExists(slug: string): Promise<boolean> {
     try {
       const filePath = this.getFilePath(slug);
-      await this.octokit.rest.repos.getContent({
+      await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -150,7 +153,7 @@ export class GitHubService {
   static async getPost(slug: string): Promise<WikiPostDetail | null> {
     try {
       const filePath = this.getFilePath(slug);
-      const { data: fileData } = await this.octokit.rest.repos.getContent({
+      const { data: fileData } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -216,7 +219,7 @@ export class GitHubService {
 
       // commitFiles は対象ファイルが無くても新規作成してしまうため、
       // 「更新」の意味を保つよう事前に存在確認する
-      const { data: fileData } = await this.octokit.rest.repos.getContent({
+      const { data: fileData } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -259,7 +262,7 @@ export class GitHubService {
 
       // 存在しないパスを deletePaths に積むと createTree が 422 で失敗するため、
       // 事前に存在確認して分かりやすいエラーを返す
-      const { data: fileData } = await this.octokit.rest.repos.getContent({
+      const { data: fileData } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -308,7 +311,7 @@ export class GitHubService {
       const filePath = this.getFilePath(slug);
 
       // ファイルのコミット履歴を取得
-      const { data: commits } = await this.octokit.rest.repos.listCommits({
+      const { data: commits } = await (await GitHubService.getOctokit()).rest.repos.listCommits({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -348,7 +351,7 @@ export class GitHubService {
     try {
       const filePath = this.getFilePath(slug);
 
-      const { data: fileData } = await this.octokit.rest.repos.getContent({
+      const { data: fileData } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -393,7 +396,7 @@ export class GitHubService {
       const filePath = this.getFilePath(slug);
 
       // GitHub APIでコミット間の差分を取得
-      const { data: comparison } = await this.octokit.rest.repos.compareCommits(
+      const { data: comparison } = await (await GitHubService.getOctokit()).rest.repos.compareCommits(
         {
           owner: this.owner,
           repo: this.repo,
@@ -435,7 +438,7 @@ export class GitHubService {
   }> {
     try {
       // content/wikiディレクトリの内容を取得
-      const { data: contents } = await this.octokit.rest.repos.getContent({
+      const { data: contents } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: "content/wiki",
@@ -492,7 +495,7 @@ export class GitHubService {
   }> {
     try {
       // content/wikiディレクトリの内容を取得
-      const { data: contents } = await this.octokit.rest.repos.getContent({
+      const { data: contents } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: "content/wiki",

@@ -1,4 +1,5 @@
 import { createHagakiClient, type HagakiClient } from "hagaki";
+import { getSecret } from "./secrets";
 
 /**
  * wiki コンテンツを保持する GitHub リポジトリ。
@@ -43,7 +44,8 @@ export function getHagakiClient(repo: GitHubRepoRef = WIKI_REPO): HagakiClient {
         branch,
         contentPath: repo.contentPath ?? WIKI_REPO.contentPath,
         // 関数で渡すことで、モジュール初期化時ではなく呼び出し時に解決される。
-        auth: () => process.env.GITHUB_TOKEN ?? "",
+        // Workers では Secrets Store バインディング、ローカルでは環境変数。
+        auth: async () => (await getSecret("GITHUB_TOKEN")) ?? "",
       },
     });
     clients.set(key, client);

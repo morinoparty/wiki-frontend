@@ -1,4 +1,3 @@
-import { CdnImage } from "@/components/CdnImage";
 import Link from "next/link";
 import { sva } from "styled-system/css";
 
@@ -237,7 +236,7 @@ export const components = {
           : 600;
 
     return (
-      <CdnImage
+      <img
         className={mdxStyles().img}
         src={
           isExternal ? src : "https://wiki-contentdev.yahiro.workers.dev" + src

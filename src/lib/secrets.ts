@@ -9,15 +9,19 @@ interface SecretsStoreSecret {
   get(): Promise<string>;
 }
 
-interface AuthEnv {
-  AUTH_SECRET?: SecretsStoreSecret | string;
-}
+/**
+ * wrangler.jsonc の `secrets_store_secrets` に定義しているバインディング名。
+ * ローカル開発 / `next build` では同名の環境変数にフォールバックする。
+ */
+type SecretName = "AUTH_SECRET" | "MAIN_SERVER_URL" | "GITHUB_TOKEN";
+
+type SecretsEnv = Partial<Record<SecretName, SecretsStoreSecret | string>>;
 
 /**
- * バインディングから AUTH_SECRET を取り出す (文字列 or Secrets Store)。
+ * バインディングから secret を取り出す (文字列 or Secrets Store)。
  */
-async function resolveFromEnv(env: AuthEnv | undefined) {
-  const binding = env?.AUTH_SECRET;
+async function resolveFromEnv(env: SecretsEnv | undefined, name: SecretName) {
+  const binding = env?.[name];
   if (typeof binding === "string") {
     return binding;
   }
@@ -45,22 +49,22 @@ async function importCloudflareWorkers(): Promise<{ env: unknown }> {
 }
 
 /**
- * AUTH_SECRET を解決する。
+ * secret を解決する。
  *
  * 解決順:
  * 1. vinext / workerd 実行時: `cloudflare:workers` の `env` から
- *    Secrets Store バインディング (BSM: shared/AUTH_SECRET) を読む。
+ *    Secrets Store バインディング (BSM: morinoparty プロジェクト) を読む。
  * 2. ローカル開発 / `next build` 時: import が失敗するため
- *    `process.env.AUTH_SECRET` にフォールバックする。
+ *    `process.env[name]` にフォールバックする。
  *
  * Secrets Store は workerd のグローバルスコープでの非同期 I/O を許可しない
  * ため、モジュールトップレベルではなく呼び出し時に解決する必要がある。
  */
-export async function getAuthSecret(): Promise<string | undefined> {
+export async function getSecret(name: SecretName): Promise<string | undefined> {
   // 1. vinext / workerd: cloudflare:workers
   try {
     const { env } = await importCloudflareWorkers();
-    const secret = await resolveFromEnv(env as AuthEnv | undefined);
+    const secret = await resolveFromEnv(env as SecretsEnv | undefined, name);
     if (secret !== undefined) {
       return secret;
     }
@@ -69,5 +73,5 @@ export async function getAuthSecret(): Promise<string | undefined> {
   }
 
   // 2. ローカル / ビルド時
-  return process.env.AUTH_SECRET;
+  return process.env[name];
 }

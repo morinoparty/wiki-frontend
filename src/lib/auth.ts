@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { genericOAuth } from "better-auth/plugins";
-import { getAuthSecret } from "./get-auth-secret";
+import { getSecret } from "./secrets";
 
 // buildAuth の戻り値から型を推論する。better-auth 1.6 以降は betterAuth() が
 // 渡したオプションにジェネリックなため、ReturnType<typeof betterAuth> だと
@@ -27,9 +27,13 @@ interface MineAuthProfile extends Record<string, unknown> {
 }
 
 async function buildAuth(baseURL: string) {
-  // AUTH_SECRET は Cloudflare Secrets Store バインディング経由の非同期読み出しが
-  // 必要なため、モジュールトップレベルではなく初回リクエスト時に解決してキャッシュする。
-  const secret = await getAuthSecret();
+  // AUTH_SECRET / MAIN_SERVER_URL は Cloudflare Secrets Store バインディング経由の
+  // 非同期読み出しが必要なため、モジュールトップレベルではなく初回リクエスト時に
+  // 解決してキャッシュする。
+  const [secret, mainServerUrl] = await Promise.all([
+    getSecret("AUTH_SECRET"),
+    getSecret("MAIN_SERVER_URL"),
+  ]);
 
   // database を渡さない DB-less 構成: セッションと MineAuth のトークンは
   // すべて署名付きクッキーに保存される。Workers の isolate 入れ替えでも
@@ -95,7 +99,7 @@ async function buildAuth(baseURL: string) {
             // token_endpoint_auth_method: "none" のため空文字列
             clientSecret: "",
             pkce: true,
-            discoveryUrl: `${process.env.MAIN_SERVER_URL}/.well-known/openid-configuration`,
+            discoveryUrl: `${mainServerUrl}/.well-known/openid-configuration`,
             scopes: ["openid", "profile", "email"],
             mapProfileToUser: (profile: MineAuthProfile) => {
               const minecraftId = profile.id ?? profile.sub ?? "";
