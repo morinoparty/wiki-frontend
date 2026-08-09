@@ -4,3 +4,11 @@ allowBuilds:
   workerd: true
   unrs-resolver: true
   es5-ext: false
+patchedDependencies:
+  ts-evaluator@1.2.0: patches/ts-evaluator@1.2.0.patch
+
+# @ark-ui/react 5.38 以降は React 19.2 の <Activity> を使うが、
+# Next.js 15.3 が同梱する React には Activity が無いためビルドが通らない。
+# chlorophyll 側の ^5.30.0 も含めて 5.37.0 に固定する。
+overrides:
+  "@ark-ui/react": "5.37.0"

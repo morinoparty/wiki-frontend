@@ -16,9 +16,7 @@
     "generate:license": "pnpm dlx license-checker-rseidelsohn --json --out './src/app/(normal)/license/data.json'"
   },
   "dependencies": {
-    "@ark-ui/react": "^5.30.0",
-    "@chakra-ui/react": "^3.19.0",
-    "@emotion/react": "^11.14.0",
+    "@ark-ui/react": "5.37.0",
     "@mdxeditor/editor": "^3.32.3",
     "@mdxeditor/gurx": "^1.2.3",
     "@morinoparty/chlorophyll-react": "file:../chlorophyll/packages/react",

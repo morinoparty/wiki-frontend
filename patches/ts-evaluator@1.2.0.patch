@@ -1,0 +1,60 @@
+diff --git a/dist/cjs/index.cjs b/dist/cjs/index.cjs
+index 99b3530fc8878949e3664ec0732facd7d673889b..025b1f4eb6b5613029b0585af7e0fe3bf1aaeaff 100644
+--- a/dist/cjs/index.cjs
++++ b/dist/cjs/index.cjs
+@@ -446,7 +446,11 @@ function getImplementationForDeclarationWithinDeclarationFile(options) {
+         return matchInLexicalEnvironment.literal;
+     }
+     // Otherwise, expect it to be something that is require'd on demand
+-    const require = getFromLexicalEnvironment(node, options.environment, "require").literal;
++    const requireEnvEntry = getFromLexicalEnvironment(node, options.environment, "require");
++    if (requireEnvEntry == null) {
++        return undefined;
++    }
++    const require = requireEnvEntry.literal;
+     const moduleDeclaration = typescript.isModuleDeclaration(node)
+         ? node
+         : findNearestParentNodeOfKind(node, typescript.SyntaxKind.ModuleDeclaration, typescript);
+@@ -470,7 +474,11 @@ function getImplementationForDeclarationWithinDeclarationFile(options) {
+ function getImplementationFromExternalFile(name, moduleSpecifier, options) {
+     var _a, _b, _c, _d, _e, _f;
+     const { node, throwError, environment } = options;
+-    const require = getFromLexicalEnvironment(node, options.environment, "require").literal;
++    const requireEnvEntry = getFromLexicalEnvironment(node, options.environment, "require");
++    if (requireEnvEntry == null) {
++        return undefined;
++    }
++    const require = requireEnvEntry.literal;
+     const resolvedModuleSpecifier = getResolvedModuleName(moduleSpecifier, options);
+     try {
+         // eslint-disable-next-line @typescript-eslint/no-require-imports,@typescript-eslint/no-var-requires
+diff --git a/dist/esm/index.js b/dist/esm/index.js
+index 90319c843e808f7b4e15a331c77a0aab97691454..a9bd6f93eaf771e781701df3611a7ecdcd8ffddf 100644
+--- a/dist/esm/index.js
++++ b/dist/esm/index.js
+@@ -423,7 +423,11 @@ function getImplementationForDeclarationWithinDeclarationFile(options) {
+         return matchInLexicalEnvironment.literal;
+     }
+     // Otherwise, expect it to be something that is require'd on demand
+-    const require = getFromLexicalEnvironment(node, options.environment, "require").literal;
++    const requireEnvEntry = getFromLexicalEnvironment(node, options.environment, "require");
++    if (requireEnvEntry == null) {
++        return undefined;
++    }
++    const require = requireEnvEntry.literal;
+     const moduleDeclaration = typescript.isModuleDeclaration(node)
+         ? node
+         : findNearestParentNodeOfKind(node, typescript.SyntaxKind.ModuleDeclaration, typescript);
+@@ -447,7 +451,11 @@ function getImplementationForDeclarationWithinDeclarationFile(options) {
+ function getImplementationFromExternalFile(name, moduleSpecifier, options) {
+     var _a, _b, _c, _d, _e, _f;
+     const { node, throwError, environment } = options;
+-    const require = getFromLexicalEnvironment(node, options.environment, "require").literal;
++    const requireEnvEntry = getFromLexicalEnvironment(node, options.environment, "require");
++    if (requireEnvEntry == null) {
++        return undefined;
++    }
++    const require = requireEnvEntry.literal;
+     const resolvedModuleSpecifier = getResolvedModuleName(moduleSpecifier, options);
+     try {
+         // eslint-disable-next-line @typescript-eslint/no-require-imports,@typescript-eslint/no-var-requires
