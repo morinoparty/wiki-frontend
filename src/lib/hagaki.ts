@@ -16,7 +16,7 @@ export const WIKI_REPO = {
 } as const;
 
 /** 生成物 (article.json / slug-index.json / categories.json) と記事本体の配信元。 */
-export const CONTENT_BASE_URL = "https://wiki-v2-content.nikomaru.workers.dev";
+export const CONTENT_BASE_URL = "https://wiki-content.moripa.nikomaru.dev";
 
 /** 記事に属する画像の URL。`content/article/<uuid>/assets/<imageId>.avif`。 */
 export function articleImageUrl(articleId: string, imageId: string): string {

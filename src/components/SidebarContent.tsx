@@ -27,6 +27,12 @@ const sidebarContentStyles = sva({
       minHeight: "0",
       overflowY: "auto",
       overscrollBehavior: "contain",
+      // 「新規作成」ボタン (asButton) は _before で左右に 8px はみ出すが、
+      // overflowY: auto を指定すると overflow-x も auto 扱いになるため
+      // そのままだと横スクロールバーが出て、左側のはみ出しは切れてしまう。
+      // 同じ幅の内側パディングではみ出しを受け止め、負のマージンで見た目の位置を戻す。
+      px: "8px",
+      mx: "-8px",
     },
     list: {
       listStyle: "none",

@@ -36,9 +36,15 @@ const layoutStyles = sva({
       display: "grid",
       gridTemplateRows: "auto 1fr",
       gridArea: "main",
+      // grid アイテムの既定 (min-width: auto) だと本文の min-content 幅より
+      // 小さくなれない。記事中の <Image> は intrinsic width (例: 1920px) で
+      // min-content に効き、max-width: 100% は intrinsic sizing では無視される
+      // ため、0 にしないと 1fr のカラムがビューポートを超えて横スクロールが出る。
+      minWidth: "0",
     },
     mainContainer: {
       minHeight: "100vh",
+      minWidth: "0",
     },
   },
 });

@@ -13,14 +13,20 @@ MoripaWiki は Next.js 15 で構築された Wiki アプリケーションです
 
 ## CMS の概要
 
-GitHub リポジトリが CMS となり、以下のディレクトリの内容がそのまま静的ファイルとして配信されます。
+GitHub リポジトリ [`Nlkomaru/wiki-content`](https://github.com/Nlkomaru/wiki-content) が CMS で、
+[hagaki のコンテンツフォーマット](https://github.com/Nlkomaru/hagaki/blob/main/sample/README.md)に従います。
 
-- `/content/wiki/` – 記事 Markdown
-- `/content/categories/` – カテゴリ定義
-- `/content/img/` – 画像アセット
-- `/content/users/` – ユーザー情報
+- `/content/article/<uuid>/index.mdx` – 記事本体 (frontmatter + MDX)
+- `/content/article/<uuid>/assets/<imageId>.avif` – その記事の画像 (AVIF 固定)
+- `/content/categories/<slug>.json` – カテゴリ定義
 
-Markdown をコミットすると `wiki-contentdev.yahiro.workers.dev/wiki/[slug].md` で取得可能です。画像も同様に `/content/img` へコミットすれば展開されます。記事の作成・更新は `src/actions` から GitHub へコミットする仕組みで行われ、履歴やレビューも GitHub 上で管理されます。
+記事の同一性は **uuid** で持ちます (slug は変わりうる)。コミットが main に入ると
+コンテンツ側の GitHub Actions が `article.json` / `slug-index.json` / `info.json` を
+生成して Cloudflare Workers Assets にデプロイし、
+<https://wiki-content.moripa.nikomaru.dev> から配信されます。
+
+記事の作成・更新は `src/actions` から hagaki 経由で GitHub へコミットする仕組みで、
+履歴やレビューも GitHub 上で管理されます。
 
 ## Actions API
 
