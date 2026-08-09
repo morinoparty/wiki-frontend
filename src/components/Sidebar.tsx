@@ -63,8 +63,8 @@ const sidebarStyles = sva({
         lgDown: "auto",
         mdDown: "1fr auto",
       },
-      bg: "leaf.50",
-      borderTopColor: "leaf.200",
+      bg: "colorPalette.bg.subtle",
+      borderTopColor: "border.subtle",
       borderTopWidth: {
         base: "none",
         mdDown: "1px",

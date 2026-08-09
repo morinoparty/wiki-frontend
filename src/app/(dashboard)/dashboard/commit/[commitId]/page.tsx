@@ -35,21 +35,21 @@ const commitCardStyles = sva({
       width: "40px",
       height: "40px",
       borderRadius: "100%",
-      bgColor: "leaf.50",
-      color: "leaf.700",
+      bgColor: "colorPalette.bg.subtle",
+      color: "colorPalette.fg",
     },
     icon: {},
     title: {
       textStyle: "heading2",
       fontSize: "18px",
-      color: "leaf.700",
+      color: "colorPalette.fg",
     },
     desc: {
       pl: "52px",
       pt: "4px",
       textStyle: "body",
       fontSize: "16px",
-      color: "leaf.700",
+      color: "colorPalette.fg",
     },
   },
 });
@@ -129,7 +129,7 @@ export default async function Home({ params }: PageProps) {
           className={css({
             textStyle: "heading1",
             fontSize: "40px",
-            color: "leaf.600",
+            color: "colorPalette.fg",
             mb: "24px",
             textAlign: "center",
           })}
@@ -139,7 +139,7 @@ export default async function Home({ params }: PageProps) {
         <p
           className={css({
             textStyle: "body",
-            color: "leaf.600",
+            color: "colorPalette.fg",
             mb: "24px",
             width: "100%",
           })}
@@ -176,7 +176,7 @@ export default async function Home({ params }: PageProps) {
                     className={css({
                       textStyle: "body",
                       fontSize: "16px",
-                      color: "leaf.500",
+                      color: "colorPalette.fg.subtle",
                       fontWeight: "bold",
                       mt: "8px",
                       display: "inline-block",
@@ -245,7 +245,7 @@ export default async function Home({ params }: PageProps) {
                             className={css({
                               textStyle: "body",
                               fontSize: "16px",
-                              color: "leaf.500",
+                              color: "colorPalette.fg.subtle",
                               fontWeight: "bold",
                               mt: "8px",
                               display: "inline-block",
@@ -284,7 +284,7 @@ export default async function Home({ params }: PageProps) {
                             className={css({
                               textStyle: "body",
                               fontSize: "16px",
-                              color: "leaf.500",
+                              color: "colorPalette.fg.subtle",
                               fontWeight: "bold",
                               mt: "8px",
                               display: "inline-block",

@@ -178,7 +178,7 @@ const CategoryHeader: React.FC<WikiCategory> = ({ title, body }) => {
         className={css({
           fontSize: "32px",
           fontWeight: "bold",
-          color: "leaf.700",
+          color: "colorPalette.fg",
           textStyle: "heading1",
           width: "100%",
           display: "flex",
@@ -191,7 +191,7 @@ const CategoryHeader: React.FC<WikiCategory> = ({ title, body }) => {
       <p
         className={css({
           textStyle: "body",
-          color: "leaf.600",
+          color: "colorPalette.fg",
           width: "100%",
           minHeight: "100%",
           alignContent: "center",
@@ -230,7 +230,7 @@ const CategoryPosts: React.FC<{
         <TentTree
           size={64}
           strokeWidth={1.25}
-          className={css({ color: "leaf.500" })}
+          className={css({ color: "colorPalette.fg.subtle" })}
         />
         <p
           className={css({

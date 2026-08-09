@@ -40,7 +40,7 @@ export const mdxStyles = sva({
   base: {
     p: {
       textStyle: "body",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       lineHeight: "1.85",
       my: "24px",
       _first: { mt: "0" },
@@ -48,7 +48,7 @@ export const mdxStyles = sva({
     h1: {
       fontSize: "32px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading1",
       mt: "56px",
       mb: "32px",
@@ -56,7 +56,7 @@ export const mdxStyles = sva({
     h2: {
       fontSize: "28px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading2",
       mt: "56px",
       mb: "32px",
@@ -64,7 +64,7 @@ export const mdxStyles = sva({
     h3: {
       fontSize: "24px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "body",
       mt: "48px",
       mb: "12px",
@@ -72,7 +72,7 @@ export const mdxStyles = sva({
     h4: {
       fontSize: "20px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading4",
       mt: "24px",
       mb: "10px",
@@ -80,7 +80,7 @@ export const mdxStyles = sva({
     h5: {
       fontSize: "18px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading5",
       mt: "18px",
       mb: "8px",
@@ -88,7 +88,7 @@ export const mdxStyles = sva({
     h6: {
       fontSize: "16px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading6",
       mt: "16px",
       mb: "6px",
@@ -117,7 +117,7 @@ export const mdxStyles = sva({
       _hover: { color: "blue.800" },
     },
     blockquote: {
-      borderLeft: "4px solid #A3C9A8",
+      borderLeft: "4px solid token(colors.colorPalette.border)",
       pl: "16px",
       color: "gray.700",
       fontStyle: "italic",
@@ -150,7 +150,7 @@ export const mdxStyles = sva({
     },
     hr: {
       border: "none",
-      borderTop: "1px solid #E2E8F0",
+      borderTop: "1px solid token(colors.border.subtle)",
       my: "32px",
     },
     table: {
@@ -160,17 +160,17 @@ export const mdxStyles = sva({
       textStyle: "body",
     },
     thead: {
-      background: "leaf.600/5",
+      background: "colorPalette.surface",
     },
     tr: {
-      borderBottom: "1px solid #E2E8F0",
+      borderBottom: "1px solid token(colors.border.subtle)",
     },
     th: {
       fontWeight: "bold",
       textAlign: "left",
       px: "12px",
       py: "8px",
-      background: "leaf.600/5",
+      background: "colorPalette.surface",
       textStyle: "body",
     },
     td: {

@@ -134,21 +134,21 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
               className={css({
                 width: "40px",
                 height: "40px",
-                bg: "#eaf2ef", // leaf.50
+                bg: "colorPalette.bg.subtle",
                 borderRadius: "10px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               })}
             >
-              <Link size={20} className={css({ color: "#347e5e" })} />
+              <Link size={20} className={css({ color: "colorPalette.fg" })} />
             </div>
             <div>
               <h2
                 className={css({
                   fontSize: "20px",
                   fontWeight: "600",
-                  color: "#2d634b", // leaf.700
+                  color: "colorPalette.fg",
                   lineHeight: "1.2",
                 })}
               >
@@ -157,7 +157,7 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
               <p
                 className={css({
                   fontSize: "14px",
-                  color: "#5ea181", // leaf.500
+                  color: "colorPalette.fg.subtle",
                   marginTop: "2px",
                 })}
               >
@@ -175,15 +175,15 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
               borderRadius: "8px",
               border: "none",
               bg: "#f8faf9",
-              color: "#5ea181",
+              color: "colorPalette.fg.subtle",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               cursor: "pointer",
               transition: "all 0.2s",
               "&:hover": {
-                bg: "#eaf2ef",
-                color: "#347e5e",
+                bg: "colorPalette.bg.subtle",
+                color: "colorPalette.fg",
               },
             })}
           >
@@ -200,7 +200,7 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
                 display: "block",
                 fontSize: "14px",
                 fontWeight: "500",
-                color: "#2d634b", // leaf.700
+                color: "colorPalette.fg",
                 marginBottom: "8px",
               })}
               htmlFor="linkText"
@@ -217,15 +217,15 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
               className={css({
                 width: "100%",
                 padding: "12px 16px",
-                border: "1px solid #cdebdf", // leaf.100
+                border: "1px solid token(colors.border.subtle)",
                 borderRadius: "8px",
                 fontSize: "14px",
-                color: "#2d634b", // leaf.700
+                color: "colorPalette.fg",
                 bg: "white",
                 outline: "none",
                 transition: "all 0.2s",
                 "&:focus": {
-                  borderColor: "#347e5e", // leaf.600
+                  borderColor: "colorPalette.border",
                   boxShadow: "0 0 0 3px rgba(52, 126, 94, 0.1)",
                 },
                 "&::placeholder": {
@@ -242,7 +242,7 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
                 display: "block",
                 fontSize: "14px",
                 fontWeight: "500",
-                color: "#2d634b", // leaf.700
+                color: "colorPalette.fg",
                 marginBottom: "8px",
               })}
               htmlFor="linkUrl"
@@ -258,15 +258,15 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
               className={css({
                 width: "100%",
                 padding: "12px 16px",
-                border: "1px solid #cdebdf", // leaf.100
+                border: "1px solid token(colors.border.subtle)",
                 borderRadius: "8px",
                 fontSize: "14px",
-                color: "#2d634b", // leaf.700
+                color: "colorPalette.fg",
                 bg: "white",
                 outline: "none",
                 transition: "all 0.2s",
                 "&:focus": {
-                  borderColor: "#347e5e", // leaf.600
+                  borderColor: "colorPalette.border",
                   boxShadow: "0 0 0 3px rgba(52, 126, 94, 0.1)",
                 },
                 "&::placeholder": {
@@ -284,7 +284,7 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
                   display: "block",
                   fontSize: "14px",
                   fontWeight: "500",
-                  color: "#2d634b", // leaf.700
+                  color: "colorPalette.fg",
                   marginBottom: "8px",
                 })}
               >
@@ -304,10 +304,10 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className={css({
-                    color: "#347e5e", // leaf.600
+                    color: "colorPalette.fg",
                     textDecoration: "underline",
                     "&:hover": {
-                      color: "#2d634b", // leaf.700
+                      color: "colorPalette.fg",
                     },
                   })}
                 >
@@ -336,17 +336,17 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
               className={css({
                 flex: 1,
                 padding: "12px 24px",
-                border: "1px solid #cdebdf", // leaf.100
+                border: "1px solid token(colors.border.subtle)",
                 borderRadius: "8px",
                 bg: "white",
-                color: "#5ea181", // leaf.500
+                color: "colorPalette.fg.subtle",
                 fontSize: "14px",
                 fontWeight: "500",
                 cursor: "pointer",
                 transition: "all 0.2s",
                 "&:hover": {
                   bg: "#fafcfb",
-                  borderColor: "#b5deca", // leaf.200
+                  borderColor: "border.muted",
                 },
               })}
             >
@@ -360,7 +360,7 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
                 padding: "12px 24px",
                 border: "none",
                 borderRadius: "8px",
-                bg: "#347e5e", // leaf.600
+                bg: "colorPalette.solid",
                 color: "white",
                 fontSize: "14px",
                 fontWeight: "500",
@@ -371,13 +371,13 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
                 justifyContent: "center",
                 gap: "8px",
                 "&:hover": {
-                  bg: "#2d634b", // leaf.700
+                  bg: "colorPalette.solid.emphasized",
                 },
                 "&:disabled": {
                   opacity: 0.5,
                   cursor: "not-allowed",
                   "&:hover": {
-                    bg: "#347e5e",
+                    bg: "colorPalette.solid",
                   },
                 },
               })}

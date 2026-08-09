@@ -20,7 +20,7 @@ const buttonStyles = cva({
     transition: "all 0.2s ease",
     whiteSpace: "nowrap",
     _hover: {
-      bg: "leaf.700",
+      bg: "colorPalette.solid.emphasized",
     },
     _disabled: {
       opacity: 0.5,
@@ -56,27 +56,27 @@ const buttonStyles = cva({
     },
     variant: {
       solid: {
-        bg: "leaf.600",
+        bg: "colorPalette.solid",
         color: "white",
         _hover: {
-          bg: "leaf.700",
+          bg: "colorPalette.solid.emphasized",
         },
       },
       outline: {
         bg: "transparent",
-        color: "leaf.600",
+        color: "colorPalette.fg",
         borderWidth: "2px",
-        borderColor: "leaf.600",
+        borderColor: "colorPalette.border",
         _hover: {
-          bg: "leaf.600",
+          bg: "colorPalette.solid",
           color: "white",
         },
       },
       ghost: {
         bg: "transparent",
-        color: "leaf.600",
+        color: "colorPalette.fg",
         _hover: {
-          bg: "leaf.100",
+          bg: "colorPalette.surface",
         },
       },
     },

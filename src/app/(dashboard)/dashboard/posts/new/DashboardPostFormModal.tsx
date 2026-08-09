@@ -34,7 +34,7 @@ const postFormModalStyles = sva({
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      bgColor: "leaf.100",
+      bgColor: "colorPalette.surface",
     },
     title: {
       gridArea: "title",
@@ -42,12 +42,12 @@ const postFormModalStyles = sva({
     subtitle: {
       textStyle: "body",
       fontWeight: "bold",
-      color: "leaf.600/50",
+      color: "colorPalette.fg.subtle",
       mb: "8px",
     },
     heading: {
       textStyle: "heading2",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       fontSize: "26px",
     },
     main: {
@@ -58,7 +58,7 @@ const postFormModalStyles = sva({
       py: "32px",
       borderTop: "1px solid",
       borderBottom: "1px solid",
-      borderColor: "leaf.50",
+      borderColor: "border.subtle",
     },
     formGroup: {
       display: "flex",
@@ -73,13 +73,13 @@ const postFormModalStyles = sva({
     label: {
       fontSize: "16px",
       fontWeight: "bold",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       lineHeight: "1.7",
     },
     required: {
       fontSize: "16px",
       fontWeight: "bold",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       lineHeight: "1.7",
     },
     inputGroup: {
@@ -87,7 +87,7 @@ const postFormModalStyles = sva({
       alignItems: "center",
       bgColor: "white",
       border: "0px 0px 2px solid",
-      borderColor: "leaf.300",
+      borderColor: "border.muted",
       borderRadius: "0px",
       overflow: "hidden",
     },
@@ -98,26 +98,26 @@ const postFormModalStyles = sva({
       outline: "none",
       fontSize: "18px",
       fontWeight: "500",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       backgroundColor: "transparent",
       lineHeight: "1.7",
       borderBottom: "2px solid",
-      borderColor: "leaf.200",
+      borderColor: "border.subtle",
       "&::placeholder": {
-        color: "leaf.500/30",
+        color: "colorPalette.fg.subtle",
         opacity: 1,
       },
       "&:focus": {
         outline: "none",
         "& + .border": {
-          borderColor: "leaf.500",
+          borderColor: "colorPalette.border",
         },
       },
     },
     urlPrefix: {
       fontSize: "16px",
       fontWeight: "500",
-      color: "leaf.400",
+      color: "fg.subtle",
       lineHeight: "1.7",
       padding: "15px 8px 15px 0px",
       flexShrink: 0,
@@ -125,18 +125,18 @@ const postFormModalStyles = sva({
     textarea: {
       padding: "15px 18px 15px 0px",
       border: "0px 0px 2px solid",
-      borderColor: "leaf.300",
+      borderColor: "border.muted",
       borderRadius: "0px",
       outline: "none",
       fontSize: "16px",
       fontWeight: "500",
-      color: "leaf.500",
+      color: "colorPalette.fg.subtle",
       backgroundColor: "white",
       lineHeight: "1.7",
       resize: "none",
       minHeight: "50px",
       "&::placeholder": {
-        color: "leaf.500/30",
+        color: "colorPalette.fg.subtle",
         opacity: 1,
       },
       "&:focus": {
@@ -156,7 +156,7 @@ const postFormModalStyles = sva({
     successMessage: {
       fontSize: "16px",
       fontWeight: "bold",
-      color: "leaf.600/50",
+      color: "colorPalette.fg.subtle",
       lineHeight: "1.7",
       textAlign: "right",
       flex: 1,

@@ -14,11 +14,11 @@ const iconButtonStyles = cva({
     flexShrink: 0,
     bg: "transparent",
     border: "none",
-    color: "leaf.600",
+    color: "colorPalette.fg",
     cursor: "pointer",
     transition: "background-color 0.2s ease",
     _hover: {
-      bg: "leaf.100",
+      bg: "colorPalette.surface",
     },
     _disabled: {
       opacity: 0.5,

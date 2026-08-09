@@ -9,7 +9,7 @@ const drawerStyles = sva({
   slots: ["content", "container", "logoContainer"],
   base: {
     content: {
-      bg: "leaf.50",
+      bg: "colorPalette.bg.subtle",
       maxWidth: "320px",
       height: "100vh",
       maxHeight: "100vh",

@@ -61,7 +61,7 @@ export default async function Home() {
           <p
             className={css({
               textStyle: "body",
-              color: "leaf.600/50",
+              color: "colorPalette.fg.subtle",
               fontSize: {
                 base: "16px",
                 lgDown: "14px",
@@ -95,7 +95,7 @@ export default async function Home() {
           <p
             className={css({
               textStyle: "body",
-              color: "leaf.600",
+              color: "colorPalette.fg",
               width: "100%",
             })}
           >
@@ -114,7 +114,7 @@ export default async function Home() {
           <h2
             className={css({
               textStyle: "heading1",
-              color: "leaf.600",
+              color: "colorPalette.fg",
               mb: {
                 base: "28px",
                 lgDown: "32px",
@@ -139,7 +139,7 @@ export default async function Home() {
           <h2
             className={css({
               textStyle: "heading1",
-              color: "leaf.600",
+              color: "colorPalette.fg",
               mb: "28px",
             })}
           >

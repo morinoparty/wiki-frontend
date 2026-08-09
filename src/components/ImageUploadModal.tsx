@@ -290,21 +290,21 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
               className={css({
                 width: "40px",
                 height: "40px",
-                bg: "#eaf2ef", // leaf.50
+                bg: "colorPalette.bg.subtle",
                 borderRadius: "10px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               })}
             >
-              <Image size={20} className={css({ color: "#347e5e" })} />
+              <Image size={20} className={css({ color: "colorPalette.fg" })} />
             </div>
             <div>
               <h2
                 className={css({
                   fontSize: "20px",
                   fontWeight: "600",
-                  color: "#2d634b", // leaf.700
+                  color: "colorPalette.fg",
                   lineHeight: "1.2",
                 })}
               >
@@ -313,7 +313,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
               <p
                 className={css({
                   fontSize: "14px",
-                  color: "#5ea181", // leaf.500
+                  color: "colorPalette.fg.subtle",
                   marginTop: "2px",
                 })}
               >
@@ -329,15 +329,15 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
               borderRadius: "8px",
               border: "none",
               bg: "#f8faf9",
-              color: "#5ea181",
+              color: "colorPalette.fg.subtle",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               cursor: "pointer",
               transition: "all 0.2s",
               "&:hover": {
-                bg: "#eaf2ef",
-                color: "#347e5e",
+                bg: "colorPalette.bg.subtle",
+                color: "colorPalette.fg",
               },
             })}
           >
@@ -352,7 +352,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
             <div
               className={cx(
                 css({
-                  border: "2px dashed #cdebdf", // leaf.100
+                  border: "2px dashed token(colors.border.subtle)",
                   borderRadius: "12px",
                   padding: "40px 24px",
                   textAlign: "center",
@@ -361,14 +361,14 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                   bg: "#fafcfb",
                   position: "relative",
                   "&:hover": {
-                    borderColor: "#b5deca", // leaf.200
+                    borderColor: "border.muted",
                     bg: "#f5faf7",
                   },
                 }),
                 isDragOver &&
                   css({
-                    borderColor: "#347e5e", // leaf.600
-                    bg: "#eaf2ef", // leaf.50
+                    borderColor: "colorPalette.border",
+                    bg: "colorPalette.bg.subtle",
                     transform: "scale(1.02)",
                   })
               )}
@@ -389,7 +389,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                 className={css({
                   width: "64px",
                   height: "64px",
-                  bg: "#eaf2ef", // leaf.50
+                  bg: "colorPalette.bg.subtle",
                   borderRadius: "16px",
                   display: "flex",
                   alignItems: "center",
@@ -397,14 +397,14 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                   margin: "0 auto 16px auto",
                 })}
               >
-                <Upload size={32} className={css({ color: "#347e5e" })} />
+                <Upload size={32} className={css({ color: "colorPalette.fg" })} />
               </div>
 
               <h3
                 className={css({
                   fontSize: "18px",
                   fontWeight: "600",
-                  color: "#2d634b", // leaf.700
+                  color: "colorPalette.fg",
                   marginBottom: "8px",
                 })}
               >
@@ -413,7 +413,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
               <p
                 className={css({
                   fontSize: "14px",
-                  color: "#5ea181", // leaf.500
+                  color: "colorPalette.fg.subtle",
                   marginBottom: "16px",
                 })}
               >
@@ -425,7 +425,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "8px",
-                  bg: "#347e5e", // leaf.600
+                  bg: "colorPalette.solid",
                   color: "white",
                   padding: "10px 20px",
                   borderRadius: "8px",
@@ -433,7 +433,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                   fontWeight: "500",
                   transition: "all 0.2s",
                   "&:hover": {
-                    bg: "#2d634b", // leaf.700
+                    bg: "colorPalette.solid.emphasized",
                   },
                 })}
               >
@@ -471,7 +471,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                     display: "block",
                     fontSize: "14px",
                     fontWeight: "500",
-                    color: "#2d634b", // leaf.700
+                    color: "colorPalette.fg",
                     marginBottom: "8px",
                   })}
                 >
@@ -485,15 +485,15 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                   className={css({
                     width: "100%",
                     padding: "12px 16px",
-                    border: "1px solid #cdebdf", // leaf.100
+                    border: "1px solid token(colors.border.subtle)",
                     borderRadius: "8px",
                     fontSize: "14px",
-                    color: "#2d634b", // leaf.700
+                    color: "colorPalette.fg",
                     bg: "white",
                     outline: "none",
                     transition: "all 0.2s",
                     "&:focus": {
-                      borderColor: "#347e5e", // leaf.600
+                      borderColor: "colorPalette.border",
                       boxShadow: "0 0 0 3px rgba(52, 126, 94, 0.1)",
                     },
                   })}
@@ -511,10 +511,10 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                       marginBottom: "8px",
                     })}
                   >
-                    <span className={css({ fontSize: "14px", color: "#5ea181" })}>
+                    <span className={css({ fontSize: "14px", color: "colorPalette.fg.subtle" })}>
                       アップロード中...
                     </span>
-                    <span className={css({ fontSize: "14px", color: "#5ea181" })}>
+                    <span className={css({ fontSize: "14px", color: "colorPalette.fg.subtle" })}>
                       {uploadProgress}%
                     </span>
                   </div>
@@ -522,7 +522,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                     className={css({
                       width: "100%",
                       height: "6px",
-                      bg: "#eaf2ef", // leaf.50
+                      bg: "colorPalette.bg.subtle",
                       borderRadius: "3px",
                       overflow: "hidden",
                     })}
@@ -530,7 +530,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                     <div
                       className={css({
                         height: "100%",
-                        bg: "#347e5e", // leaf.600
+                        bg: "colorPalette.solid",
                         transition: "width 0.3s ease",
                         borderRadius: "3px",
                       })}
@@ -552,17 +552,17 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                   className={css({
                     flex: 1,
                     padding: "12px 24px",
-                    border: "1px solid #cdebdf", // leaf.100
+                    border: "1px solid token(colors.border.subtle)",
                     borderRadius: "8px",
                     bg: "white",
-                    color: "#5ea181", // leaf.500
+                    color: "colorPalette.fg.subtle",
                     fontSize: "14px",
                     fontWeight: "500",
                     cursor: "pointer",
                     transition: "all 0.2s",
                     "&:hover": {
                       bg: "#fafcfb",
-                      borderColor: "#b5deca", // leaf.200
+                      borderColor: "border.muted",
                     },
                     "&:disabled": {
                       opacity: 0.5,
@@ -580,7 +580,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                     padding: "12px 24px",
                     border: "none",
                     borderRadius: "8px",
-                    bg: "#347e5e", // leaf.600
+                    bg: "colorPalette.solid",
                     color: "white",
                     fontSize: "14px",
                     fontWeight: "500",
@@ -591,7 +591,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                     justifyContent: "center",
                     gap: "8px",
                     "&:hover": {
-                      bg: "#2d634b", // leaf.700
+                      bg: "colorPalette.solid.emphasized",
                     },
                     "&:disabled": {
                       opacity: 0.7,

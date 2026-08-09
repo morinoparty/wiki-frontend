@@ -23,7 +23,7 @@ export default async function Home() {
         <h1
           className={css({
             textStyle: "heading1",
-            color: "leaf.600",
+            color: "colorPalette.fg",
             mb: "24px",
           })}
         >
@@ -72,7 +72,7 @@ export default async function Home() {
               padding: "12px",
               gap: "24px",
               borderBottom: "1px solid",
-              borderColor: "leaf.50",
+              borderColor: "border.subtle",
               _last: {
                 borderBottom: "none",
               },
@@ -106,7 +106,7 @@ export default async function Home() {
               <h2
                 className={css({
                   textStyle: "body",
-                  color: "leaf.600",
+                  color: "colorPalette.fg",
                   fontWeight: "bold",
                 })}
               >
@@ -115,7 +115,7 @@ export default async function Home() {
               <p
                 className={css({
                   textStyle: "body",
-                  color: "leaf.600",
+                  color: "colorPalette.fg",
                   opacity: 0.5,
                   textOverflow: "ellipsis",
                   overflow: "hidden",
@@ -140,9 +140,9 @@ export default async function Home() {
                 variant="ghost"
                 className={css({
                   px: "12px",
-                  color: "leaf.600",
+                  color: "colorPalette.fg",
                   _hover: {
-                    backgroundColor: "leaf.50",
+                    backgroundColor: "colorPalette.bg.subtle",
                   },
                 })}
                 asChild

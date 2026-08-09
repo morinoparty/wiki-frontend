@@ -35,7 +35,7 @@ export const UserBox: React.FC = async () => {
       <p
         className={css({
           textStyle: "body",
-          color: "leaf.600",
+          color: "colorPalette.fg",
         })}
       >
         <Link href={"/dashboard/"}>
