@@ -1,5 +1,6 @@
 import NextAuth, { type Session, type User } from "next-auth";
 import type { JWT } from "next-auth/jwt";
+import { getAuthSecret } from "./get-auth-secret";
 interface MyToken extends JWT {
   accessToken?: string;
 }
@@ -15,7 +16,10 @@ export interface ExtendedSession extends Session {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth(async () => {
-  // let { env } = await getCloudflareContext({async: true})
+  // AUTH_SECRET は Cloudflare Secrets Store バインディング経由の非同期読み出しが
+  // 必要なため、NextAuth の async 設定関数の中で解決する。
+  const secret = await getAuthSecret();
+
   return {
     debug: false,
     trustHost: true,
@@ -46,7 +50,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async () => {
             image: `https://crafthead.net/avatar/${profile.id}`,
           };
         },
-        clientId: process.env.019e2648-25db-7551-9dbc-963004f24734 as string,
+        clientId: process.env.CLIENT_ID as string,
         client: {
           token_endpoint_auth_method: "none",
         },
@@ -91,7 +95,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async () => {
               },
               body: new URLSearchParams({
                 grant_type: "refresh_token",
-                client_id: process.env.019e2648-25db-7551-9dbc-963004f24734 as string,
+                client_id: process.env.CLIENT_ID as string,
                 redirect_uri: process.env.AUTH_URL as string,
                 refresh_token: token.refresh_token as string, // 型アサーションを使用してstring型として扱う
               }),
@@ -143,6 +147,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async () => {
     pages: {
       signIn: "/auth/sign-in",
     },
-    secret: process.env.AUTH_SECRET,
+    secret,
   };
 });

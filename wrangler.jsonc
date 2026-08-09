@@ -15,6 +15,18 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS",
   },
+  "vars": {
+    "CLIENT_ID": "019fe59c-1673-72f5-a5d2-49cce1d4161f",
+  },
+  // AUTH_SECRET は Cloudflare Secrets Store (BSM: shared/AUTH_SECRET) から供給する。
+  // 他の env と違いバインディング経由の非同期 `.get()` で読む (src/lib/get-auth-secret.ts)。
+  "secrets_store_secrets": [
+    {
+      "binding": "AUTH_SECRET",
+      "store_id": "d36d5a11ea07462c83bb21a0e9ccb811",
+      "secret_name": "shared_AUTH_SECRET",
+    },
+  ],
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
