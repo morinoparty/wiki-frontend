@@ -2,8 +2,7 @@ import { sva } from "styled-system/css";
 import Link from "next/link";
 import { Tag } from "lucide-react";
 import { getAllCategories } from "@/lib/getAllCategories";
-import Image from "next/image";
-import cloudflareLoader from "@/lib/image-loader";
+import { CdnImage } from "@/components/CdnImage";
 
 export const postHeaderStyles = sva({
   slots: ["container", "info", "image", "category", "title", "description"],
@@ -93,12 +92,11 @@ export async function PostHeader({
     <header className={classes.container}>
       {image && (
         <div className={classes.image}>
-          <Image
+          <CdnImage
             src={image}
             alt={title}
             fill
             style={{ objectFit: "cover" }}
-            loader={cloudflareLoader}
           />
         </div>
       )}

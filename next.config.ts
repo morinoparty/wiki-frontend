@@ -7,10 +7,6 @@ import type { NextConfig } from "next";
 const styledSystemDir = path.join(process.cwd(), "styled-system");
 
 const nextConfig: NextConfig = {
-  images: {
-    loader: "custom",
-    path: "./src/lib/image-loader.ts",
-  },
   // chlorophyll is published as raw TypeScript sources, so Next has to
   // compile it together with the app.
   transpilePackages: ["@morinoparty/chlorophyll-react"],
