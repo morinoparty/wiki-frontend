@@ -7,6 +7,7 @@ import { WikiPostDetail } from "@/types/wiki";
 import matter from "gray-matter";
 import type { AppSession } from "@/lib/auth";
 import { randomUUID } from "crypto";
+import { ImageValidationError, validateAvifUpload } from "hagaki/image";
 
 /**
  * GitHub 上の wiki コンテンツを読み書きするサービス。
@@ -526,6 +527,22 @@ export class GitHubService {
         return { success: false, error: "記事 (articleId) が指定されていません" };
       }
       const arrayBuffer = await file.arrayBuffer();
+      // 記事画像は AVIF 固定。変換は投稿側 (hagaki/image の processImage) の
+      // 責務なので、ここでは形式とサイズだけ弾く。
+      try {
+        validateAvifUpload(new Uint8Array(arrayBuffer));
+      } catch (error) {
+        if (error instanceof ImageValidationError) {
+          return {
+            success: false,
+            error:
+              error.code === "size"
+                ? "画像が大きすぎます (500KB 以下の AVIF にしてください)"
+                : "画像は AVIF 形式のみ受け付けます",
+          };
+        }
+        throw error;
+      }
       const imageId = randomUUID();
       const filePath = this.getAssetPath(articleId, imageId);
 
