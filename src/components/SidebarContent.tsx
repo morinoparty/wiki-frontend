@@ -21,6 +21,12 @@ const sidebarContentStyles = sva({
   base: {
     nav: {
       height: "100%",
+      // サイドバーは 100vh 固定。カテゴリが増えて入り切らなくなったとき、
+      // grid の 1fr 行が縮めるように min-height を 0 にしてこの中でスクロールさせる
+      // (そうしないと未ログイン時のログインカードにメニュー末尾が隠れる)。
+      minHeight: "0",
+      overflowY: "auto",
+      overscrollBehavior: "contain",
     },
     list: {
       listStyle: "none",
