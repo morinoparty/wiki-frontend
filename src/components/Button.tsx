@@ -1,17 +1,24 @@
-import { cva, cx } from "styled-system/css";
-import { Button as ChakraButton, type ButtonProps } from "@chakra-ui/react";
-import { forwardRef } from "react";
+"use client";
 
+import { ark, type HTMLArkProps } from "@ark-ui/react/factory";
+import { cva, cx } from "styled-system/css";
+
+// chlorophyll の Button recipe ではなく、この cva をそのまま使い続ける。
+// chlorophyll の intent="primary" は ::after で内側の影(inset.raised)を描くため、
+// leaf 系のフラットな見た目を持つこの定義に重ねると余計な立体感が透けてしまう。
+// レイアウト/配色は据え置き、Chakra への依存だけを ark.button に差し替える。
 const buttonStyles = cva({
   base: {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
+    gap: "8px",
     borderRadius: "16px",
     textStyle: "button",
     fontWeight: "700",
     cursor: "pointer",
     transition: "all 0.2s ease",
+    whiteSpace: "nowrap",
     _hover: {
       bg: "leaf.700",
     },
@@ -80,24 +87,23 @@ const buttonStyles = cva({
   },
 });
 
-export interface CustomButtonProps
-  extends Omit<ButtonProps, "size" | "variant"> {
+export interface CustomButtonProps extends Omit<HTMLArkProps<"button">, "size"> {
   size?: "sm" | "md" | "lg";
   variant?: "solid" | "outline" | "ghost";
 }
 
-export const Button = forwardRef<HTMLButtonElement, CustomButtonProps>(
-  ({ size, variant, className, ...props }, ref) => {
-    return (
-      <ChakraButton
-        ref={ref}
-        {...props}
-        className={cx(buttonStyles({ size, variant }), className)}
-      >
-        {props.children}
-      </ChakraButton>
-    );
-  }
-);
+export const Button = ({
+  size,
+  variant,
+  className,
+  ...props
+}: CustomButtonProps) => {
+  return (
+    <ark.button
+      {...props}
+      className={cx(buttonStyles({ size, variant }), className)}
+    />
+  );
+};
 
 Button.displayName = "Button";

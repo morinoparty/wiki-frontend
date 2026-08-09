@@ -1,9 +1,44 @@
 "use client";
 
-import { Button, Editable, Spinner } from "@chakra-ui/react";
+import { Editable } from "@ark-ui/react/editable";
+import { Spinner } from "@morinoparty/chlorophyll-react/components";
 import { Tag, Image } from "lucide-react";
+import { Button } from "@/components/Button";
 import { postHeaderStyles } from "./PostHeader";
-import { css, cx } from "styled-system/css";
+import { css, cx, sva } from "styled-system/css";
+
+// Chakra の Editable が持っていた最低限の見た目(枠線なし・背景透過・折返し)を
+// Ark の素の Editable に与える。フォントまわりは呼び出し側の
+// postHeaderStyles(title / description)がそのまま担当する。
+const editableStyles = sva({
+  slots: ["area", "preview", "input"],
+  base: {
+    area: {
+      display: "block",
+      width: "100%",
+    },
+    preview: {
+      display: "block",
+      width: "100%",
+      cursor: "text",
+      whiteSpace: "pre-wrap",
+      wordBreak: "break-word",
+    },
+    input: {
+      display: "block",
+      width: "100%",
+      bg: "transparent",
+      border: "none",
+      outline: "none",
+      resize: "none",
+      font: "inherit",
+      color: "inherit",
+      _focusVisible: {
+        outline: "none",
+      },
+    },
+  },
+});
 import { useRef, useState, useEffect } from "react";
 import { uploadImage } from "@/actions/upload-image";
 import { toaster } from "@/components/ui/toaster";
@@ -218,14 +253,18 @@ export function PostHeaderEdit({
           css({ mb: "24px !important", gap: "0px !important", ml: "-14px" })
         )}
       >
-        <Button size="sm" variant="ghost" opacity={0.5}>
+        <Button
+          size="sm"
+          variant="ghost"
+          className={css({ opacity: 0.5 })}
+        >
           <Tag size={16} />
           カテゴリ
         </Button>
         <Button
           size="sm"
           variant="ghost"
-          opacity={0.5}
+          className={css({ opacity: 0.5 })}
           onClick={handleImageIconClick}
           disabled={disabled || isUploading}
         >
@@ -248,6 +287,7 @@ export function PostHeaderEdit({
    * タイトル編集フィールドのレンダリング
    */
   const renderTitleEdit = () => {
+    const editable = editableStyles();
     return (
       <Editable.Root
         value={title}
@@ -255,17 +295,26 @@ export function PostHeaderEdit({
         disabled={disabled}
         selectOnFocus
         placeholder="タイトル"
-        size="lg"
+        autoResize
       >
-        <Editable.Preview
-          className={cx(classes.title, css({ px: "0", py: "0", margin: "0" }))}
-        />
-        <Editable.Textarea
-          className={cx(
-            classes.title,
-            css({ px: "0", py: "0", margin: "0", fieldSizing: "content" })
-          )}
-        />
+        <Editable.Area className={editable.area}>
+          <Editable.Preview
+            className={cx(
+              editable.preview,
+              classes.title,
+              css({ px: "0", py: "0", margin: "0" })
+            )}
+          />
+          {/* Ark には Chakra の Editable.Textarea 相当が無いため、
+              タイトルの編集中は 1 行入力になる(表示は従来どおり折り返す) */}
+          <Editable.Input
+            className={cx(
+              editable.input,
+              classes.title,
+              css({ px: "0", py: "0", margin: "0" })
+            )}
+          />
+        </Editable.Area>
       </Editable.Root>
     );
   };
@@ -274,6 +323,7 @@ export function PostHeaderEdit({
    * 説明編集フィールドのレンダリング
    */
   const renderDescriptionEdit = () => {
+    const editable = editableStyles();
     return (
       <Editable.Root
         value={description}
@@ -281,21 +331,24 @@ export function PostHeaderEdit({
         disabled={disabled}
         selectOnFocus
         placeholder="説明"
-        size="md"
         autoResize={false}
       >
-        <Editable.Preview
-          className={cx(
-            classes.description,
-            css({ px: "0", py: "0", margin: "0" })
-          )}
-        />
-        <Editable.Input
-          className={cx(
-            classes.description,
-            css({ px: "0", py: "0", margin: "0", fieldSizing: "content" })
-          )}
-        />
+        <Editable.Area className={editable.area}>
+          <Editable.Preview
+            className={cx(
+              editable.preview,
+              classes.description,
+              css({ px: "0", py: "0", margin: "0" })
+            )}
+          />
+          <Editable.Input
+            className={cx(
+              editable.input,
+              classes.description,
+              css({ px: "0", py: "0", margin: "0" })
+            )}
+          />
+        </Editable.Area>
       </Editable.Root>
     );
   };

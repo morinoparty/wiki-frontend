@@ -1,6 +1,6 @@
 import { getAllCategories } from "@/lib/getAllCategories";
 import { getAllPosts } from "@/lib/getAllPosts";
-import { ModalDialogWrapper } from "@/components/ModalDialogWrapper";
+import { ModalDialogRoot } from "@/components/ModalDialogRoot";
 import { PostCreationClient } from "@/app/(dashboard)/dashboard/posts/new/PostCreationClient";
 
 export default async function Home() {
@@ -19,11 +19,11 @@ export default async function Home() {
   });
 
   return (
-    <ModalDialogWrapper>
+    <ModalDialogRoot>
       <PostCreationClient
         categories={categories}
         existingSlugs={existingSlugs}
       />
-    </ModalDialogWrapper>
+    </ModalDialogRoot>
   );
 }

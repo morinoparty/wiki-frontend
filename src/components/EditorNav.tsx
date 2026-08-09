@@ -1,6 +1,6 @@
 import { sva } from "styled-system/css";
 import Link from "next/link";
-import { Button } from "@chakra-ui/react";
+import { Button } from "@/components/Button";
 import { ChevronLeft } from "lucide-react";
 
 const editorNavStyles = sva({
@@ -57,7 +57,7 @@ export function EditorNav({ title, children }: EditorNavProps) {
           gap: "4px",
         }}
       >
-        <Button asChild className={styles.backButton} variant="ghost">
+        <Button asChild className={styles.backButton} variant="ghost" size="sm">
           <Link href="/dashboard">
             <ChevronLeft />
             戻る

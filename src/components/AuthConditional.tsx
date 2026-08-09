@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { auth, ExtendedSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 
 interface AuthConditionalProps {
   children: ReactNode;
@@ -10,7 +10,7 @@ export const AuthConditional = async ({
   children,
   fallback = null,
 }: AuthConditionalProps) => {
-  const session = (await auth()) as ExtendedSession;
+  const session = await getSession();
   if (!session) return <>{fallback}</>;
   return <>{children}</>;
 };

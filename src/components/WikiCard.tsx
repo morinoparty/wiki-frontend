@@ -1,8 +1,6 @@
 import { sva } from "styled-system/css";
 import Link from "next/link";
 import { WikiPost } from "@/types/wiki";
-import Image from "next/image";
-import cloudflareLoader from "@/lib/image-loader";
 
 const wikiCardStyles = sva({
   slots: [
@@ -69,14 +67,13 @@ export default function WikiCard({ post }: { post: WikiPost }) {
   return (
     <Link href={`/${link}`}>
       <article className={styles.card}>
-        <Image
+        <img
           className={styles.image}
           src={imageUrl}
           alt={post.title}
           width={400}
           height={600}
           loading="lazy"
-          loader={cloudflareLoader}
         />
 
         <div className={styles.container}>

@@ -9,7 +9,8 @@ import { useTransition } from "react";
 import { updatePost } from "@/actions/update-post";
 import { WikiPostDetail } from "@/types/wiki";
 import { EditorNav } from "@/components/EditorNav";
-import { Button } from "@chakra-ui/react";
+import { Button } from "@/components/Button";
+import { Spinner } from "@morinoparty/chlorophyll-react/components";
 import dynamic from "next/dynamic";
 import type { MDXEditorMethods } from "@mdxeditor/editor";
 
@@ -105,11 +106,11 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
     >
       <EditorNav title="ページの編集">
         <Button
-          textStyle={"body"}
+          size="sm"
           onClick={handleSave}
-          loading={isPending}
-          disabled={!isDirty}
+          disabled={!isDirty || isPending}
         >
+          {isPending ? <Spinner size="sm" /> : null}
           保存
         </Button>
       </EditorNav>

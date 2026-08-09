@@ -1,14 +1,11 @@
 import { css } from "styled-system/css";
 import { Button } from "./Button";
-import { signIn } from "@/lib/auth";
+import { signInWithMineAuth } from "@/actions/auth-actions";
 
 export const LoginModal: React.FC = () => {
   return (
     <form
-      action={async () => {
-        "use server";
-        await signIn("MineAuth", { redirectTo: "/" });
-      }}
+      action={signInWithMineAuth}
       className={css({
         background: "#fff",
         display: "grid",

@@ -65,17 +65,17 @@ export const CreatePostInputSchema = z.object({
   y: z.number().int("Y座標は整数で入力してください").optional(),
   status: z
     .enum(["draft", "published", "archived"], {
-      errorMap: () => ({ message: "無効なステータスです" }),
+      error: () => "無効なステータスです",
     })
     .optional(),
   visibility: z
     .enum(["public", "private", "restricted"], {
-      errorMap: () => ({ message: "無効な可視性設定です" }),
+      error: () => "無効な可視性設定です",
     })
     .optional(),
   priority: z
     .enum(["low", "medium", "high"], {
-      errorMap: () => ({ message: "無効な優先度です" }),
+      error: () => "無効な優先度です",
     })
     .optional(),
 });

@@ -1,15 +1,39 @@
 import { Octokit } from "octokit";
+import { getSecret } from "@/lib/secrets";
+import type { Committer } from "hagaki";
+import { committerFromBetterAuth } from "hagaki/auth/better-auth";
+import { getHagakiClient, WIKI_REPO } from "@/lib/hagaki";
 import { WikiPostDetail } from "@/types/wiki";
 import matter from "gray-matter";
-import { Session } from "next-auth";
+import type { AppSession } from "@/lib/auth";
 import { randomUUID } from "crypto";
 import path from "path";
 
+/**
+ * GitHub 上の wiki コンテンツを読み書きするサービス。
+ *
+ * 書き込み系 (作成 / 更新 / 削除 / 画像アップロード) は hagaki の
+ * `commits.commitFiles` に委譲する。読み取り系 (getContent / listCommits /
+ * compareCommits) は hagaki に対応 API が無いため Octokit を直接使う。
+ */
 export class GitHubService {
-  private static octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-  private static owner = "morinoparty"; // TODO: 環境変数から取得
-  private static repo = "wiki-contentdev"; // TODO: 環境変数から取得
-  private static branch = "main";
+  private static _octokit: Promise<Octokit> | null = null;
+  private static owner = WIKI_REPO.owner;
+  private static repo = WIKI_REPO.repo;
+  private static branch = WIKI_REPO.branch;
+
+  /**
+   * 読み取り用の Octokit。モジュール初期化時ではなく初回アクセス時に
+   * GITHUB_TOKEN (Workers では Secrets Store バインディング) を解決する。
+   */
+  private static getOctokit(): Promise<Octokit> {
+    if (!this._octokit) {
+      this._octokit = getSecret("GITHUB_TOKEN").then(
+        (token) => new Octokit({ auth: token }),
+      );
+    }
+    return this._octokit;
+  }
 
   /**
    * スラッグからファイルパスを生成
@@ -38,14 +62,56 @@ export class GitHubService {
 
   /**
    * コミッター情報を生成
+   *
+   * hagaki の `committerFromBetterAuth` は既定の nameFormat が `"<name> (<id>)"`
+   * を生成するため、従来の手組みと同一の結果になる。
+   * MineAuth が返す `email` は noreply アドレスで commit には使いたくないうえ、
+   * 空文字が入ると `email ?? defaultEmail` の nullish 判定をすり抜けるため、
+   * email は明示的に null にして常に `players@morino.party` を使わせる。
+   * name / id が揃わない場合は undefined を返し、GitHub にトークン所有者を使わせる。
    */
-  private static getCommitter(session: Session | null) {
-    return session?.user?.name && session?.user?.id
-      ? {
-          name: `${session.user.name} (${session.user.id})`,
-          email: "players@morino.party",
-        }
-      : undefined;
+  private static getCommitter(session: AppSession): Committer | undefined {
+    if (!session?.user?.name || !session?.user?.id) {
+      return undefined;
+    }
+    return committerFromBetterAuth(
+      {
+        user: {
+          id: session.user.id,
+          name: session.user.name,
+          email: null,
+        },
+      },
+      { defaultEmail: "players@morino.party" }
+    );
+  }
+
+  /**
+   * 記事本文と frontmatter からコミットするファイル内容を組み立てる
+   */
+  private static buildContent(post: WikiPostDetail): string {
+    return matter.stringify(
+      post.body || "",
+      this.cleanMetadata({
+        title: post.title,
+        slug: post.slug,
+        category: post.category,
+        description: post.description,
+        image: post.image || "",
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        createdBy: post.createdBy,
+        documentOwner: post.documentOwner,
+        lastModifiedBy: post.lastModifiedBy,
+        status: post.status,
+        visibility: post.visibility,
+        version: post.version,
+        priority: post.priority,
+        isLocked: post.isLocked,
+        lockedAt: post.lockedAt,
+        lockedBy: post.lockedBy,
+      })
+    );
   }
 
   /**
@@ -69,7 +135,7 @@ export class GitHubService {
   static async checkPostExists(slug: string): Promise<boolean> {
     try {
       const filePath = this.getFilePath(slug);
-      await this.octokit.rest.repos.getContent({
+      await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -87,7 +153,7 @@ export class GitHubService {
   static async getPost(slug: string): Promise<WikiPostDetail | null> {
     try {
       const filePath = this.getFilePath(slug);
-      const { data: fileData } = await this.octokit.rest.repos.getContent({
+      const { data: fileData } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -116,53 +182,20 @@ export class GitHubService {
   static async createPost(
     post: WikiPostDetail,
     commitMessage: string,
-    session: Session | null
+    session: AppSession
   ): Promise<{ success: boolean; error?: string; commitId?: string }> {
     try {
       const filePath = this.getFilePath(post.slug);
-      const content = matter.stringify(
-        post.body || "",
-        this.cleanMetadata({
-          title: post.title,
-          slug: post.slug,
-          category: post.category,
-          description: post.description,
-          image: post.image || "",
-          createdAt: post.createdAt,
-          updatedAt: post.updatedAt,
-          createdBy: post.createdBy,
-          documentOwner: post.documentOwner,
-          lastModifiedBy: post.lastModifiedBy,
-          status: post.status,
-          visibility: post.visibility,
-          version: post.version,
-          priority: post.priority,
-          isLocked: post.isLocked,
-          lockedAt: post.lockedAt,
-          lockedBy: post.lockedBy,
-        })
-      );
 
-      const contentEncoded = Buffer.from(content, "utf-8").toString("base64");
-      const committer = this.getCommitter(session);
-
-      const { data: commitData } =
-        await this.octokit.rest.repos.createOrUpdateFileContents({
-          owner: this.owner,
-          repo: this.repo,
-          path: filePath,
-          message: commitMessage,
-          content: contentEncoded,
-          branch: this.branch,
-          ...(committer && {
-            committer,
-            author: committer,
-          }),
-        });
+      const result = await getHagakiClient().commits.commitFiles({
+        files: [{ path: filePath, content: this.buildContent(post) }],
+        committer: this.getCommitter(session),
+        commitMessage,
+      });
 
       return {
         success: true,
-        commitId: commitData.commit.sha,
+        commitId: result.commitSha,
       };
     } catch (error) {
       console.error("GitHub API error:", error);
@@ -179,13 +212,14 @@ export class GitHubService {
   static async updatePost(
     post: WikiPostDetail,
     commitMessage: string,
-    session: Session | null
+    session: AppSession
   ): Promise<{ success: boolean; error?: string; commitId?: string }> {
     try {
       const filePath = this.getFilePath(post.slug);
 
-      // 既存ファイルのSHAを取得
-      const { data: fileData } = await this.octokit.rest.repos.getContent({
+      // commitFiles は対象ファイルが無くても新規作成してしまうため、
+      // 「更新」の意味を保つよう事前に存在確認する
+      const { data: fileData } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -196,50 +230,15 @@ export class GitHubService {
         return { success: false, error: "ファイルが見つかりません" };
       }
 
-      const content = matter.stringify(
-        post.body || "",
-        this.cleanMetadata({
-          title: post.title,
-          slug: post.slug,
-          category: post.category,
-          description: post.description,
-          image: post.image || "",
-          createdAt: post.createdAt,
-          updatedAt: post.updatedAt,
-          createdBy: post.createdBy,
-          documentOwner: post.documentOwner,
-          lastModifiedBy: post.lastModifiedBy,
-          status: post.status,
-          visibility: post.visibility,
-          version: post.version,
-          priority: post.priority,
-          isLocked: post.isLocked,
-          lockedAt: post.lockedAt,
-          lockedBy: post.lockedBy,
-        })
-      );
-
-      const contentEncoded = Buffer.from(content, "utf-8").toString("base64");
-      const committer = this.getCommitter(session);
-
-      const { data: commitData } =
-        await this.octokit.rest.repos.createOrUpdateFileContents({
-          owner: this.owner,
-          repo: this.repo,
-          path: filePath,
-          message: commitMessage,
-          content: contentEncoded,
-          branch: this.branch,
-          sha: fileData.sha,
-          ...(committer && {
-            committer,
-            author: committer,
-          }),
-        });
+      const result = await getHagakiClient().commits.commitFiles({
+        files: [{ path: filePath, content: this.buildContent(post) }],
+        committer: this.getCommitter(session),
+        commitMessage,
+      });
 
       return {
         success: true,
-        commitId: commitData.commit.sha,
+        commitId: result.commitSha,
       };
     } catch (error) {
       console.error("GitHub API error:", error);
@@ -256,13 +255,14 @@ export class GitHubService {
   static async deletePost(
     slug: string,
     commitMessage: string,
-    session: Session | null
+    session: AppSession
   ): Promise<{ success: boolean; error?: string; commitId?: string }> {
     try {
       const filePath = this.getFilePath(slug);
 
-      // 既存ファイルのSHAを取得
-      const { data: fileData } = await this.octokit.rest.repos.getContent({
+      // 存在しないパスを deletePaths に積むと createTree が 422 で失敗するため、
+      // 事前に存在確認して分かりやすいエラーを返す
+      const { data: fileData } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -273,24 +273,15 @@ export class GitHubService {
         return { success: false, error: "ファイルが見つかりません" };
       }
 
-      const committer = this.getCommitter(session);
-
-      const { data: commitData } = await this.octokit.rest.repos.deleteFile({
-        owner: this.owner,
-        repo: this.repo,
-        path: filePath,
-        message: commitMessage,
-        sha: fileData.sha,
-        branch: this.branch,
-        ...(committer && {
-          committer,
-          author: committer,
-        }),
+      const result = await getHagakiClient().commits.commitFiles({
+        deletePaths: [filePath],
+        committer: this.getCommitter(session),
+        commitMessage,
       });
 
       return {
         success: true,
-        commitId: commitData.commit.sha,
+        commitId: result.commitSha,
       };
     } catch (error) {
       console.error("GitHub API error:", error);
@@ -320,7 +311,7 @@ export class GitHubService {
       const filePath = this.getFilePath(slug);
 
       // ファイルのコミット履歴を取得
-      const { data: commits } = await this.octokit.rest.repos.listCommits({
+      const { data: commits } = await (await GitHubService.getOctokit()).rest.repos.listCommits({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -360,7 +351,7 @@ export class GitHubService {
     try {
       const filePath = this.getFilePath(slug);
 
-      const { data: fileData } = await this.octokit.rest.repos.getContent({
+      const { data: fileData } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: filePath,
@@ -405,7 +396,7 @@ export class GitHubService {
       const filePath = this.getFilePath(slug);
 
       // GitHub APIでコミット間の差分を取得
-      const { data: comparison } = await this.octokit.rest.repos.compareCommits(
+      const { data: comparison } = await (await GitHubService.getOctokit()).rest.repos.compareCommits(
         {
           owner: this.owner,
           repo: this.repo,
@@ -447,7 +438,7 @@ export class GitHubService {
   }> {
     try {
       // content/wikiディレクトリの内容を取得
-      const { data: contents } = await this.octokit.rest.repos.getContent({
+      const { data: contents } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: "content/wiki",
@@ -504,7 +495,7 @@ export class GitHubService {
   }> {
     try {
       // content/wikiディレクトリの内容を取得
-      const { data: contents } = await this.octokit.rest.repos.getContent({
+      const { data: contents } = await (await GitHubService.getOctokit()).rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
         path: "content/wiki",
@@ -546,33 +537,24 @@ export class GitHubService {
    */
   static async uploadImage(
     file: File,
-    session: Session | null
+    session: AppSession
   ): Promise<{ success: boolean; error?: string; url?: string; commitId?: string }> {
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
       const ext = path.extname(file.name);
       const filename = `${randomUUID()}${ext}`;
       const filePath = `content/img/${filename}`;
-      const committer = this.getCommitter(session);
 
-      const { data } = await this.octokit.rest.repos.createOrUpdateFileContents({
-        owner: this.owner,
-        repo: this.repo,
-        path: filePath,
-        message: `Upload image: ${file.name}`,
-        content: buffer.toString("base64"),
-        branch: this.branch,
-        ...(committer && {
-          committer,
-          author: committer,
-        }),
+      const result = await getHagakiClient().commits.commitFiles({
+        files: [{ path: filePath, content: arrayBuffer }],
+        committer: this.getCommitter(session),
+        commitMessage: `Upload image: ${file.name}`,
       });
 
       return {
         success: true,
         url: `/img/${filename}`,
-        commitId: data.commit.sha,
+        commitId: result.commitSha,
       };
     } catch (error) {
       console.error("GitHub image upload error:", error);

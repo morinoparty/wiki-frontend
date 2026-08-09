@@ -1,40 +1,15 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "./lib/auth";
-// export {auth as middleware} from "~/lib/auth";
+import { getSessionCookie } from "better-auth/cookies";
 
-// APIヘルスチェック用の関数
-// async function checkApiHealth() {
-//   try {
-//     // タイムアウト付きのfetch
-//     const controller = new AbortController();
-//     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒でタイムアウト
+export function middleware(request: NextRequest) {
+  // ミドルウェアではフルなセッション検証は行わず、セッションクッキーの
+  // 存在だけを見る (better-auth 公式の推奨。Edge で DB / fetch を叩かない)。
+  // 実際の認可は各 Server Action / Server Component 側の
+  // `getSession()` が担う。
+  const sessionCookie = getSessionCookie(request);
 
-//     const response = await fetch(`${process.env.MAIN_SERVER_URL}`, {
-//       signal: controller.signal,
-//     });
-//     clearTimeout(timeoutId);
-
-//     return response.ok;
-//   } catch (error) {
-//     console.error("API health check failed:", error);
-//     return false;
-//   }
-// }
-
-export async function middleware(request: NextRequest) {
-  // APIの健全性をチェック
-  // const isApiHealthy = await checkApiHealth();
-
-  // if (!isApiHealthy) {
-  //   // APIが応答しない場合は503エラーページにリダイレクト
-  //   return NextResponse.redirect(new URL("/service-unavailable", request.url));
-  // }
-
-  // 通常の認証処理を実行
-  const response = await auth();
-
-  if (!response?.user && request.nextUrl.pathname.startsWith("/dashboard")) {
+  if (!sessionCookie && request.nextUrl.pathname.startsWith("/dashboard")) {
     // Redirect to login page if not authenticated
     return NextResponse.redirect(new URL("/auth/sign-in", request.url));
   }

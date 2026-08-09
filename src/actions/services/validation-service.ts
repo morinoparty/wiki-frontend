@@ -14,7 +14,7 @@ export class ValidationService {
   private static zodErrorToValidationErrors(
     error: ZodError
   ): ValidationError[] {
-    return error.errors.map((err) => ({
+    return error.issues.map((err) => ({
       field: err.path.join("."),
       message: err.message,
     }));

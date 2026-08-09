@@ -1,5 +1,3 @@
-import cloudflareLoader from "@/lib/image-loader";
-import Image from "next/image";
 import Link from "next/link";
 import { sva } from "styled-system/css";
 
@@ -215,7 +213,7 @@ export const components = {
   pre: (props: React.ComponentProps<"pre">) => (
     <pre className={mdxStyles().pre} {...props} />
   ),
-  img: (props: React.ComponentProps<typeof Image>) => {
+  img: (props: React.ComponentProps<"img">) => {
     const { src = "", alt = "", width, height, ...rest } = props;
     if (typeof src !== "string") return null;
     const isExternal =
@@ -238,7 +236,7 @@ export const components = {
           : 600;
 
     return (
-      <Image
+      <img
         className={mdxStyles().img}
         src={
           isExternal ? src : "https://wiki-contentdev.yahiro.workers.dev" + src
@@ -247,7 +245,6 @@ export const components = {
         width={imageWidth}
         height={imageHeight}
         loading="lazy"
-        loader={cloudflareLoader}
         {...rest}
       />
     );

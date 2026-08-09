@@ -1,148 +1,156 @@
-import NextAuth, { type Session, type User } from "next-auth";
-import type { JWT } from "next-auth/jwt";
-interface MyToken extends JWT {
-  accessToken?: string;
+import { headers } from "next/headers";
+import { betterAuth } from "better-auth";
+import { nextCookies } from "better-auth/next-js";
+import { genericOAuth } from "better-auth/plugins";
+import { getSecret } from "./secrets";
+
+// buildAuth の戻り値から型を推論する。better-auth 1.6 以降は betterAuth() が
+// 渡したオプションにジェネリックなため、ReturnType<typeof betterAuth> だと
+// genericOAuth プラグインのエンドポイント型 (signInWithOAuth2 など) が失われる
+type Auth = Awaited<ReturnType<typeof buildAuth>>;
+
+// baseURL(= リクエストの origin)ごとに BetterAuth インスタンスをメモ化する。
+// 固定の AUTH_URL を持たないことで、production / preview / ローカル開発の
+// どの origin でもそのまま動く
+const authCache = new Map<string, Promise<Auth>>();
+
+/**
+ * MineAuth の `/oauth2/userinfo` レスポンス。
+ * OIDC 標準クレーム (`sub` / `preferred_username` / `picture`) と、
+ * 旧実装が参照していた独自クレーム (`id` / `username`) の両方を受け付ける。
+ */
+interface MineAuthProfile extends Record<string, unknown> {
+  sub?: string;
+  id?: string;
+  username?: string;
+  preferred_username?: string;
 }
 
-export interface ExtendedSession extends Session {
-  accessToken?: string;
-  user?: {
-    id?: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
-}
+async function buildAuth(baseURL: string) {
+  // AUTH_SECRET / MAIN_SERVER_URL は Cloudflare Secrets Store バインディング経由の
+  // 非同期読み出しが必要なため、モジュールトップレベルではなく初回リクエスト時に
+  // 解決してキャッシュする。
+  const [secret, mainServerUrl] = await Promise.all([
+    getSecret("AUTH_SECRET"),
+    getSecret("MAIN_SERVER_URL"),
+  ]);
 
-export const { handlers, signIn, signOut, auth } = NextAuth(async () => {
-  // let { env } = await getCloudflareContext({async: true})
-  return {
-    debug: false,
-    trustHost: true,
-    providers: [
-      {
-        id: "MineAuth",
-        name: "MineAuth",
-        type: "oauth",
-        authorization: {
-          url: `${process.env.MAIN_SERVER_URL}/oauth2/authorize`,
-          params: {
-            response_type: "code",
-            scope: "openid profile email",
+  // database を渡さない DB-less 構成: セッションと MineAuth のトークンは
+  // すべて署名付きクッキーに保存される。Workers の isolate 入れ替えでも
+  // ログイン状態が維持される。
+  return betterAuth({
+    baseURL,
+    secret,
+    session: {
+      // MineAuth の refresh token 寿命 (30日) に合わせる。
+      // クッキー内セッションペイロードの expiresAt はこの値で決まり、
+      // cookieCache.maxAge より短いとそちらが先に失効してしまう
+      expiresIn: 60 * 60 * 24 * 30,
+      cookieCache: {
+        enabled: true,
+        // DB-less ではこの値が session_data クッキーの寿命になる
+        // (= 実質のセッション上限)。refresh token と同じ30日
+        maxAge: 60 * 60 * 24 * 30,
+      },
+    },
+    account: {
+      // MineAuth のトークン一式を account_data クッキーに保存する。
+      // access token が切れると getAccessToken が refresh token で
+      // 自動更新し、ローテーション後の新 refresh token も書き戻す
+      storeAccountCookie: true,
+    },
+    user: {
+      // Minecraft UUID を user レコードに載せるための追加フィールド。
+      // better-auth は OAuth プロフィールの `id` を account.accountId にしか
+      // 使わず、user.id は自前で採番してしまう。DB-less (メモリアダプタ) では
+      // その id がログインのたびに変わり、frontmatter の
+      // createdBy / documentOwner / lockedBy と突き合わせられなくなる。
+      // そこで UUID を追加フィールドとして持ち回り、下の databaseHooks で
+      // user.id そのものに固定する。
+      additionalFields: {
+        minecraftId: {
+          type: "string",
+          required: false,
+          input: true,
+        },
+      },
+    },
+    databaseHooks: {
+      user: {
+        create: {
+          // user 作成直前に id を Minecraft UUID で上書きする。
+          // internalAdapter は forceAllowId 付きで create するため、
+          // ここで渡した id がそのまま採用される。
+          before: async (user) => {
+            const minecraftId = user.minecraftId;
+            if (typeof minecraftId === "string" && minecraftId.length > 0) {
+              return { data: { id: minecraftId } };
+            }
           },
         },
-        // ...他のプロバイダ設定...
-        token: {
-          url: `${process.env.MAIN_SERVER_URL}/oauth2/token`,
-        },
-        userinfo: {
-          url: `${process.env.MAIN_SERVER_URL}/oauth2/userinfo`,
-        },
-        checks: ["pkce", "state"],
-        profile: (profile: { id: string; username: string }) => {
-          return {
-            id: profile.id,
-            name: profile.username,
-            image: `https://crafthead.net/avatar/${profile.id}`,
-          };
-        },
-        clientId: process.env.019e2648-25db-7551-9dbc-963004f24734 as string,
-        client: {
-          token_endpoint_auth_method: "none",
-        },
       },
+    },
+    plugins: [
+      genericOAuth({
+        config: [
+          {
+            providerId: "MineAuth",
+            clientId: process.env.CLIENT_ID as string,
+            // token_endpoint_auth_method: "none" のため空文字列
+            clientSecret: "",
+            pkce: true,
+            discoveryUrl: `${mainServerUrl}/.well-known/openid-configuration`,
+            scopes: ["openid", "profile", "email"],
+            mapProfileToUser: (profile: MineAuthProfile) => {
+              const minecraftId = profile.id ?? profile.sub ?? "";
+              return {
+                id: minecraftId,
+                name: profile.username ?? profile.preferred_username,
+                image: `https://crafthead.net/avatar/${minecraftId}`,
+                minecraftId,
+              };
+            },
+          },
+        ],
+      }),
+      // Next.js の cookies() へ Set-Cookie を転送する公式プラグイン。
+      // hooks.after を持つプラグインより後ろ(= 最後)に置く必要がある
+      nextCookies(),
     ],
-    callbacks: {
-      async jwt({ token, account, profile }) {
-        // 初回サインイン時に accessToken をトークンに保存
-        if (account) {
-          // First login, save the `access_token`, `refresh_token`, and other
-          // details into the JWT
+  });
+}
 
-          const userProfile: User = {
-            id: profile?.id as string,
-            name: profile?.username as string,
-            email: "",
-            image: `https://crafthead.net/avatar/${profile?.id}` as string,
-          };
+/**
+ * 現在のリクエストの origin を baseURL としたメモ化済み BetterAuth インスタンスを返す。
+ * リクエストコンテキスト内 (Server Component / Server Action / Route Handler) からのみ
+ * 呼び出せる。
+ */
+export async function getAuth(): Promise<Auth> {
+  const headerList = await headers();
+  const host =
+    headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:3000";
+  const proto =
+    headerList.get("x-forwarded-proto") ??
+    (host.startsWith("localhost") || host.startsWith("127.0.0.1")
+      ? "http"
+      : "https");
+  const origin = `${proto}://${host}`;
 
-          return {
-            access_token: account.access_token,
-            expires_at: account.expires_at,
-            refresh_token: account.refresh_token,
-            user: userProfile,
-          };
-        }
-        if (Date.now() < (token.expires_at as number) * 1000) {
-          // Subsequent logins, if the `access_token` is still valid, return the JWT
-          return token;
-        }
-        // Subsequent logins, if the `access_token` has expired, try to refresh it
-        if (!token.refresh_token) throw new Error("Missing refresh token");
-        try {
-          // The `token_endpoint` can be found in the provider's documentation. Or if they support OIDC,
-          // at their `/.well-known/openid-configuration` endpoint.
-          // i.e. https://accounts.google.com/.well-known/openid-configuration
-          const response = await fetch(
-            `${process.env.MAIN_SERVER_URL}/oauth2/token`,
-            {
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-              },
-              body: new URLSearchParams({
-                grant_type: "refresh_token",
-                client_id: process.env.019e2648-25db-7551-9dbc-963004f24734 as string,
-                redirect_uri: process.env.AUTH_URL as string,
-                refresh_token: token.refresh_token as string, // 型アサーションを使用してstring型として扱う
-              }),
-              method: "POST",
-            }
-          );
+  let auth = authCache.get(origin);
+  if (!auth) {
+    auth = buildAuth(origin);
+    authCache.set(origin, auth);
+  }
+  return auth;
+}
 
-          const responseTokens = (await response.json()) as {
-            access_token: string;
-            expires_in: number;
-            refresh_token: string;
-          };
+/**
+ * 現在のセッションを取得する。未ログインなら null。
+ */
+export async function getSession() {
+  const auth = await getAuth();
+  return auth.api.getSession({ headers: await headers() });
+}
 
-          if (!response.ok) throw responseTokens;
-          return {
-            // Keep the previous token properties
-            ...token,
-            access_token: responseTokens.access_token,
-            expires_at: Math.floor(
-              Date.now() / 1000 + (responseTokens.expires_in as number)
-            ),
-            // Fall back to old refresh token, but note that
-            // many providers may only allow using a refresh token once.
-            refresh_token: responseTokens.refresh_token ?? token.refresh_token,
-          };
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-          // The error property can be used client-side to handle the refresh token error
-          return {
-            ...token,
-            error: "RefreshAccessTokenError" as const,
-          };
-        }
-      },
-      async session({
-        session,
-        token,
-      }: {
-        session: ExtendedSession;
-        token: MyToken;
-      }) {
-        if (token.user) {
-          session.user = token.user as User;
-          session.accessToken = token.access_token as string;
-        }
-        return session;
-      },
-    },
-    pages: {
-      signIn: "/auth/sign-in",
-    },
-    secret: process.env.AUTH_SECRET,
-  };
-});
+/** `getSession()` の戻り値型 (better-auth のセッション or null)。 */
+export type AppSession = Awaited<ReturnType<typeof getSession>>;
