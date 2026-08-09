@@ -12,9 +12,7 @@
     "build:vinext": "pnpm generate:license && pnpm index && vinext build",
     "start:vinext": "vinext start",
     "lint": "next lint",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "pnpm index && opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "deploy": "pnpm build:vinext && vinext-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "index": "pnpm dlx tsx src/generate-search-index.ts",
     "generate:license": "pnpm dlx license-checker-rseidelsohn --json --out './src/app/(normal)/license/data.json'"
@@ -24,7 +22,6 @@
     "@mdxeditor/editor": "^3.32.3",
     "@mdxeditor/gurx": "^1.2.3",
     "@morinoparty/chlorophyll-react": "file:../chlorophyll/packages/react",
-    "@opennextjs/cloudflare": "^1.0.2",
     "better-auth": "^1.6.26",
     "flexsearch": "^0.8.167",
     "gray-matter": "^4.0.3",

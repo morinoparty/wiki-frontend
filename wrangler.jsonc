@@ -1,7 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   // vinext 組み込みの App Router エントリ。
-  // OpenNext 時代の値: ".open-next/worker.js"
   "main": "vinext/server/app-router-entry",
   "name": "wiki-frontend",
   "compatibility_date": "2026-02-12",
@@ -28,20 +27,6 @@
       "store_id": "d36d5a11ea07462c83bb21a0e9ccb811",
       "secret_name": "shared_AUTH_SECRET",
     },
-  ],
-  "services": [
-    {
-      "binding": "WORKER_SELF_REFERENCE",
-      // The service should match the "name" of your worker
-      "service": "wiki-frontend",
-    },
-  ],
-  "r2_buckets": [
-    // Create a R2 binding with the binding name "NEXT_INC_CACHE_R2_BUCKET"
-    // {
-    //   "binding": "NEXT_INC_CACHE_R2_BUCKET",
-    //   "bucket_name": "<BUCKET_NAME>",
-    // },
   ],
   "observability": {
     "enabled": true,
