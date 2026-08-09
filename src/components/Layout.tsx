@@ -19,14 +19,14 @@ const layoutStyles = sva({
         mdDown: '"sidebar" "main"',
       },
       minHeight: { base: "100vh", lgDown: "auto" },
-      backgroundColor: "leaf.50",
+      backgroundColor: "colorPalette.bg.subtle",
       width: "100%",
     },
     sidebar: {
       gridTemplateRows: "auto 1fr",
       gridArea: "sidebar",
       borderRight: "1px solid",
-      borderColor: "leaf.200",
+      borderColor: "border.subtle",
       minHeight: { base: "100vh", lgDown: "inherit" },
       display: {
         base: "grid",

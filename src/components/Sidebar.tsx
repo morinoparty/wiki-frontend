@@ -63,8 +63,8 @@ const sidebarStyles = sva({
         lgDown: "auto",
         mdDown: "1fr auto",
       },
-      bg: "leaf.50",
-      borderTopColor: "leaf.200",
+      bg: "colorPalette.bg.subtle",
+      borderTopColor: "border.subtle",
       borderTopWidth: {
         base: "none",
         mdDown: "1px",
@@ -119,6 +119,10 @@ const sidebarStyles = sva({
       height: {
         base: "100%",
       },
+      // grid の 1fr 行は既定 (min-height: auto) だと中身より小さくなれない。
+      // 0 にしておかないとサイドバー全体が 100vh をはみ出し、メニュー末尾が
+      // 未ログイン時のログインカードに隠れる。
+      minHeight: "0",
     },
   },
 });

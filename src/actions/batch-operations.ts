@@ -234,7 +234,10 @@ export async function duplicatePost(
       ...sourcePost,
       slug: newSlug,
       title: newTitle || `${sourcePost.title} (複製)`,
-      date: now,
+      // 複製は別の記事なので uuid を新しく採番する
+      uuid: crypto.randomUUID(),
+      created: null,
+      updated: null,
       createdAt: now,
       updatedAt: now,
       createdBy: session.user.id,

@@ -2,6 +2,7 @@ import path from "node:path";
 import { writeFile } from "node:fs/promises";
 import { getAllPosts } from "@/lib/getAllPosts";
 import { getPostBySlug } from "./lib/getPostBySlug";
+import { postDate } from "./types/wiki";
 
 export type PostDocument = {
   slug: string;
@@ -50,7 +51,7 @@ export const generateSearchIndex = async () => {
       title: tokenizedTitle,
       tags: fileContent.category || "",
       content: tokenizedContent,
-      date: fileContent.date || "",
+      date: postDate(fileContent),
     });
   }
 

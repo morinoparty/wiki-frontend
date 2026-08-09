@@ -42,6 +42,7 @@ const editableStyles = sva({
 import { useRef, useState, useEffect } from "react";
 import { uploadImage } from "@/actions/upload-image";
 import { toaster } from "@/components/ui/toaster";
+import { CONTENT_BASE_URL } from "@/lib/hagaki";
 
 // 定数
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -51,6 +52,8 @@ const TOAST_DURATION = {
 };
 
 interface PostHeaderEditProps {
+  /** 編集中の記事の uuid。サムネイルは記事の assets 配下に保存される。 */
+  articleId: string;
   image?: string;
   category: string;
   title: string;
@@ -66,6 +69,7 @@ interface PostHeaderEditProps {
 }
 
 export function PostHeaderEdit({
+  articleId,
   image,
   category,
   title,
@@ -162,7 +166,7 @@ export function PostHeaderEdit({
       const base64 = await convertToBase64(file);
       setBase64Cache(base64);
 
-      const uploadPromise = uploadImage(file);
+      const uploadPromise = uploadImage(file, articleId);
 
       toaster.promise(uploadPromise, {
         loading: {
@@ -235,7 +239,7 @@ export function PostHeaderEdit({
       <div
         className={classes.image}
         style={{
-          backgroundImage: `url(${"https://wiki-contentdev.yahiro.workers.dev/" + previewImage})`,
+          backgroundImage: `url(${`${CONTENT_BASE_URL}/${previewImage}`})`,
           position: "relative",
         }}
       />

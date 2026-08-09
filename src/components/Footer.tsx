@@ -25,13 +25,13 @@ const footerStyles = sva({
         lgDown: "32px 0",
       },
       borderTop: "1px solid",
-      borderColor: "leaf.200",
+      borderColor: "border.subtle",
     },
     logo: {},
     description: {
       textStyle: "body",
       fontSize: "14px",
-      color: "leaf.600/50",
+      color: "colorPalette.fg.subtle",
       mt: "24px",
     },
     list: {
@@ -40,7 +40,7 @@ const footerStyles = sva({
       flexDirection: "column",
       gap: "8px",
       textAlign: "left",
-      color: "leaf.500",
+      color: "colorPalette.fg.subtle",
       "&:hover li:not(:hover)": {
         opacity: 0.5,
       },
@@ -51,7 +51,7 @@ const footerStyles = sva({
     copyright: {
       textStyle: "copyright",
       textAlign: "left",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       gridColumn: {
         base: "1 / 3",
         lgDown: "1 / -1",
@@ -68,7 +68,7 @@ const footerStyles = sva({
     },
     license: {
       textStyle: "body",
-      color: "leaf.600/50",
+      color: "colorPalette.fg.subtle",
       fontSize: "14px",
       gridColumn: {
         base: "3 / -1",
@@ -77,7 +77,7 @@ const footerStyles = sva({
       alignSelf: "end",
       transition: "color 0.2s ease",
       _hover: {
-        color: "leaf.600/70",
+        color: "colorPalette.fg.subtle",
       },
     },
   },

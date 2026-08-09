@@ -48,7 +48,7 @@ export const Cta: React.FC = () => {
         <h2
           className={css({
             textStyle: "heading1",
-            color: "leaf.600",
+            color: "colorPalette.fg",
             mb: {
               base: "20px",
               lgDown: "12px",
@@ -66,7 +66,7 @@ export const Cta: React.FC = () => {
         <p
           className={css({
             textStyle: "body",
-            color: "leaf.600",
+            color: "colorPalette.fg",
             mb: {
               base: "64px",
               lgDown: "32px",

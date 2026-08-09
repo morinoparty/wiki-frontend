@@ -1,17 +1,20 @@
-// 投稿データの型定義
-export type WikiPost = {
-  title: string;
-  slug: string;
-  description: string;
-  date: string;
-  category: string;
-  image?: string;
+import type {
+  GetAllPostsOptions as HagakiGetAllPostsOptions,
+  WikiCategory as HagakiCategory,
+  WikiPost as HagakiPost,
+  WikiPostDetail as HagakiPostDetail,
+  WikiThumbnail,
+} from "hagaki";
+
+export type { WikiThumbnail };
+
+// 記事のメタデータ。hagaki のコンテンツフォーマット
+// (content/article/<uuid>/index.mdx) が正で、以下は wiki-frontend の
+// ダッシュボード機能だけが使う補助フィールド。
+type DashboardMetadata = {
   // 座標情報（hasPositionがtrueのカテゴリで使用）
   x?: number;
   y?: number;
-  // 時間関連
-  createdAt?: string;
-  updatedAt?: string;
   // 作成者・所有者情報
   createdBy?: string;
   documentOwner?: string;
@@ -26,24 +29,23 @@ export type WikiPost = {
   isLocked?: boolean;
   lockedAt?: string;
   lockedBy?: string;
+  // 旧フォーマット由来のタイムスタンプ。コンテンツには保存されない
+  // (作成/更新日時は生成物の created / updated が正)。
+  createdAt?: string;
+  updatedAt?: string;
 };
+
+// 投稿データの型定義
+export type WikiPost = HagakiPost & DashboardMetadata;
 
 // 詳細取得時（bodyあり）
-export type WikiPostDetail = WikiPost & {
-  body: string;
-};
+export type WikiPostDetail = HagakiPostDetail & DashboardMetadata;
 
-export type GetAllPostsOptions = {
-  sortBy?: "date" | "title";
-  order?: "asc" | "desc";
-};
+export type GetAllPostsOptions = HagakiGetAllPostsOptions;
 
-export type WikiCategory = {
-  title: string;
-  slug: string;
-  body: string;
-  hasPosition: boolean;
-};
+export type WikiCategory = HagakiCategory;
 
-// 画像ファイル名リストの型定義
-export type WikiImageFile = string;
+/** 記事の表示用日時。生成物が無い記事では空文字。 */
+export function postDate(post: Pick<WikiPost, "updated" | "created">): string {
+  return post.updated ?? post.created ?? "";
+}

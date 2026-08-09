@@ -4,16 +4,24 @@ import { getSecret } from "./secrets";
 /**
  * wiki コンテンツを保持する GitHub リポジトリ。
  *
- * コンテンツフォーマットは従来どおり `content/wiki/<slug>.md` のままで、
- * hagaki の新フォーマット (content/article/<uuid>/index.mdx) には移行していない。
- * そのため `posts.save` は使わず、パス非依存の `commits.commitFiles` を使う。
+ * コンテンツは hagaki のフォーマット (content/article/<uuid>/index.mdx +
+ * assets/<imageId>.avif) で管理し、Cloudflare Workers Assets 経由で
+ * `CONTENT_BASE_URL` から配信される。
  */
 export const WIKI_REPO = {
-  owner: "morinoparty", // TODO: 環境変数から取得
-  repo: "wiki-contentdev", // TODO: 環境変数から取得
+  owner: "Nlkomaru",
+  repo: "wiki-content",
   branch: "main",
-  contentPath: "content/wiki",
+  contentPath: "content/article",
 } as const;
+
+/** 生成物 (article.json / slug-index.json / categories.json) と記事本体の配信元。 */
+export const CONTENT_BASE_URL = "https://wiki-v2-content.nikomaru.workers.dev";
+
+/** 記事に属する画像の URL。`content/article/<uuid>/assets/<imageId>.avif`。 */
+export function articleImageUrl(articleId: string, imageId: string): string {
+  return `${CONTENT_BASE_URL}/article/${encodeURIComponent(articleId)}/assets/${encodeURIComponent(imageId)}.avif`;
+}
 
 export interface GitHubRepoRef {
   owner: string;
@@ -46,6 +54,9 @@ export function getHagakiClient(repo: GitHubRepoRef = WIKI_REPO): HagakiClient {
         // 関数で渡すことで、モジュール初期化時ではなく呼び出し時に解決される。
         // Workers では Secrets Store バインディング、ローカルでは環境変数。
         auth: async () => (await getSecret("GITHUB_TOKEN")) ?? "",
+      },
+      content: {
+        cdnBaseUrl: CONTENT_BASE_URL,
       },
     });
     clients.set(key, client);

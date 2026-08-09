@@ -1,6 +1,7 @@
 import { sva } from "styled-system/css";
 import Link from "next/link";
 import { WikiPost } from "@/types/wiki";
+import { articleImageUrl } from "@/lib/hagaki";
 
 const wikiCardStyles = sva({
   slots: [
@@ -29,13 +30,13 @@ const wikiCardStyles = sva({
       fontSize: "18px",
       fontWeight: "bold",
       textStyle: "button",
-      color: "leaf.700",
+      color: "colorPalette.fg",
     },
     description: {
       textStyle: "body",
       fontSize: "14px",
       mt: "0.4vh",
-      color: "leaf.700/50",
+      color: "colorPalette.fg.subtle",
       overflow: "hidden",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
@@ -45,7 +46,7 @@ const wikiCardStyles = sva({
       aspectRatio: "16/9",
       height: "fit-content",
       borderRadius: "10px",
-      bg: "leaf.200",
+      bg: "colorPalette.surface.hover",
       objectFit: "cover",
       objectPosition: "center",
     },
@@ -58,10 +59,8 @@ export default function WikiCard({ post }: { post: WikiPost }) {
     // 全てを小文字に変換
     post.slug.toLowerCase();
 
-  // post.imageの../を削除して、URLを生成
-  const imageUrl = post.image
-    ? "https://wiki-contentdev.yahiro.workers.dev/" +
-      post.image.replace(/^\.\.\//, "")
+  const imageUrl = post.thumbnail
+    ? articleImageUrl(post.uuid, post.thumbnail.imageId)
     : "/assets/placeholder.svg";
 
   return (

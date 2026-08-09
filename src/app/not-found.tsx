@@ -31,7 +31,7 @@ const notFoundPageStyles = sva({
       gap: "24px",
     },
     icon: {
-      color: "leaf.500",
+      color: "colorPalette.fg.subtle",
     },
     content: {
       textAlign: "center",
@@ -47,7 +47,7 @@ const notFoundPageStyles = sva({
         mdDown: "36px",
       },
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
     },
     subtitle: {
       textStyle: "heading2",
@@ -56,12 +56,12 @@ const notFoundPageStyles = sva({
         mdDown: "20px",
       },
       fontWeight: "600",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       mb: "8px",
     },
     description: {
       textStyle: "body",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       textAlign: "center",
       lineHeight: "1.6",
     },

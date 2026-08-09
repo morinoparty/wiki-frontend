@@ -8,7 +8,7 @@ export const postHeaderStyles = sva({
   base: {
     container: {
       borderBottom: "1px solid",
-      borderColor: "leaf.100",
+      borderColor: "border.subtle",
     },
     info: {
       px: {
@@ -38,7 +38,7 @@ export const postHeaderStyles = sva({
       alignItems: "center",
       gap: "10px",
       textStyle: "body",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       mb: {
         base: "42px",
         lgDown: "16px",
@@ -50,7 +50,7 @@ export const postHeaderStyles = sva({
         lgDown: "32px",
       },
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading1",
       mb: {
         base: "24px",
@@ -60,7 +60,7 @@ export const postHeaderStyles = sva({
     },
     description: {
       textStyle: "body",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       fontSize: {
         base: "18px",
         lgDown: "14px",

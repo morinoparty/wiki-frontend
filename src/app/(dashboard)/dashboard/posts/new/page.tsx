@@ -20,7 +20,7 @@ export default async function Home() {
   });
 
   return (
-    <ModalDialogRoot isPage className={css({ bg: "leaf.100" })}>
+    <ModalDialogRoot isPage className={css({ bg: "colorPalette.surface" })}>
       <PostCreationClient
         categories={categories}
         existingSlugs={existingSlugs}

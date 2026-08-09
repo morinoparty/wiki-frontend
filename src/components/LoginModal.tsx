@@ -33,7 +33,7 @@ export const LoginModal: React.FC = () => {
         <h2
           className={css({
             textStyle: "heading2",
-            color: "leaf.600",
+            color: "colorPalette.fg",
             mb: "20px",
           })}
         >
@@ -42,7 +42,7 @@ export const LoginModal: React.FC = () => {
         <p
           className={css({
             textStyle: "body",
-            color: "leaf.600",
+            color: "colorPalette.fg",
             mb: "42px",
           })}
         >

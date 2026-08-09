@@ -1,5 +1,17 @@
 import Link from "next/link";
 import { sva } from "styled-system/css";
+import {
+  ContentImage,
+  type HagakiImageProps,
+} from "./ContentImage";
+import { CONTENT_BASE_URL } from "@/lib/hagaki";
+
+/**
+ * 本文中の hagaki `<Image />` に対応するカスタム要素名。
+ * remark 側 (MarkdownParser) がこの名前で hast 要素を作り、ここで
+ * `hagaki/react` の `<Image>` に繋ぐ。
+ */
+export const HAGAKI_IMAGE_TAG = "hagaki-image";
 
 export const mdxStyles = sva({
   slots: [
@@ -28,7 +40,7 @@ export const mdxStyles = sva({
   base: {
     p: {
       textStyle: "body",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       lineHeight: "1.85",
       my: "24px",
       _first: { mt: "0" },
@@ -36,7 +48,7 @@ export const mdxStyles = sva({
     h1: {
       fontSize: "32px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading1",
       mt: "56px",
       mb: "32px",
@@ -44,7 +56,7 @@ export const mdxStyles = sva({
     h2: {
       fontSize: "28px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading2",
       mt: "56px",
       mb: "32px",
@@ -52,7 +64,7 @@ export const mdxStyles = sva({
     h3: {
       fontSize: "24px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "body",
       mt: "48px",
       mb: "12px",
@@ -60,7 +72,7 @@ export const mdxStyles = sva({
     h4: {
       fontSize: "20px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading4",
       mt: "24px",
       mb: "10px",
@@ -68,7 +80,7 @@ export const mdxStyles = sva({
     h5: {
       fontSize: "18px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading5",
       mt: "18px",
       mb: "8px",
@@ -76,7 +88,7 @@ export const mdxStyles = sva({
     h6: {
       fontSize: "16px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading6",
       mt: "16px",
       mb: "6px",
@@ -105,7 +117,7 @@ export const mdxStyles = sva({
       _hover: { color: "blue.800" },
     },
     blockquote: {
-      borderLeft: "4px solid #A3C9A8",
+      borderLeft: "4px solid token(colors.colorPalette.border)",
       pl: "16px",
       color: "gray.700",
       fontStyle: "italic",
@@ -138,7 +150,7 @@ export const mdxStyles = sva({
     },
     hr: {
       border: "none",
-      borderTop: "1px solid #E2E8F0",
+      borderTop: "1px solid token(colors.border.subtle)",
       my: "32px",
     },
     table: {
@@ -148,17 +160,17 @@ export const mdxStyles = sva({
       textStyle: "body",
     },
     thead: {
-      background: "leaf.600/5",
+      background: "colorPalette.surface",
     },
     tr: {
-      borderBottom: "1px solid #E2E8F0",
+      borderBottom: "1px solid token(colors.border.subtle)",
     },
     th: {
       fontWeight: "bold",
       textAlign: "left",
       px: "12px",
       py: "8px",
-      background: "leaf.600/5",
+      background: "colorPalette.surface",
       textStyle: "body",
     },
     td: {
@@ -238,9 +250,7 @@ export const components = {
     return (
       <img
         className={mdxStyles().img}
-        src={
-          isExternal ? src : "https://wiki-contentdev.yahiro.workers.dev" + src
-        }
+        src={isExternal ? src : CONTENT_BASE_URL + src}
         alt={alt}
         width={imageWidth}
         height={imageHeight}
@@ -249,6 +259,11 @@ export const components = {
       />
     );
   },
+  // hagaki の `<Image imageId="…" />` (MarkdownParser が変換したカスタム要素)。
+  // articleId と URL 解決は <HagakiImageConfig> が供給する。
+  [HAGAKI_IMAGE_TAG]: (props: HagakiImageProps) => (
+    <ContentImage {...props} className={mdxStyles().img} />
+  ),
   hr: (props: React.ComponentProps<"hr">) => (
     <hr className={mdxStyles().hr} {...props} />
   ),

@@ -6,6 +6,10 @@ import { ReactNode } from "react";
 import { getCommitWithChecks } from "@/lib/getCommitWithChecks";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { WIKI_REPO } from "@/lib/hagaki";
+
+/** wiki-content の deploy workflow (.github/workflows/deploy.yml) のジョブ名。 */
+const DEPLOY_CHECK_NAME = "deploy";
 
 const commitCardStyles = sva({
   slots: ["card", "iconBox", "title", "desc", "inner", "icon"],
@@ -31,21 +35,21 @@ const commitCardStyles = sva({
       width: "40px",
       height: "40px",
       borderRadius: "100%",
-      bgColor: "leaf.50",
-      color: "leaf.700",
+      bgColor: "colorPalette.bg.subtle",
+      color: "colorPalette.fg",
     },
     icon: {},
     title: {
       textStyle: "heading2",
       fontSize: "18px",
-      color: "leaf.700",
+      color: "colorPalette.fg",
     },
     desc: {
       pl: "52px",
       pt: "4px",
       textStyle: "body",
       fontSize: "16px",
-      color: "leaf.700",
+      color: "colorPalette.fg",
     },
   },
 });
@@ -79,8 +83,8 @@ export default async function Home({ params }: PageProps) {
   const { commitId } = await params;
 
   // GitHubリポジトリ情報
-  const owner = "morinoparty";
-  const repo = "wiki-contentdev";
+  const owner = WIKI_REPO.owner;
+  const repo = WIKI_REPO.repo;
 
   let commitData = null;
   let checksData = null;
@@ -125,7 +129,7 @@ export default async function Home({ params }: PageProps) {
           className={css({
             textStyle: "heading1",
             fontSize: "40px",
-            color: "leaf.600",
+            color: "colorPalette.fg",
             mb: "24px",
             textAlign: "center",
           })}
@@ -135,7 +139,7 @@ export default async function Home({ params }: PageProps) {
         <p
           className={css({
             textStyle: "body",
-            color: "leaf.600",
+            color: "colorPalette.fg",
             mb: "24px",
             width: "100%",
           })}
@@ -172,7 +176,7 @@ export default async function Home({ params }: PageProps) {
                     className={css({
                       textStyle: "body",
                       fontSize: "16px",
-                      color: "leaf.500",
+                      color: "colorPalette.fg.subtle",
                       fontWeight: "bold",
                       mt: "8px",
                       display: "inline-block",
@@ -187,17 +191,17 @@ export default async function Home({ params }: PageProps) {
             )
           }
         />
-        {/* Workers Builds: wiki-contentdev のチェックランを抽出し、カードを分岐表示 */}
+        {/* コンテンツのデプロイ (GitHub Actions) のチェックランを抽出し、カードを分岐表示 */}
         {((): React.ReactNode => {
           if (checksData && Array.isArray(checksData.check_runs)) {
             const buildRuns = checksData.check_runs.filter(
-              (run) => run.name === "Workers Builds: wiki-contentdev"
+              (run) => run.name === DEPLOY_CHECK_NAME
             );
             if (buildRuns.length === 0) {
               return (
                 <CommitCard
                   icon={<GithubIcon />}
-                  title="Workers Builds: wiki-contentdev"
+                  title={DEPLOY_CHECK_NAME}
                   description={<>CIチェック情報がありません</>}
                 />
               );
@@ -241,7 +245,7 @@ export default async function Home({ params }: PageProps) {
                             className={css({
                               textStyle: "body",
                               fontSize: "16px",
-                              color: "leaf.500",
+                              color: "colorPalette.fg.subtle",
                               fontWeight: "bold",
                               mt: "8px",
                               display: "inline-block",
@@ -280,7 +284,7 @@ export default async function Home({ params }: PageProps) {
                             className={css({
                               textStyle: "body",
                               fontSize: "16px",
-                              color: "leaf.500",
+                              color: "colorPalette.fg.subtle",
                               fontWeight: "bold",
                               mt: "8px",
                               display: "inline-block",
@@ -300,7 +304,7 @@ export default async function Home({ params }: PageProps) {
           return (
             <CommitCard
               icon={<GithubIcon />}
-              title={"Workers Builds: wiki-contentdev"}
+              title={DEPLOY_CHECK_NAME}
               description={<>CIチェック情報がありません</>}
             />
           );

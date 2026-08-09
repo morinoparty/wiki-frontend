@@ -25,14 +25,14 @@ const editorNavStyles = sva({
     },
     backButton: {
       textStyle: "body",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       display: "flex",
       alignItems: "center",
       gap: "4px",
     },
     title: {
       textStyle: "body",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       fontWeight: "bold",
     },
     saveButton: {

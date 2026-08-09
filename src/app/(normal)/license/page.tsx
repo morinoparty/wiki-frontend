@@ -131,12 +131,12 @@ const licensePageStyles = sva({
     title: {
       fontSize: "32px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading1",
     },
     description: {
       textStyle: "body",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       gridColumn: {
         base: "initial",
         lgDown: "1 / -1",
@@ -178,14 +178,14 @@ const licenseCardStyles = sva({
     title: {
       fontSize: "24px",
       fontWeight: "bold",
-      color: "leaf.700",
+      color: "colorPalette.fg",
       textStyle: "heading3",
       wordBreak: "break-all",
       flex: "1",
     },
     badge: {
-      background: "leaf.100",
-      color: "leaf.700",
+      background: "colorPalette.surface",
+      color: "colorPalette.fg",
       padding: "4px 12px",
       borderRadius: "16px",
       fontSize: "14px",
@@ -194,13 +194,13 @@ const licenseCardStyles = sva({
     },
     description: {
       textStyle: "body",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       marginBottom: "8px",
       lineHeight: "1.6",
     },
     summary: {
       fontSize: "14px",
-      color: "leaf.500",
+      color: "colorPalette.fg.subtle",
       fontStyle: "italic",
       marginBottom: "12px",
     },
@@ -220,13 +220,13 @@ const licenseCardStyles = sva({
       padding: "12px 16px",
       borderRadius: "12px",
       border: "2px solid",
-      borderColor: "leaf.100/50",
+      borderColor: "colorPalette.fg.subtle",
       transition: "all 0.2s ease",
       textDecoration: "none",
       color: "inherit",
       cursor: "pointer",
       _hover: {
-        borderColor: "leaf.200",
+        borderColor: "border.subtle",
         borderWidth: "2px",
       },
       _active: {
@@ -239,7 +239,7 @@ const licenseCardStyles = sva({
     },
     packageName: {
       fontSize: "14px",
-      color: "leaf.800",
+      color: "colorPalette.fg",
       textStyle: "body",
       fontWeight: "500",
       marginBottom: "2px",
@@ -247,10 +247,10 @@ const licenseCardStyles = sva({
     },
     publisher: {
       fontSize: "12px",
-      color: "leaf.600",
+      color: "colorPalette.fg",
     },
     link: {
-      color: "leaf.600",
+      color: "colorPalette.fg",
       padding: "4px",
       borderRadius: "4px",
       transition: "all 0.2s ease",

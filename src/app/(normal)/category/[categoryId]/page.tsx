@@ -3,7 +3,7 @@ import WikiCard from "@/components/WikiCard";
 import { WikiCardGrid } from "@/components/WikiCardGrid";
 import { getAllCategories } from "@/lib/getAllCategories";
 import { getAllPosts } from "@/lib/getAllPosts";
-import { WikiCategory, WikiPost } from "@/types/wiki";
+import { postDate, WikiCategory, WikiPost } from "@/types/wiki";
 import { Tag, TentTree } from "lucide-react";
 import { notFound } from "next/navigation";
 import { useId } from "react";
@@ -98,8 +98,8 @@ export default async function Page(props: PageProps) {
   const categoryPosts = posts.filter((post) => post.category === category.slug);
   if (!categoryPosts) return notFound();
   categoryPosts.sort((a, b) => {
-    const aDate = new Date(a.date);
-    const bDate = new Date(b.date);
+    const aDate = new Date(postDate(a));
+    const bDate = new Date(postDate(b));
     return bDate.getTime() - aDate.getTime();
   });
 
@@ -178,7 +178,7 @@ const CategoryHeader: React.FC<WikiCategory> = ({ title, body }) => {
         className={css({
           fontSize: "32px",
           fontWeight: "bold",
-          color: "leaf.700",
+          color: "colorPalette.fg",
           textStyle: "heading1",
           width: "100%",
           display: "flex",
@@ -191,7 +191,7 @@ const CategoryHeader: React.FC<WikiCategory> = ({ title, body }) => {
       <p
         className={css({
           textStyle: "body",
-          color: "leaf.600",
+          color: "colorPalette.fg",
           width: "100%",
           minHeight: "100%",
           alignContent: "center",
@@ -230,7 +230,7 @@ const CategoryPosts: React.FC<{
         <TentTree
           size={64}
           strokeWidth={1.25}
-          className={css({ color: "leaf.500" })}
+          className={css({ color: "colorPalette.fg.subtle" })}
         />
         <p
           className={css({

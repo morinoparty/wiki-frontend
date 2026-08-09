@@ -29,7 +29,7 @@ const postAddModalStyles = sva({
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      bgColor: "leaf.100",
+      bgColor: "colorPalette.surface",
     },
     title: {
       gridArea: "title",
@@ -37,12 +37,12 @@ const postAddModalStyles = sva({
     subtitle: {
       textStyle: "body",
       fontWeight: "bold",
-      color: "leaf.600/50",
+      color: "colorPalette.fg.subtle",
       mb: "8px",
     },
     heading: {
       textStyle: "heading2",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       fontSize: "26px",
     },
     main: {
@@ -55,7 +55,7 @@ const postAddModalStyles = sva({
       py: "32px",
       borderTop: "1px solid",
       borderBottom: "1px solid",
-      borderColor: "leaf.50",
+      borderColor: "border.subtle",
     },
     categoryItem: {
       display: "flex",
@@ -71,8 +71,8 @@ const postAddModalStyles = sva({
       position: "relative",
       borderRadius: "12px",
       border: "2px solid",
-      borderColor: "leaf.300",
-      bgColor: "leaf.100",
+      borderColor: "border.muted",
+      bgColor: "colorPalette.surface",
       flexShrink: 0,
     },
     radioChecked: {
@@ -82,7 +82,7 @@ const postAddModalStyles = sva({
       width: "14px",
       height: "14px",
       borderRadius: "7px",
-      bgColor: "leaf.600",
+      bgColor: "colorPalette.solid",
     },
     categoryContent: {
       display: "flex",
@@ -93,13 +93,13 @@ const postAddModalStyles = sva({
     categoryTitle: {
       fontSize: "18px",
       fontWeight: "bold",
-      color: "leaf.600",
+      color: "colorPalette.fg",
       lineHeight: "1em",
     },
     categoryDescription: {
       fontSize: "14px",
       fontWeight: "500",
-      color: "leaf.600/50",
+      color: "colorPalette.fg.subtle",
       lineHeight: "1.5",
     },
     footer: {

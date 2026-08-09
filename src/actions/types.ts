@@ -27,6 +27,8 @@ export type OperationContext = {
 
 // Zodスキーマ定義
 export const CreatePostInputSchema = z.object({
+  // 記事の同一性は uuid で持つ (slug は変わりうる)
+  uuid: z.uuid("記事 ID が uuid ではありません").optional(),
   title: z
     .string()
     .trim()
@@ -48,18 +50,13 @@ export const CreatePostInputSchema = z.object({
     .trim()
     .min(1, "説明は必須です")
     .max(500, "説明は500文字以内で入力してください"),
-  image: z
-    .union([
-      z
-        .string()
-        .regex(
-          /^(https?:\/\/|\/)[a-zA-Z0-9\-\._~:\/\?#\[\]@!\$&'\(\)\*\+,;=]+\.(jpg|jpeg|png|gif|svg|webp)$/i,
-          "画像ファイルの形式が正しくありません（jpg, jpeg, png, gif, svg, webpのみ対応）"
-        ),
-      z.string().max(0), // 空文字を許容
-      z.undefined(), // undefinedを許容
-    ])
-    .optional(),
+  // サムネイル。記事の assets 配下にある AVIF を imageId で指す
+  thumbnail: z
+    .object({
+      imageId: z.uuid("画像 ID が uuid ではありません"),
+      blurhash64: z.string().default(""),
+    })
+    .nullish(),
   // 座標情報（hasPositionがtrueのカテゴリで必須）
   x: z.number().int("X座標は整数で入力してください").optional(),
   y: z.number().int("Y座標は整数で入力してください").optional(),
@@ -90,19 +87,6 @@ export const UpdatePostInputSchema = CreatePostInputSchema.partial().extend({
       /^[a-zA-Z0-9-_\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]+$/,
       "スラッグは英数字、ハイフン、アンダースコア、ひらがな、カタカナ、漢字のみ使用できます"
     ),
-  // image フィールドを明示的に上書きして、undefinedまたは空文字の場合も許容する
-  image: z
-    .union([
-      z
-        .string()
-        .regex(
-          /^(https?:\/\/|\/)[a-zA-Z0-9\-\._~:\/\?#\[\]@!\$&'\(\)\*\+,;=]+\.(jpg|jpeg|png|gif|svg|webp)$/i,
-          "画像ファイルの形式が正しくありません（jpg, jpeg, png, gif, svg, webpのみ対応）"
-        ),
-      z.string().max(0), // 空文字を許容
-      z.undefined(), // undefinedを許容
-    ])
-    .optional(),
 });
 
 // 記事作成時の入力データ

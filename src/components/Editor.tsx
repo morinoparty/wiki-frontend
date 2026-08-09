@@ -1,5 +1,10 @@
 "use client";
 
+// `@lexical/code` は prismjs の **グローバル** `Prism` を前提にしている。
+// ESM バンドル (vite/vinext) では import しないと定義されず、コードブロックの
+// ハイライトで `ReferenceError: Prism is not defined` になる。
+import "prismjs";
+
 import {
   MDXEditor,
   MDXEditorMethods,
@@ -17,6 +22,7 @@ import {
   AdmonitionDirectiveDescriptor,
   quotePlugin,
   codeBlockPlugin,
+  codeMirrorPlugin,
   thematicBreakPlugin,
   usePublisher,
   insertMarkdown$,
@@ -36,6 +42,7 @@ import { toaster } from "@/components/ui/toaster";
 
 import "@mdxeditor/editor/style.css";
 import "./mdx-editor-custom.css";
+import { CONTENT_BASE_URL } from "@/lib/hagaki";
 
 // 日本語翻訳オブジェクト
 const JAPANESE_TRANSLATIONS = {
@@ -189,6 +196,8 @@ interface EditorProps {
   markdown: string;
   editorRef?: React.RefObject<MDXEditorMethods | null>;
   onChange: (markdown: string) => void;
+  /** 編集中の記事の uuid。画像は記事の assets 配下に保存される。 */
+  articleId: string;
 }
 
 /**
@@ -293,7 +302,7 @@ const ImageInsertComponent = () => {
  * Extend this Component further with the necessary plugins or props you need.
  * proxying the ref is necessary. Next.js dynamically imported components don't support refs.
  */
-const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
+const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange, articleId }) => {
   console.log("=== Editor レンダリング ===");
   console.log("markdown:", markdown?.substring(0, 100) + "...");
   console.log("editorRef:", editorRef);
@@ -428,7 +437,20 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
           directivesPlugin({
             directiveDescriptors: [AdmonitionDirectiveDescriptor],
           }),
-          codeBlockPlugin(),
+          // descriptor が無いと ``` のコードブロックで
+          // "Parsing of the following markdown structure failed" になる
+          codeBlockPlugin({ defaultCodeBlockLanguage: "" }),
+          codeMirrorPlugin({
+            codeBlockLanguages: {
+              "": "Plain text",
+              js: "JavaScript",
+              ts: "TypeScript",
+              json: "JSON",
+              yaml: "YAML",
+              bash: "Shell",
+              mcfunction: "Minecraft",
+            },
+          }),
           quotePlugin(),
           thematicBreakPlugin(),
           markdownShortcutPlugin(),
@@ -444,7 +466,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
               }
 
               try {
-                const result = await uploadImage(file);
+                const result = await uploadImage(file, articleId);
                 if (!result.success || !result.data) {
                   throw new Error(result.error || "アップロードに失敗しました");
                 }
@@ -477,7 +499,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
               }
 
               // 相対パスの場合は完全なURLを構築
-              const fullUrl = `https://wiki-contentdev.yahiro.workers.dev/${url}`;
+              const fullUrl = `${CONTENT_BASE_URL}/${url}`;
               console.log("✅ Constructed full URL:", fullUrl);
               return fullUrl;
             },
@@ -543,6 +565,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onChange }) => {
 
       {/* 画像アップロードモーダル */}
       <ImageUploadModal
+        articleId={articleId}
         isOpen={isImageModalOpen}
         onClose={() => {
           setIsImageModalOpen(false);

@@ -1,5 +1,6 @@
 import { getPostBySlug } from "@/lib/getPostBySlug";
 import { getAllPosts } from "@/lib/getAllPosts";
+import { articleImageUrl } from "@/lib/hagaki";
 import { notFound } from "next/navigation";
 import { css } from "styled-system/css";
 import { PostHeader } from "@/components/PostHeader";
@@ -29,15 +30,15 @@ export default async function Page({ params }: PageProps) {
     >
       <PostHeader
         image={
-          post.image
-            ? "https://wiki-contentdev.yahiro.workers.dev/" + post.image
+          post.thumbnail
+            ? articleImageUrl(post.uuid, post.thumbnail.imageId)
             : undefined
         }
         category={post.category}
         title={post.title}
         description={post.description}
       />
-      <PostBody body={post.body} />
+      <PostBody body={post.body} articleId={post.uuid} />
       <PostCta />
 
       <nav

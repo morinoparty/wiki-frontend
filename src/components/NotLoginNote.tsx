@@ -8,11 +8,11 @@ export const NotLoginNote = () => {
     <form
       action={signInWithMineAuth}
       className={css({
-        background: "#fff",
+        background: "bg.panel",
         borderRadius: "18px",
         padding: "20px",
         maxWidth: "320px",
-        boxShadow: "0 2px 8px 0 #eaf2ef",
+        boxShadow: "sm",
         display: "flex",
         flexDirection: "column",
         gap: "16px",
@@ -23,7 +23,7 @@ export const NotLoginNote = () => {
     >
       <div
         className={css({
-          color: "leaf.600",
+          color: "colorPalette.fg",
         })}
       >
         <div
@@ -56,8 +56,8 @@ export const NotLoginNote = () => {
         <Button
           // type="submit"
           style={{
-            background: "#cdebdf",
-            color: "#347e5e",
+            background: "colorPalette.surface",
+            color: "colorPalette.fg",
             fontWeight: 700,
             fontSize: "14px",
             borderRadius: "10px",
