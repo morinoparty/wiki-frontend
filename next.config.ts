@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
     loader: "custom",
     path: "./src/lib/image-loader.ts",
   },
+  // chlorophyll is published as raw TypeScript sources, so Next has to
+  // compile it together with the app.
+  transpilePackages: ["@morinoparty/chlorophyll-react"],
   experimental: {
     optimizePackageImports: ["@chakra-ui/react"],
   },

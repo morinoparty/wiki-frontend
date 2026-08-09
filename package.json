@@ -16,10 +16,12 @@
     "generate:license": "pnpm dlx license-checker-rseidelsohn --json --out './src/app/(normal)/license/data.json'"
   },
   "dependencies": {
+    "@ark-ui/react": "^5.30.0",
     "@chakra-ui/react": "^3.19.0",
     "@emotion/react": "^11.14.0",
     "@mdxeditor/editor": "^3.32.3",
     "@mdxeditor/gurx": "^1.2.3",
+    "@morinoparty/chlorophyll-react": "file:../chlorophyll/packages/react",
     "@opennextjs/cloudflare": "^1.0.2",
     "better-auth": "^1.6.26",
     "flexsearch": "^0.8.167",
@@ -43,7 +45,8 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@pandacss/dev": "^0.53.6",
+    "@pandacss/dev": "^1.7.2",
+    "@pandacss/preset-base": "^1.7.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

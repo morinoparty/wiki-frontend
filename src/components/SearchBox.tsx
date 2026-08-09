@@ -324,9 +324,9 @@ export const SearchBox = () => {
           <span
             key={index}
             style={{
-              backgroundColor: "var(--colors-leaf-100)",
+              backgroundColor: "var(--mpc-colors-leaf-100)",
               fontWeight: "bold",
-              color: "var(--colors-leaf-800)",
+              color: "var(--mpc-colors-leaf-800)",
             }}
           >
             {segment}
