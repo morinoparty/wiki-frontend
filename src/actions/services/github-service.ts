@@ -1,10 +1,7 @@
-import { Octokit } from "octokit";
-import { getSecret } from "@/lib/secrets";
 import type { Committer } from "hagaki";
 import { committerFromBetterAuth } from "hagaki/auth/better-auth";
 import { getHagakiClient, WIKI_REPO } from "@/lib/hagaki";
 import { WikiPostDetail } from "@/types/wiki";
-import matter from "gray-matter";
 import type { AppSession } from "@/lib/auth";
 import { randomUUID } from "crypto";
 import { ImageValidationError, validateAvifUpload } from "hagaki/image";
@@ -17,33 +14,10 @@ import { ImageValidationError, validateAvifUpload } from "hagaki/image";
  * `assets/<imageId>.avif` に置かれ、パスは常に uuid ベースで解決する
  * (slug は変わりうるため)。
  *
- * 記事の保存は hagaki の `posts.save` に委譲する。履歴・差分・存在確認など
- * hagaki に対応 API が無いものは Octokit を直接使う。
+ * 読み書きはすべて hagaki クライアント経由 (posts.* / files.* / commits.*)。
+ * 配信済みの内容は CDN、編集中の内容はリポジトリから読む。
  */
 export class GitHubService {
-  private static _octokit: Promise<Octokit> | null = null;
-  private static owner = WIKI_REPO.owner;
-  private static repo = WIKI_REPO.repo;
-  private static branch = WIKI_REPO.branch;
-
-  /**
-   * 読み取り用の Octokit。モジュール初期化時ではなく初回アクセス時に
-   * GITHUB_TOKEN (Workers では Secrets Store バインディング) を解決する。
-   */
-  private static getOctokit(): Promise<Octokit> {
-    if (!this._octokit) {
-      this._octokit = getSecret("GITHUB_TOKEN").then(
-        (token) => new Octokit({ auth: token }),
-      );
-    }
-    return this._octokit;
-  }
-
-  /** 記事本体のパス。ディレクトリ名は uuid。 */
-  private static getFilePath(uuid: string): string {
-    return `${WIKI_REPO.contentPath}/${uuid}/index.mdx`;
-  }
-
   /** 記事に属する画像のパス。 */
   private static getAssetPath(uuid: string, imageId: string): string {
     return `${WIKI_REPO.contentPath}/${uuid}/assets/${imageId}.avif`;
@@ -86,19 +60,7 @@ export class GitHubService {
 
   /** 記事の存在を uuid で確認する。 */
   static async checkPostExistsByUuid(uuid: string): Promise<boolean> {
-    try {
-      await (
-        await GitHubService.getOctokit()
-      ).rest.repos.getContent({
-        owner: this.owner,
-        repo: this.repo,
-        path: this.getFilePath(uuid),
-        ref: this.branch,
-      });
-      return true;
-    } catch {
-      return false;
-    }
+    return getHagakiClient().posts.existsInRepo(uuid);
   }
 
   /**
@@ -112,25 +74,7 @@ export class GitHubService {
 
   /** uuid 指定で GitHub 上の記事 (未配信の変更を含む) を取得する。 */
   static async getPostByUuid(uuid: string): Promise<WikiPostDetail | null> {
-    try {
-      const { data: fileData } = await (
-        await GitHubService.getOctokit()
-      ).rest.repos.getContent({
-        owner: this.owner,
-        repo: this.repo,
-        path: this.getFilePath(uuid),
-        ref: this.branch,
-      });
-
-      if (Array.isArray(fileData) || fileData.type !== "file") {
-        return null;
-      }
-
-      const content = Buffer.from(fileData.content, "base64").toString("utf-8");
-      return this.parsePost(content, uuid);
-    } catch {
-      return null;
-    }
+    return getHagakiClient().posts.getFromRepo(uuid);
   }
 
   /**
@@ -140,24 +84,6 @@ export class GitHubService {
     const uuid = await this.resolveUuid(slug);
     if (!uuid) return null;
     return this.getPostByUuid(uuid);
-  }
-
-  /** index.mdx (frontmatter + 本文) を WikiPostDetail に変換する。 */
-  private static parsePost(content: string, uuid: string): WikiPostDetail {
-    const parsed = matter(content);
-    const data = parsed.data as Record<string, unknown>;
-    return {
-      title: (data.title as string) ?? "",
-      slug: (data.slug as string) ?? "",
-      uuid: (data.uuid as string) ?? uuid,
-      description: (data.description as string) ?? "",
-      category: (data.category as string) ?? "",
-      thumbnail: (data.thumbnail as WikiPostDetail["thumbnail"]) ?? null,
-      created: null,
-      updated: null,
-      modified: data.modified as WikiPostDetail["modified"],
-      body: parsed.content,
-    };
   }
 
   /**
@@ -244,7 +170,7 @@ export class GitHubService {
 
       // 存在しないパスを deletePaths に積むと createTree が 422 で失敗するため、
       // 記事ディレクトリ配下の実ファイルを列挙してから消す
-      const paths = await this.listArticleFiles(uuid);
+      const paths = await getHagakiClient().posts.repoPaths(uuid);
       if (paths.length === 0) {
         return { success: false, error: "ファイルが見つかりません" };
       }
@@ -268,37 +194,6 @@ export class GitHubService {
     }
   }
 
-  /** 記事ディレクトリ配下 (index.mdx + assets) の実ファイルパスを列挙する。 */
-  private static async listArticleFiles(uuid: string): Promise<string[]> {
-    const octokit = await GitHubService.getOctokit();
-    const dir = `${WIKI_REPO.contentPath}/${uuid}`;
-    const paths: string[] = [];
-
-    const walk = async (path: string) => {
-      const { data } = await octokit.rest.repos.getContent({
-        owner: this.owner,
-        repo: this.repo,
-        path,
-        ref: this.branch,
-      });
-      if (!Array.isArray(data)) {
-        if (data.type === "file") paths.push(data.path);
-        return;
-      }
-      for (const item of data) {
-        if (item.type === "file") paths.push(item.path);
-        else if (item.type === "dir") await walk(item.path);
-      }
-    };
-
-    try {
-      await walk(dir);
-    } catch {
-      return [];
-    }
-    return paths;
-  }
-
   /**
    * 記事の履歴を取得
    */
@@ -320,22 +215,17 @@ export class GitHubService {
         return { success: false, error: "記事が見つかりません" };
       }
 
-      // ファイルのコミット履歴を取得
-      const { data: commits } = await (
-        await GitHubService.getOctokit()
-      ).rest.repos.listCommits({
-        owner: this.owner,
-        repo: this.repo,
-        path: this.getFilePath(uuid),
-        per_page: 50,
+      // 記事本体のコミット履歴を取得
+      const commits = await getHagakiClient().posts.history(uuid, {
+        perPage: 50,
       });
 
       const history = commits.map((commit, index) => ({
         commitId: commit.sha,
         version: commits.length - index, // 新しいものほど大きいバージョン番号
-        message: commit.commit.message,
-        author: commit.commit.author?.name || "Unknown",
-        date: commit.commit.author?.date || new Date().toISOString(),
+        message: commit.message,
+        author: commit.author,
+        date: commit.date || new Date().toISOString(),
         changes: [], // TODO: 変更内容の詳細を取得
       }));
 
@@ -366,25 +256,15 @@ export class GitHubService {
         return { success: false, error: "記事が見つかりません" };
       }
 
-      const { data: fileData } = await (
-        await GitHubService.getOctokit()
-      ).rest.repos.getContent({
-        owner: this.owner,
-        repo: this.repo,
-        path: this.getFilePath(uuid),
+      const post = await getHagakiClient().posts.getFromRepo(uuid, {
         ref: commitId,
       });
 
-      if (Array.isArray(fileData) || fileData.type !== "file") {
+      if (!post) {
         return { success: false, error: "ファイルが見つかりません" };
       }
 
-      const content = Buffer.from(fileData.content, "base64").toString("utf-8");
-
-      return {
-        success: true,
-        data: this.parsePost(content, uuid),
-      };
+      return { success: true, data: post };
     } catch (error) {
       console.error("GitHub API error:", error);
       return {
@@ -410,30 +290,20 @@ export class GitHubService {
       if (!uuid) {
         return { success: false, error: "記事が見つかりません" };
       }
-      const filePath = this.getFilePath(uuid);
-
-      // GitHub APIでコミット間の差分を取得
-      const { data: comparison } = await (
-        await GitHubService.getOctokit()
-      ).rest.repos.compareCommits({
-        owner: this.owner,
-        repo: this.repo,
-        base: fromCommit,
-        head: toCommit,
-      });
-
-      // 該当ファイルの差分を探す
-      const fileDiff = comparison.files?.find(
-        (file) => file.filename === filePath,
+      // コミット間の記事本体の差分を取得
+      const patch = await getHagakiClient().posts.diff(
+        uuid,
+        fromCommit,
+        toCommit,
       );
 
-      if (!fileDiff) {
+      if (patch === null) {
         return { success: false, error: "差分が見つかりません" };
       }
 
       return {
         success: true,
-        data: fileDiff.patch || "",
+        data: patch,
       };
     } catch (error) {
       console.error("GitHub API error:", error);
