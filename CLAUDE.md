@@ -24,18 +24,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Architecture
 
 ### Core Structure
-This is a Next.js 15 Wiki application using App Router with GitHub as the CMS backend. Content is stored in a separate GitHub repository (`morinoparty/wiki-contentdev`) with the following structure:
-- `/content/wiki/` - Markdown articles
-- `/content/categories/` - Category definitions  
-- `/content/img/` - Image assets
-- `/content/users/` - User information
+This is a Next.js 15 Wiki application using App Router with GitHub as the CMS backend. Content lives in a separate repository (`Nlkomaru/wiki-content`) in the hagaki content format:
+- `/content/article/<uuid>/index.mdx` - article body (frontmatter + MDX)
+- `/content/article/<uuid>/assets/<imageId>.avif` - images owned by that article
+- `/content/categories/<slug>.json` - category definitions
+
+Paths are uuid-based because a slug can change. Reads go through the deployed
+copy at <https://wiki-content.moripa.nikomaru.dev> (manifests: `article.json`,
+`slug-index.json`, per-article `info.json`); writes are commits to the
+repository via hagaki.
 
 ### Key Technologies
 - **Next.js 15** with App Router and React Server Components
-- **Chakra UI + Panda CSS** for styling system
-- **OpenNext** for Cloudflare Workers deployment
-- **GitHub API (Octokit)** for content management
-- **NextAuth.js** for authentication
+- **chlorophyll + Panda CSS** for styling system (`colorPalette: mori`)
+- **vinext** for Cloudflare Workers deployment
+- **hagaki** for content reads/writes (GitHub + CDN)
+- **better-auth** for authentication
 - **MDX Editor** for content editing
 - **FlexSearch** for client-side search
 
