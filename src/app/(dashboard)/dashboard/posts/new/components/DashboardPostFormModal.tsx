@@ -3,6 +3,13 @@
 import { Button } from "@/components/Button";
 import { ModalDialog } from "@morinoparty/chlorophyll-react/components";
 import { WikiCategory } from "@/types/wiki";
+import type { PositionKey } from "@/lib/categoryOptions";
+import {
+  POSITION_KEYS,
+  hasPositionOption,
+  positionLabel,
+  positionPlaceholder,
+} from "@/lib/categoryOptions";
 import { useState, useEffect, useCallback } from "react";
 import { sva } from "styled-system/css";
 
@@ -213,7 +220,8 @@ export const DashboardPostFormModal: React.FC<{
   const currentCategory = categories.find(
     (cat) => cat.slug === selectedCategory
   );
-  const requiresPosition = currentCategory?.hasPosition ?? false;
+  // 座標入力を出すかどうかはカテゴリの option 宣言から決まる
+  const requiresPosition = hasPositionOption(currentCategory);
 
   // Slugの重複チェック
   const checkSlugAvailability = useCallback(
@@ -278,7 +286,7 @@ export const DashboardPostFormModal: React.FC<{
     }));
   };
 
-  const handleCoordinateChange = (field: "x" | "y", value: string) => {
+  const handleCoordinateChange = (field: PositionKey, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value === "" ? undefined : parseInt(value, 10),
@@ -379,46 +387,30 @@ export const DashboardPostFormModal: React.FC<{
           </div>
         </div>
 
-        {/* Coordinate Fields - Only show if the category requires position */}
-        {requiresPosition && (
-          <>
-            <div className={styles.formGroup}>
+        {/* Coordinate Fields - Only show if the category declares x / y */}
+        {requiresPosition &&
+          POSITION_KEYS.map((key) => (
+            <div key={key} className={styles.formGroup}>
               <div className={styles.labelRow}>
-                <label className={styles.label}>X座標</label>
+                {/* ラベルとプレースホルダーはカテゴリの option 宣言に従う */}
+                <label className={styles.label}>
+                  {positionLabel(currentCategory, key)}
+                </label>
                 <span className={styles.required}>*</span>
               </div>
               <div className={styles.inputGroup}>
                 <input
                   type="number"
-                  value={formData.x ?? ""}
+                  value={formData[key] ?? ""}
                   onChange={(e) => {
-                    handleCoordinateChange("x", e.target.value);
+                    handleCoordinateChange(key, e.target.value);
                   }}
-                  placeholder="例: 1000"
+                  placeholder={positionPlaceholder(currentCategory, key)}
                   className={styles.input}
                 />
               </div>
             </div>
-
-            <div className={styles.formGroup}>
-              <div className={styles.labelRow}>
-                <label className={styles.label}>Y座標</label>
-                <span className={styles.required}>*</span>
-              </div>
-              <div className={styles.inputGroup}>
-                <input
-                  type="number"
-                  value={formData.y ?? ""}
-                  onChange={(e) => {
-                    handleCoordinateChange("y", e.target.value);
-                  }}
-                  placeholder="例: 2000"
-                  className={styles.input}
-                />
-              </div>
-            </div>
-          </>
-        )}
+          ))}
       </div>
 
       {/* Bottom navigation */}

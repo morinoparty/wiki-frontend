@@ -1,4 +1,4 @@
-import { PostEditorClient } from "@/components/PostEditorClient";
+import { PostEditorClient } from "./components/PostEditorClient";
 import { getPost } from "@/actions/queries";
 import { notFound } from "next/navigation";
 

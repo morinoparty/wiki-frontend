@@ -134,14 +134,13 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
               className={css({
                 width: "40px",
                 height: "40px",
-                bg: "colorPalette.bg.subtle",
                 borderRadius: "10px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               })}
             >
-              <Link size={20} className={css({ color: "colorPalette.fg" })} />
+              <Link size={20}/>
             </div>
             <div>
               <h2
@@ -181,10 +180,6 @@ export const LinkInsertModal: React.FC<LinkInsertModalProps> = ({
               justifyContent: "center",
               cursor: "pointer",
               transition: "all 0.2s",
-              "&:hover": {
-                bg: "colorPalette.bg.subtle",
-                color: "colorPalette.fg",
-              },
             })}
           >
             <X size={16} />

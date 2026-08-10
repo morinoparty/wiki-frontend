@@ -19,7 +19,7 @@ const layoutStyles = sva({
         mdDown: '"sidebar" "main"',
       },
       minHeight: { base: "100vh", lgDown: "auto" },
-      backgroundColor: "colorPalette.bg.subtle",
+      backgroundColor: "colorPalette.bg",
       width: "100%",
     },
     sidebar: {

@@ -227,7 +227,7 @@ const licenseCardStyles = sva({
       cursor: "pointer",
       _hover: {
         borderColor: "border.subtle",
-        borderWidth: "2px",
+        borderWidth: "1px",
       },
       _active: {
         transform: "translateY(0px)",

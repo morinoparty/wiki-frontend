@@ -51,10 +51,8 @@ export default defineConfig({
 
   globalCss: {
     "html, body": {
-      // chlorophyll の mori パレットを既定にする。以降は配下で
-      // colorPalette.bg / colorPalette.fg などのセマンティックトークンを使う。
       colorPalette: "mori",
-      backgroundColor: "colorPalette.bg.subtle",
+      backgroundColor: "colorPalette.bg",
       color: "colorPalette.fg",
     },
   },

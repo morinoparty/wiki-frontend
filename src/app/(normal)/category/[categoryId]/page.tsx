@@ -1,7 +1,8 @@
-import { PaginationWrapper } from "@/components/PaginationWrapper";
+import { PaginationWrapper } from "./components/PaginationWrapper";
 import WikiCard from "@/components/WikiCard";
 import { WikiCardGrid } from "@/components/WikiCardGrid";
 import { getAllCategories } from "@/lib/getAllCategories";
+import { hasPositionOption } from "@/lib/categoryOptions";
 import { getAllPosts } from "@/lib/getAllPosts";
 import { postDate, WikiCategory, WikiPost } from "@/types/wiki";
 import { Tag, TentTree } from "lucide-react";
@@ -92,7 +93,7 @@ export default async function Page(props: PageProps) {
   const categories = await getAllCategories();
   const category = categories.find((category) => category.slug === categoryId);
   if (!category) return notFound();
-  const hasPosition = category.hasPosition ?? false;
+  const hasPosition = hasPositionOption(category);
 
   const posts = await getAllPosts();
   const categoryPosts = posts.filter((post) => post.category === category.slug);

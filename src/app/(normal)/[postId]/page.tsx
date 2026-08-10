@@ -4,8 +4,9 @@ import { articleImageUrl } from "@/lib/hagaki";
 import { notFound } from "next/navigation";
 import { css } from "styled-system/css";
 import { PostHeader } from "@/components/PostHeader";
-import { PostBody } from "@/components/PostBody";
-import { PostCta } from "@/components/PostCta";
+import { PostBody } from "./components/PostBody";
+import { PostCta } from "./components/PostCta";
+import { PostContributors } from "./components/PostContributors";
 import { Button } from "@/components/Button";
 import Link from "next/link";
 import { Edit } from "lucide-react";
@@ -39,6 +40,7 @@ export default async function Page({ params }: PageProps) {
         description={post.description}
       />
       <PostBody body={post.body} articleId={post.uuid} />
+      <PostContributors articleId={post.uuid} />
       <PostCta />
 
       <nav

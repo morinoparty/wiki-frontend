@@ -12,3 +12,6 @@ patchedDependencies:
 # chlorophyll 側の ^5.30.0 も含めて 5.37.0 に固定する。
 overrides:
   "@ark-ui/react": "5.37.0"
+
+minimumReleaseAgeExclude:
+  - '@morinoparty/chlorophyll-react@0.4.4'

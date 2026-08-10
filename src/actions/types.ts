@@ -57,7 +57,7 @@ export const CreatePostInputSchema = z.object({
       blurhash64: z.string().default(""),
     })
     .nullish(),
-  // 座標情報（hasPositionがtrueのカテゴリで必須）
+  // 座標情報（option で x / y を宣言しているカテゴリで必須）
   x: z.number().int("X座標は整数で入力してください").optional(),
   y: z.number().int("Y座標は整数で入力してください").optional(),
   status: z

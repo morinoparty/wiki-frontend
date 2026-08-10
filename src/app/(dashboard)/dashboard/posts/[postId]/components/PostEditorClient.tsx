@@ -18,7 +18,7 @@ interface PostEditorClientProps {
   post: WikiPostDetail;
 }
 
-const EditorComp = dynamic(() => import("./Editor"), { ssr: false });
+const EditorComp = dynamic(() => import("@/components/Editor"), { ssr: false });
 
 export function PostEditorClient({ post }: PostEditorClientProps) {
   const [form, setForm] = useState(post);

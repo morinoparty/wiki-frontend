@@ -1,6 +1,6 @@
 import { sva } from "styled-system/css";
-import { ContentImageConfig } from "./ContentImageConfig";
-import { MarkdownParser } from "./MarkdownParser";
+import { ContentImageConfig } from "@/components/ContentImageConfig";
+import { MarkdownParser } from "@/components/MarkdownParser";
 
 const postBody = sva({
   slots: ["root"],

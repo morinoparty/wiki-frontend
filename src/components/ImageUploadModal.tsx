@@ -290,7 +290,6 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
               className={css({
                 width: "40px",
                 height: "40px",
-                bg: "colorPalette.bg.subtle",
                 borderRadius: "10px",
                 display: "flex",
                 alignItems: "center",
@@ -335,10 +334,7 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
               justifyContent: "center",
               cursor: "pointer",
               transition: "all 0.2s",
-              "&:hover": {
-                bg: "colorPalette.bg.subtle",
-                color: "colorPalette.fg",
-              },
+
             })}
           >
             <X size={16} />
@@ -368,7 +364,6 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                 isDragOver &&
                   css({
                     borderColor: "colorPalette.border",
-                    bg: "colorPalette.bg.subtle",
                     transform: "scale(1.02)",
                   })
               )}
@@ -389,7 +384,6 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                 className={css({
                   width: "64px",
                   height: "64px",
-                  bg: "colorPalette.bg.subtle",
                   borderRadius: "16px",
                   display: "flex",
                   alignItems: "center",
@@ -522,7 +516,6 @@ export function ImageUploadModal({ articleId, isOpen, onClose, onImageInsert, ed
                     className={css({
                       width: "100%",
                       height: "6px",
-                      bg: "colorPalette.bg.subtle",
                       borderRadius: "3px",
                       overflow: "hidden",
                     })}

@@ -35,7 +35,6 @@ const commitCardStyles = sva({
       width: "40px",
       height: "40px",
       borderRadius: "100%",
-      bgColor: "colorPalette.bg.subtle",
       color: "colorPalette.fg",
     },
     icon: {},

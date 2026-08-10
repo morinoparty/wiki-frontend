@@ -24,8 +24,8 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@morinoparty/chlorophyll-react':
-        specifier: file:../chlorophyll/packages/react
-        version: file:../chlorophyll/packages/react(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: 0.4.4
+        version: 0.4.4(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       better-auth:
         specifier: ^1.6.26
         version: 1.6.26(next@15.3.2(babel-plugin-macros@3.1.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -37,7 +37,7 @@ importers:
         version: 4.0.3
       hagaki:
         specifier: file:../hagaki
-        version: file:../hagaki(@mdxeditor/editor@3.32.3(@codemirror/language@6.11.0)(@lezer/highlight@1.2.1)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)(yjs@13.6.27))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)
+        version: file:../hagaki(@mdxeditor/editor@3.32.3(@codemirror/language@6.11.0)(@lezer/highlight@1.2.1)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)(yjs@13.6.27))(@mdxeditor/gurx@1.2.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)
       lucide-react:
         specifier: ^0.511.0
         version: 0.511.0(react@19.2.8)
@@ -1300,8 +1300,8 @@ packages:
     resolution: {integrity: sha512-rmOWVRUbUJD7iSvJugjUbFZshTAuJ48MXoZ80Osx1GM0K/H1w7rSEvmw8m6vdWxNASgtaHIhAgre4H/E9GJiYQ==}
     engines: {node: '>=18'}
 
-  '@morinoparty/chlorophyll-react@file:../chlorophyll/packages/react':
-    resolution: {directory: ../chlorophyll/packages/react, type: directory}
+  '@morinoparty/chlorophyll-react@0.4.4':
+    resolution: {integrity: sha512-IJSc2RgXNxkNogue/LIQkU3UIV2KAq/U+NFK8Q3y8wl3UYXrmD8m9Zhcfbb1gTPAoCDMsHRnhcRV1oHTbze9SQ==, tarball: https://npm.pkg.github.com/download/@morinoparty/chlorophyll-react/0.4.4/e8f9646a3edf9d7132a77c89a1ad4ec1d59adfff}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
@@ -3706,6 +3706,7 @@ packages:
     engines: {node: '>=18'}
     peerDependencies:
       '@mdxeditor/editor': ^3
+      '@mdxeditor/gurx': ^1.2.4
       react: '>=18'
       react-dom: '>=18'
     peerDependenciesMeta:
@@ -7025,7 +7026,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@morinoparty/chlorophyll-react@file:../chlorophyll/packages/react(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@morinoparty/chlorophyll-react@0.4.4(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@ark-ui/react': 5.37.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@react-three/fiber': 9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
@@ -10057,9 +10058,10 @@ snapshots:
       section-matter: 1.0.0
       strip-bom-string: 1.0.0
 
-  hagaki@file:../hagaki(@mdxeditor/editor@3.32.3(@codemirror/language@6.11.0)(@lezer/highlight@1.2.1)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)(yjs@13.6.27))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2):
+  hagaki@file:../hagaki(@mdxeditor/editor@3.32.3(@codemirror/language@6.11.0)(@lezer/highlight@1.2.1)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)(yjs@13.6.27))(@mdxeditor/gurx@1.2.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2):
     dependencies:
       '@jsquash/avif': 2.1.1
+      '@mdxeditor/gurx': 1.2.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       blurhash: 2.0.5
       gray-matter: 4.0.3
       octokit: 5.0.1

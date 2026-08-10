@@ -7,6 +7,7 @@ import { ValidationService } from "./services/validation-service";
 import { AuthService } from "./services/auth-service";
 import { PermissionService } from "./services/permission-service";
 import { getAllCategories } from "@/lib/getAllCategories";
+import { hasPositionOption } from "@/lib/categoryOptions";
 
 /**
  * 既存の記事を更新する
@@ -57,8 +58,8 @@ export async function updatePost(
         return { success: false, error: "指定されたカテゴリが見つかりません" };
       }
 
-      // hasPositionがtrueの場合、座標情報が必須
-      if (newCategory.hasPosition) {
+      // カテゴリが option で x / y を宣言している場合、座標情報が必須
+      if (hasPositionOption(newCategory)) {
         if (input.x === undefined || input.y === undefined) {
           return {
             success: false,

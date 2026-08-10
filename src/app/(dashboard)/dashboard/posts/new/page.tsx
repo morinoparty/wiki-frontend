@@ -1,6 +1,6 @@
 import { getAllCategories } from "@/lib/getAllCategories";
 import { getAllPosts } from "@/lib/getAllPosts";
-import { PostCreationClient } from "./PostCreationClient";
+import { PostCreationClient } from "./components/PostCreationClient";
 import { ModalDialogRoot } from "@/components/ModalDialogRoot";
 import { css } from "styled-system/css";
 

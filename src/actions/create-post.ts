@@ -7,6 +7,7 @@ import { ValidationService } from "./services/validation-service";
 import { AuthService } from "./services/auth-service";
 import { PermissionService } from "./services/permission-service";
 import { getAllCategories } from "@/lib/getAllCategories";
+import { hasPositionOption } from "@/lib/categoryOptions";
 
 /**
  * 新しい記事を作成する
@@ -50,8 +51,8 @@ export async function createPost(
       return { success: false, error: "指定されたカテゴリが見つかりません" };
     }
 
-    // hasPositionがtrueの場合、座標情報が必須
-    if (category.hasPosition) {
+    // カテゴリが option で x / y を宣言している場合、座標情報が必須
+    if (hasPositionOption(category)) {
       if (input.x === undefined || input.y === undefined) {
         return {
           success: false,
@@ -84,8 +85,8 @@ export async function createPost(
       visibility: input.visibility || "public",
       version: 1,
       isLocked: false,
-      // hasPositionがtrueの場合のみ座標情報を含める
-      ...(category.hasPosition && {
+      // 座標を宣言しているカテゴリのときだけ座標情報を含める
+      ...(hasPositionOption(category) && {
         x: input.x,
         y: input.y,
       }),

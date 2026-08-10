@@ -140,10 +140,6 @@ export default async function Home() {
                 variant="ghost"
                 className={css({
                   px: "12px",
-                  color: "colorPalette.fg",
-                  _hover: {
-                    backgroundColor: "colorPalette.bg.subtle",
-                  },
                 })}
                 asChild
               >
