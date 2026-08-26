@@ -4,7 +4,7 @@ import { Editable } from "@ark-ui/react/editable";
 import { Spinner } from "@morinoparty/chlorophyll-react/components";
 import { Tag, Image } from "lucide-react";
 import { Button } from "@/components/Button";
-import { postHeaderStyles } from "./PostHeader";
+import { postHeaderStyles } from "@/components/PostHeader";
 import { css, cx, sva } from "styled-system/css";
 
 // Chakra の Editable が持っていた最低限の見た目(枠線なし・背景透過・折返し)を
@@ -40,7 +40,9 @@ const editableStyles = sva({
   },
 });
 import { useRef, useState, useEffect } from "react";
-import { uploadImage } from "@/actions/upload-image";
+import { blurhashToBase64 } from "hagaki/markdown";
+import type { WikiThumbnail } from "@/types/wiki";
+import { handleInsertImage } from "./pending-images";
 import { toaster } from "@/components/ui/toaster";
 import { CONTENT_BASE_URL } from "@/lib/hagaki";
 
@@ -54,7 +56,8 @@ const TOAST_DURATION = {
 interface PostHeaderEditProps {
   /** 編集中の記事の uuid。サムネイルは記事の assets 配下に保存される。 */
   articleId: string;
-  image?: string;
+  /** 現在のサムネイル。未設定なら null。 */
+  thumbnail?: WikiThumbnail | null;
   category: string;
   title: string;
   description: string;
@@ -62,7 +65,7 @@ interface PostHeaderEditProps {
     title: string;
     description: string;
     category: string;
-    image?: string;
+    thumbnail?: WikiThumbnail | null;
   }) => void;
   disabled?: boolean;
   onSaveComplete?: boolean;
@@ -70,7 +73,7 @@ interface PostHeaderEditProps {
 
 export function PostHeaderEdit({
   articleId,
-  image,
+  thumbnail,
   category,
   title,
   description,
@@ -81,7 +84,10 @@ export function PostHeaderEdit({
   const classes = postHeaderStyles();
   const fileInputRef = useRef<HTMLInputElement>(null);
   // 画像プレビュー用のローカルステート
-  const [previewImage, setPreviewImage] = useState<string | undefined>(image);
+  const [thumb, setThumb] = useState<WikiThumbnail | null>(thumbnail ?? null);
+  const previewImage = thumb
+    ? `article/${articleId}/assets/${thumb.imageId}.avif`
+    : undefined;
   // アップロード直後のbase64キャッシュ
   const [base64Cache, setBase64Cache] = useState<string | null>(null);
 
@@ -94,7 +100,7 @@ export function PostHeaderEdit({
       title: details.value,
       description,
       category,
-      image: previewImage,
+      thumbnail: thumb,
     });
   };
   const handleDescriptionChange = (details: { value: string }) => {
@@ -102,7 +108,7 @@ export function PostHeaderEdit({
       title,
       description: details.value,
       category,
-      image: previewImage,
+      thumbnail: thumb,
     });
   };
 
@@ -166,40 +172,31 @@ export function PostHeaderEdit({
       const base64 = await convertToBase64(file);
       setBase64Cache(base64);
 
-      const uploadPromise = uploadImage(file, articleId);
-
-      toaster.promise(uploadPromise, {
-        loading: {
-          title: "アップロード中",
-          description: "画像をアップロードしています...",
-        },
-        success: {
-          title: "成功",
-          description: "画像が正常にアップロードされました",
-        },
-        error: {
-          title: "エラー",
-          description: "アップロードに失敗しました",
-        },
-      });
-
-      const result = await uploadPromise;
-
-      if (!result.success || !result.data) {
-        throw new Error(result.error || "アップロードに失敗しました");
-      }
-
-      // アップロード成功時の処理 - プレビュー画像更新と親への通知のみ
-      setPreviewImage(result.data.url);
-      onChange?.({
-        title,
-        description,
-        category,
-        image: result.data.url,
+      // 本文の画像と同じ pending フロー。バイト列は R2 の一時置き場に入り、
+      // 記事の保存時に本文と同じコミットへ移る。
+      const attrs = await handleInsertImage(file, articleId);
+      const next: WikiThumbnail = {
+        imageId: attrs.id,
+        blurhash64: attrs.blurhash ? blurhashToBase64(attrs.blurhash) : "",
+      };
+      setThumb(next);
+      onChange?.({ title, description, category, thumbnail: next });
+      toaster.success({
+        title: "成功",
+        description: "画像を設定しました。記事を保存すると確定します",
+        duration: TOAST_DURATION.DEFAULT,
+        meta: { closable: true },
       });
     } catch (error) {
       console.error("画像アップロード中にエラーが発生しました:", error);
       setBase64Cache(null); // エラー時もキャッシュをクリア
+      toaster.error({
+        title: "エラー",
+        description:
+          error instanceof Error ? error.message : "画像の設定に失敗しました",
+        duration: TOAST_DURATION.ERROR,
+        meta: { closable: true },
+      });
     } finally {
       finishUpload();
     }

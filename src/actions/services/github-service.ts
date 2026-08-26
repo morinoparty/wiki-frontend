@@ -5,6 +5,12 @@ import { WikiPostDetail } from "@/types/wiki";
 import type { AppSession } from "@/lib/auth";
 import { randomUUID } from "crypto";
 import { ImageValidationError, validateAvifUpload } from "hagaki/image";
+import {
+  assertOwnedAssetPath,
+  collectPendingImages,
+  deletePendingImages,
+  PendingImageError,
+} from "./pending-images";
 
 /**
  * GitHub 上の wiki コンテンツを読み書きするサービス。
@@ -125,6 +131,12 @@ export class GitHubService {
     post: WikiPostDetail,
     commitMessage: string,
     session: AppSession,
+    images?: {
+      /** 本文が参照する未コミット画像の id。R2 から回収して同じコミットに載せる。 */
+      pendingImageIds?: string[];
+      /** 本文から消えた画像のリポジトリパス。同じコミットで削除する。 */
+      deletePaths?: string[];
+    },
   ): Promise<{ success: boolean; error?: string; commitId?: string }> {
     try {
       if (!post.uuid) {
@@ -136,16 +148,33 @@ export class GitHubService {
         return { success: false, error: "ファイルが見つかりません" };
       }
 
+      // 画像は記事本文と同じコミットに載せる。別コミットにすると、
+      // エディタで消した画像の孤児コミットが履歴に残り、revert も噛み合わない。
+      const { files, keys } = await collectPendingImages(
+        post.uuid,
+        images?.pendingImageIds ?? [],
+      );
+      const deletePaths = images?.deletePaths ?? [];
+      for (const path of deletePaths) assertOwnedAssetPath(path, post.uuid);
+
       const result = await getHagakiClient().posts.save(post, {
         committer: this.getCommitter(session),
         commitMessage,
+        files,
+        deletePaths,
       });
+
+      // バイト列はリポジトリに移った。pending 側はもう不要。
+      await deletePendingImages(keys);
 
       return {
         success: true,
         commitId: result.commitSha,
       };
     } catch (error) {
+      if (error instanceof PendingImageError) {
+        return { success: false, error: error.message };
+      }
       console.error("GitHub API error:", error);
       return {
         success: false,

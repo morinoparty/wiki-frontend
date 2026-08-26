@@ -23,6 +23,13 @@ export type OperationContext = {
   userId?: string;
   userName?: string;
   commitMessage?: string;
+  /**
+   * 本文が参照する未コミット画像の id。編集中は R2 の一時置き場にあり、
+   * 保存時に記事本文と同じコミットへ移す。
+   */
+  pendingImageIds?: string[];
+  /** 本文から消えた画像のリポジトリパス。同じコミットで削除する。 */
+  deletePaths?: string[];
 };
 
 // Zodスキーマ定義

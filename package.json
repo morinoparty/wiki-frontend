@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "@ark-ui/react": "5.37.0",
-    "@mdxeditor/editor": "^3.32.3",
-    "@mdxeditor/gurx": "^1.2.3",
+    "@mdxeditor/editor": "^3.55.0",
+    "@mdxeditor/gurx": "^1.2.4",
     "@morinoparty/chlorophyll-react": "0.4.4",
     "better-auth": "^1.6.26",
     "flexsearch": "^0.8.167",

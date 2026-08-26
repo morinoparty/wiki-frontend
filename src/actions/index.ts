@@ -27,7 +27,6 @@ export {
 
 // Statistics & Monitoring
 export { getSystemStats, getUserStats, healthCheck } from "./stats";
-export { uploadImage } from "./upload-image";
 
 // Service Classes
 export { GitHubService } from "./services/github-service";

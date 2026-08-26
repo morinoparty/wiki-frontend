@@ -7,6 +7,7 @@ import { ValidationService } from "./services/validation-service";
 import { AuthService } from "./services/auth-service";
 import { PermissionService } from "./services/permission-service";
 import { getAllCategories } from "@/lib/getAllCategories";
+import { postCommitMessage } from "./services/pending-images";
 import { hasPositionOption } from "@/lib/categoryOptions";
 
 /**
@@ -86,10 +87,18 @@ export async function updatePost(
     };
 
     // 7. GitHubに保存
+    const pendingImageIds = context.pendingImageIds ?? [];
+    const deletePaths = context.deletePaths ?? [];
     const commitResult = await GitHubService.updatePost(
       updatedPost,
-      context.commitMessage || `Update post: ${updatedPost.title}`,
-      session
+      context.commitMessage ||
+        postCommitMessage(
+          updatedPost.slug,
+          pendingImageIds.length,
+          deletePaths.length
+        ),
+      session,
+      { pendingImageIds, deletePaths }
     );
 
     if (!commitResult.success) {

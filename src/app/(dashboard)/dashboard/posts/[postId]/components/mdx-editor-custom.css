@@ -421,8 +421,13 @@
   color: #1e40af !important; /* blue.800 */
 }
 
-/* Image styles - 元のTSXスタイルを移植 */
-.prose img {
+/* Image styles - 元のTSXスタイルを移植
+   hagaki の <Image /> ([data-hagaki-img] の中) は除外する。あちらは
+   wrapper 側で aspect-ratio + overflow:hidden の箱を作り、blurhash を
+   position:absolute で敷いて実画像を重ねる構造なので、ここで position や
+   height を !important で潰すと blurhash が通常フローに落ちて箱を埋め、
+   実画像が下へ押し出されてクリップされる (= ずっと blurhash に見える)。 */
+.prose img:not([data-hagaki-img] *) {
   max-width: 100% !important;
   border-radius: 8px !important;
   margin: 16px 0 !important;
@@ -431,7 +436,7 @@
 }
 
 /* 画像の位置修正 - 最優先 */
-.prose img {
+.prose img:not([data-hagaki-img] *) {
   position: static !important;
   transform: none !important;
   float: none !important;
@@ -479,8 +484,8 @@
 }
 
 /* 画像選択時のスタイル改善 */
-.prose img:focus,
-.prose img.selected {
+.prose img:not([data-hagaki-img] *):focus,
+.prose img:not([data-hagaki-img] *).selected {
   outline: 2px solid #347e5e !important; /* leaf.600 */
   outline-offset: 2px !important;
   border-radius: 4px !important;

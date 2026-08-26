@@ -19,6 +19,15 @@
   "vars": {
     "CLIENT_ID": "019fe59c-1673-72f5-a5d2-49cce1d4161f",
   },
+  // 編集中の画像の一時置き場。エディタが AVIF を `pending/<postUuid>/<imageId>.avif`
+  // に PUT し、記事の保存時に本文と同じコミットへ移して削除する。保存されずに
+  // 残ったものは `pending/` に付けたライフサイクルルール (7 日) が掃除する。
+  "r2_buckets": [
+    {
+      "binding": "PENDING_IMAGES",
+      "bucket_name": "wiki-frontend-pending-images",
+    },
+  ],
   // secrets は Cloudflare Secrets Store (BSM: morinoparty プロジェクト) から供給する。
   // 他の env と違いバインディング経由の非同期 `.get()` で読む (src/lib/secrets.ts)。
   "secrets_store_secrets": [

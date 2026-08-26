@@ -234,9 +234,9 @@ export const SearchBox = () => {
 
         // 検索インデックスJSONを取得
         const res = await fetch("/search-index.json");
-        const data = await res.json();
+        const data = (await res.json()) as PostDocument[];
 
-        data.forEach((post: PostDocument) => {
+        data.forEach((post) => {
           index.add(post);
         });
 
