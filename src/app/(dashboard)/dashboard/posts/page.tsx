@@ -83,7 +83,9 @@ export default async function Home() {
                 post.thumbnail
                   ? post.draft || post.unpublished
                     ? // CDN に無い記事のサムネイルはリポジトリ経由で読む
-                      `/api/draft-assets/${post.uuid}/${post.thumbnail.imageId}`
+                      `/api/article-assets/${post.uuid}/${post.thumbnail.imageId}${
+                        post.draft ? "?draft=1" : ""
+                      }`
                     : articleImageUrl(post.uuid, post.thumbnail.imageId)
                   : "/assets/placeholder.svg"
               }

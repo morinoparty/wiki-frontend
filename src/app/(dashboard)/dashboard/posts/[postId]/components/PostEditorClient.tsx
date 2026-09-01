@@ -52,8 +52,8 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
   const [isPending, startTransition] = useTransition();
   const [isDirty, setIsDirty] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
-  // 下書きの間はコミット済み画像を CDN でなく draft-assets ルートから読む
-  // (配信 worker が draft の assets を 404 にするため)。
+  // 下書きの画像は CDN に載らないので、article-assets ルートに
+  // 「CDN を試さなくていい」と伝えるために使う。
   const isDraft = form.draft === true;
 
   // 変更検知用

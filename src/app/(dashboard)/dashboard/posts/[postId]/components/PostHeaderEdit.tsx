@@ -45,7 +45,6 @@ import { blurhashToBase64 } from "hagaki/markdown";
 import type { WikiThumbnail } from "@/types/wiki";
 import { handleInsertImage } from "./pending-images";
 import { toaster } from "@/components/ui/toaster";
-import { CONTENT_BASE_URL } from "@/lib/hagaki";
 
 // 定数
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -90,12 +89,10 @@ export function PostHeaderEdit({
   const fileInputRef = useRef<HTMLInputElement>(null);
   // 画像プレビュー用のローカルステート
   const [thumb, setThumb] = useState<WikiThumbnail | null>(thumbnail ?? null);
-  // 下書きのコミット済みサムネイルは CDN に無い (配信 worker が遮断する)
-  // ため、認証付きの draft-assets ルート経由でリポジトリから読む。
+  // 本文の画像と同じく article-assets ルート経由。配信済みなら CDN へ
+  // リダイレクトされ、下書き中や保存直後はリポジトリの実体が返る。
   const previewImage = thumb
-    ? draft
-      ? `/api/draft-assets/${articleId}/${thumb.imageId}`
-      : `${CONTENT_BASE_URL}/article/${articleId}/assets/${thumb.imageId}.avif`
+    ? `/api/article-assets/${articleId}/${thumb.imageId}${draft ? "?draft=1" : ""}`
     : undefined;
   // アップロード直後のbase64キャッシュ
   const [base64Cache, setBase64Cache] = useState<string | null>(null);

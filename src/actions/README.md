@@ -34,8 +34,10 @@
 - 新規作成は `draft: true` で始まり、エディタのトグルを外して保存すると公開
 - draft は `article.json` / `slug-index.json` に載らず、配信 worker が
   `article/<uuid>/` 配下を 404 にする
-- draft の画像はエディタ専用の `/api/draft-assets/<uuid>/<imageId>` 経由で
-  リポジトリから読む
+- エディタの記事画像は `/api/article-assets/<uuid>/<imageId>` 経由。配信済み
+  なら CDN へリダイレクトし、無ければリポジトリの実体を返す。保存すると R2 の
+  一時置き場は消えるので、下書き中と「保存済み・デプロイ待ち」の窓では
+  リポジトリだけが画像を持っている
 
 すべて `ApiResult<T>` を返す。
 

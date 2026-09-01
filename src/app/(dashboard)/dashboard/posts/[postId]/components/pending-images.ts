@@ -1,6 +1,5 @@
 "use client";
 
-import { resolveCdnUrl } from "hagaki";
 import {
   extractImageComponentIds,
   type ImageComponentAttrs,
@@ -11,7 +10,6 @@ import {
   removePending,
   startPending,
 } from "hagaki/pending-images";
-import { CONTENT_BASE_URL } from "@/lib/hagaki";
 
 /**
  * 編集中の画像は、記事ごとに 1 コミットへまとめるため R2 の一時置き場を経由する。
@@ -37,21 +35,20 @@ export function pendingImagePreviewUrl(
 }
 
 /**
- * コミット済み画像の表示 URL。公開記事は CDN、draft は配信 worker に
- * 遮断されるため認証付きの draft-assets ルート経由でリポジトリから読む。
+ * コミット済み画像の表示 URL。
+ *
+ * CDN を直接見ずに article-assets ルートを挟む。保存が成功すると R2 の
+ * 一時置き場は消えるので、そのあと CDN のデプロイが終わるまでの数十秒は
+ * リポジトリだけが画像を持っている (下書きなら CDN には永久に載らない)。
+ * ルート側が配信済みかを見て CDN へリダイレクトするか実体を返すかを選ぶ。
  */
 export function committedImageUrl(
   imageId: string,
   postUuid: string,
   draft?: boolean
 ): string {
-  if (draft) {
-    return `/api/draft-assets/${postUuid}/${imageId}`;
-  }
-  return resolveCdnUrl(
-    `${imageUrlPrefix(postUuid)}${imageId}.avif`,
-    CONTENT_BASE_URL
-  );
+  // 下書きと分かっているときは CDN の確認を省かせる。
+  return `/api/article-assets/${postUuid}/${imageId}${draft ? "?draft=1" : ""}`;
 }
 
 /**
