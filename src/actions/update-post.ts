@@ -9,6 +9,8 @@ import { PermissionService } from "./services/permission-service";
 import { getAllCategories } from "@/lib/getAllCategories";
 import { postCommitMessage } from "./services/pending-images";
 import { hasPositionOption } from "@/lib/categoryOptions";
+import { getHagakiClient } from "@/lib/hagaki";
+import { toUrlSlug } from "hagaki";
 
 /**
  * 既存の記事を更新する
@@ -30,13 +32,14 @@ export async function updatePost(
       return { success: false, error: validationResult.error };
     }
 
-    // 3. 既存記事の取得
-    const existingPost = await GitHubService.getPost(input.slug);
+    // 3. 既存記事の取得。draft は slug-index に載らないため、slug ではなく
+    // uuid でリポジトリから直接引く (未配信の変更も見える)。
+    const existingPost = await GitHubService.getPostByUuid(input.uuid);
     if (!existingPost) {
       return { success: false, error: "記事が見つかりません" };
     }
 
-    // 4. 権限チェック（ロック状態も含めて一元管理）
+    // 4. 権限チェック
     const hasPermission = await PermissionService.checkPostPermission(
       session.user.id,
       existingPost,
@@ -45,13 +48,27 @@ export async function updatePost(
     if (!hasPermission) {
       return {
         success: false,
-        error: existingPost.isLocked
-          ? "この記事はロックされています。管理者のみが編集できます"
-          : "この記事を編集する権限がありません",
+        error: "この記事を編集する権限がありません",
       };
     }
 
-    // 5. カテゴリの座標要件チェック（カテゴリが更新される場合）
+    // 5. slug 衝突チェック（公開する保存のみ）。draft は slug-index に
+    // 載らないため、公開時に既存の公開記事と slug が被っていると
+    // `hagaki generate` が fail してコンテンツのデプロイ全体が止まる。
+    // ここで公開前に弾く (draft 同士の残余ケースは生成側の fail が防波堤)。
+    if (input.draft !== true) {
+      const conflicting = await getHagakiClient().posts.getBySlug(
+        toUrlSlug(input.slug)
+      );
+      if (conflicting && conflicting.uuid !== input.uuid) {
+        return {
+          success: false,
+          error: "このスラッグは既に別の記事で使用されています",
+        };
+      }
+    }
+
+    // 6. カテゴリの座標要件チェック（カテゴリが更新される場合）
     if (input.category && input.category !== existingPost.category) {
       const categories = await getAllCategories();
       const newCategory = categories.find((cat) => cat.slug === input.category);
@@ -76,17 +93,15 @@ export async function updatePost(
       }
     }
 
-    // 6. 更新データの準備
-    const now = new Date().toISOString();
+    // 7. 更新データの準備。draft は「送られなかった」(undefined) と
+    // 「下書きを外した」(false) を区別する — undefined で既存値を保つ。
     const updatedPost: WikiPostDetail = {
       ...existingPost,
       ...input,
-      updatedAt: now,
-      lastModifiedBy: session.user.id,
-      version: (existingPost.version || 1) + 1,
+      draft: typeof input.draft === "boolean" ? input.draft : existingPost.draft,
     };
 
-    // 7. GitHubに保存
+    // 8. GitHubに保存
     const pendingImageIds = context.pendingImageIds ?? [];
     const deletePaths = context.deletePaths ?? [];
     const commitResult = await GitHubService.updatePost(

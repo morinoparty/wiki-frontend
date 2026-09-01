@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { LoginModal } from "@/components/LoginModal";
 import { ModalDialogRoot } from "@/components/ModalDialogRoot";
 import { css } from "styled-system/css";
+
+export const metadata: Metadata = {
+  title: "サインイン",
+  robots: { index: false, follow: false },
+};
 
 export default async function Home() {
   return (

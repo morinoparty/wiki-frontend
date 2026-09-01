@@ -52,25 +52,9 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
   const [isPending, startTransition] = useTransition();
   const [isDirty, setIsDirty] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
-  
-  // デバッグ用：editorRefの状態を監視
-  useEffect(() => {
-    console.log("=== PostEditorClient useEffect ===");
-    console.log("editorRef:", editorRef);
-    console.log("editorRef.current:", editorRef.current);
-    
-    const interval = setInterval(() => {
-      if (editorRef.current) {
-        console.log("✅ PostEditorClient: Editor ref is ready!");
-        console.log("Available methods:", Object.keys(editorRef.current));
-        clearInterval(interval);
-      } else {
-        console.log("⏳ PostEditorClient: Editor ref not ready yet...");
-      }
-    }, 500);
-    
-    return () => clearInterval(interval);
-  }, []);
+  // 下書きの間はコミット済み画像を CDN でなく draft-assets ルートから読む
+  // (配信 worker が draft の assets を 404 にするため)。
+  const isDraft = form.draft === true;
 
   // 変更検知用
   useEffect(() => {
@@ -158,8 +142,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
           category: form.category,
           description: form.description,
           thumbnail: form.thumbnail,
-          visibility: form.visibility,
-          status: form.status,
+          draft: form.draft === true,
         },
         { pendingImageIds, deletePaths }
       );
@@ -213,6 +196,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
         category={form.category}
         title={form.title}
         description={form.description}
+        draft={isDraft}
         onChange={handleHeaderChange}
       />
 
@@ -223,6 +207,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
             editorRef={editorRef}
             onChange={handleEditorChange}
             articleId={post.uuid}
+            draft={isDraft}
             onInsertImage={onInsertImage}
             committedImageIds={committedImageIds}
           />

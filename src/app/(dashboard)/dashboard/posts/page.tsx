@@ -1,12 +1,12 @@
 import { Button } from "@/components/Button";
-import { getAllPosts } from "@/lib/getAllPosts";
 import { articleImageUrl } from "@/lib/hagaki";
 import { Edit } from "lucide-react";
 import Link from "next/link";
 import { css } from "styled-system/css";
+import { getDashboardPosts } from "./getDashboardPosts";
 
 export default async function Home() {
-  const posts = await getAllPosts();
+  const posts = await getDashboardPosts();
 
   return (
     <div
@@ -81,7 +81,10 @@ export default async function Home() {
             <img
               src={
                 post.thumbnail
-                  ? articleImageUrl(post.uuid, post.thumbnail.imageId)
+                  ? post.draft || post.unpublished
+                    ? // CDN に無い記事のサムネイルはリポジトリ経由で読む
+                      `/api/draft-assets/${post.uuid}/${post.thumbnail.imageId}`
+                    : articleImageUrl(post.uuid, post.thumbnail.imageId)
                   : "/assets/placeholder.svg"
               }
               alt={post.title}
@@ -108,9 +111,43 @@ export default async function Home() {
                   textStyle: "body",
                   color: "colorPalette.fg",
                   fontWeight: "bold",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
                 })}
               >
-                {post.title}
+                {post.title || "(無題)"}
+                {post.draft ? (
+                  <span
+                    className={css({
+                      fontSize: "xs",
+                      fontWeight: "normal",
+                      color: "colorPalette.fg",
+                      bg: "gray.200",
+                      borderRadius: "full",
+                      px: "8px",
+                      py: "2px",
+                      flexShrink: 0,
+                    })}
+                  >
+                    下書き
+                  </span>
+                ) : post.unpublished ? (
+                  <span
+                    className={css({
+                      fontSize: "xs",
+                      fontWeight: "normal",
+                      color: "colorPalette.fg",
+                      bg: "amber.200",
+                      borderRadius: "full",
+                      px: "8px",
+                      py: "2px",
+                      flexShrink: 0,
+                    })}
+                  >
+                    配信待ち
+                  </span>
+                ) : null}
               </h2>
               <p
                 className={css({
@@ -143,7 +180,7 @@ export default async function Home() {
                 })}
                 asChild
               >
-                <Link href={`/dashboard/posts/${post.slug.toLowerCase()}`}>
+                <Link href={`/dashboard/posts/${post.uuid}`}>
                   <Edit />
                   編集
                 </Link>

@@ -84,6 +84,19 @@ const categoryPostsPageStyles = sva({
   },
 });
 
+// 「<カテゴリ名>の記事一覧 | もりのパーティ公式Wiki もりぱうぃき!」になる
+// (接尾辞は root layout の title.template)。
+export async function generateMetadata(props: PageProps) {
+  const { categoryId } = await props.params;
+  const categories = await getAllCategories();
+  const category = categories.find((c) => c.slug === categoryId);
+  if (!category) return {};
+  return {
+    title: `${category.title}の記事一覧`,
+    description: category.body || undefined,
+  };
+}
+
 export default async function Page(props: PageProps) {
   const { params, searchParams } = props;
   const { categoryId } = await params;

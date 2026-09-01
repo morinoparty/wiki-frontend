@@ -15,16 +15,27 @@
 | `src/actions/*.ts` | Server Actions。認証 → バリデーション → 権限 → hagaki 呼び出し → `ApiResult<T>` |
 | `services/github-service.ts` | hagaki client の薄いラッパ。パス組み立てとコミッター生成 |
 | `services/auth-service.ts` | better-auth セッションの取得とロール判定 |
-| `services/permission-service.ts` | admin / editor / viewer と記事の可視性による許可判定 |
+| `services/permission-service.ts` | role (admin / editor / viewer) ベースの許可判定 |
 | `services/validation-service.ts` | Zod スキーマ (`types.ts`) による入力検証 |
 
 ## Actions
 
-- **Core**: `createPost` `updatePost` `deletePost` `lockPost` `unlockPost` `changePostStatus` `transferPostOwnership`
-- **Query**: `getAllPosts` `getPost` `getPostsByCategory` `searchPosts` `getUserPosts`
-- **Batch**: `batchDeletePosts` `batchChangePostsStatus` `duplicatePost`
+- **Core**: `createPost` `updatePost`
+- **Query**: `getPostForEdit` (uuid 指定・要認証。リポジトリから読むので draft も見える)
 - **History**: `getPostHistory` `restorePostVersion` `getPostDiff`
-- **Stats**: `getSystemStats` `getUserStats` `healthCheck`
+
+公開ページの読み取りは actions ではなく `@/lib/getAllPosts` /
+`@/lib/getPostBySlug` (CDN 経由)。draft は配信されないため自動的に除外される。
+
+## 公開状態 (draft)
+
+公開状態は hagaki コンテンツフォーマットの `draft: true` (frontmatter) が正。
+
+- 新規作成は `draft: true` で始まり、エディタのトグルを外して保存すると公開
+- draft は `article.json` / `slug-index.json` に載らず、配信 worker が
+  `article/<uuid>/` 配下を 404 にする
+- draft の画像はエディタ専用の `/api/draft-assets/<uuid>/<imageId>` 経由で
+  リポジトリから読む
 
 すべて `ApiResult<T>` を返す。
 
@@ -59,4 +70,5 @@ if (!result.success) console.error(result.error);
 - 記事画像は AVIF 固定。変換はブラウザ側 (`hagaki/image` の `processImage`) の
   責務で、サーバー側は `validateAvifUpload` で形式とサイズだけ弾く。
 - slug から uuid への解決は配信中の `slug-index.json` を引く。まだデプロイ
-  されていない新規記事は slug では引けない。
+  されていない新規記事や draft は slug では引けない。編集系のルートと
+  action は常に uuid を使うこと。

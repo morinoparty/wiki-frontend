@@ -59,9 +59,10 @@ export function PostCreationClient({
         description: `「${data.title}」が正常に作成されました。`,
       });
 
-      // 成功時は記事の詳細ページにリダイレクト
+      // 成功時は編集ページへ。編集ルートは uuid ベース (slug だと配信側の
+      // slug-index 反映を待つ必要があり、draft はそもそも載らない)。
       if (result.data) {
-        router.push(`/dashboard/posts/${result.data.slug}`);
+        router.push(`/dashboard/posts/${result.data.uuid}`);
       }
     } catch (error) {
       const errorMessage =
