@@ -9,6 +9,8 @@ import { PermissionService } from "./services/permission-service";
 import { getAllCategories } from "@/lib/getAllCategories";
 import { postCommitMessage } from "./services/pending-images";
 import { hasPositionOption } from "@/lib/categoryOptions";
+import { getHagakiClient } from "@/lib/hagaki";
+import { toUrlSlug } from "hagaki";
 
 /**
  * 既存の記事を更新する
@@ -50,7 +52,23 @@ export async function updatePost(
       };
     }
 
-    // 5. カテゴリの座標要件チェック（カテゴリが更新される場合）
+    // 5. slug 衝突チェック（公開する保存のみ）。draft は slug-index に
+    // 載らないため、公開時に既存の公開記事と slug が被っていると
+    // `hagaki generate` が fail してコンテンツのデプロイ全体が止まる。
+    // ここで公開前に弾く (draft 同士の残余ケースは生成側の fail が防波堤)。
+    if (input.draft !== true) {
+      const conflicting = await getHagakiClient().posts.getBySlug(
+        toUrlSlug(input.slug)
+      );
+      if (conflicting && conflicting.uuid !== input.uuid) {
+        return {
+          success: false,
+          error: "このスラッグは既に別の記事で使用されています",
+        };
+      }
+    }
+
+    // 6. カテゴリの座標要件チェック（カテゴリが更新される場合）
     if (input.category && input.category !== existingPost.category) {
       const categories = await getAllCategories();
       const newCategory = categories.find((cat) => cat.slug === input.category);
@@ -75,7 +93,7 @@ export async function updatePost(
       }
     }
 
-    // 6. 更新データの準備。draft は「送られなかった」(undefined) と
+    // 7. 更新データの準備。draft は「送られなかった」(undefined) と
     // 「下書きを外した」(false) を区別する — undefined で既存値を保つ。
     const updatedPost: WikiPostDetail = {
       ...existingPost,
@@ -83,7 +101,7 @@ export async function updatePost(
       draft: typeof input.draft === "boolean" ? input.draft : existingPost.draft,
     };
 
-    // 7. GitHubに保存
+    // 8. GitHubに保存
     const pendingImageIds = context.pendingImageIds ?? [];
     const deletePaths = context.deletePaths ?? [];
     const commitResult = await GitHubService.updatePost(

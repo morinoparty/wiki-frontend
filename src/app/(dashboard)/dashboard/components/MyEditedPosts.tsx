@@ -131,7 +131,7 @@ export async function MyEditedPosts() {
           </div>
           <div className={styles.actions}>
             <Button size="sm" variant="ghost" asChild>
-              <Link href={`/dashboard/posts/${post.slug.toLowerCase()}`}>
+              <Link href={`/dashboard/posts/${post.uuid}`}>
                 <Edit />
                 編集
               </Link>

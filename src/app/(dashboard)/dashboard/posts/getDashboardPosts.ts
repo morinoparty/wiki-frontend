@@ -29,6 +29,10 @@ export async function getDashboardPosts(): Promise<DashboardPost[]> {
   const session = await getSession();
   if (!session?.user?.id) return published;
 
+  // CDN 障害時 (getAllPosts は空配列を返す) に全記事を GitHub API から
+  // 個別取得してしまわないよう、公開分が読めないときは補完もしない。
+  if (published.length === 0) return published;
+
   try {
     const client = getHagakiClient();
     const publishedUuids = new Set(published.map((post) => post.uuid));
