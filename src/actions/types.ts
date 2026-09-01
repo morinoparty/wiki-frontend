@@ -9,14 +9,7 @@ export type ApiResult<T = void> = {
 };
 
 // 操作権限の種類
-export type Permission =
-  | "read"
-  | "write"
-  | "delete"
-  | "lock"
-  | "unlock"
-  | "transfer_ownership"
-  | "change_status";
+export type Permission = "read" | "write" | "delete";
 
 // 操作のコンテキスト
 export type OperationContext = {
@@ -67,24 +60,14 @@ export const CreatePostInputSchema = z.object({
   // 座標情報（option で x / y を宣言しているカテゴリで必須）
   x: z.number().int("X座標は整数で入力してください").optional(),
   y: z.number().int("Y座標は整数で入力してください").optional(),
-  status: z
-    .enum(["draft", "published", "archived"], {
-      error: () => "無効なステータスです",
-    })
-    .optional(),
-  visibility: z
-    .enum(["public", "private", "restricted"], {
-      error: () => "無効な可視性設定です",
-    })
-    .optional(),
-  priority: z
-    .enum(["low", "medium", "high"], {
-      error: () => "無効な優先度です",
-    })
-    .optional(),
+  // 下書きフラグ。frontmatter に永続化され、true の間は配信されない
+  draft: z.boolean().optional(),
 });
 
 export const UpdatePostInputSchema = CreatePostInputSchema.partial().extend({
+  // 更新対象の同一性は uuid で持つ (slug は変わりうるし、draft は
+  // slug-index に載らないため slug では解決できない)
+  uuid: z.uuid("記事 ID が uuid ではありません"),
   slug: z
     .string()
     .trim()
@@ -101,26 +84,6 @@ export type CreatePostInput = z.infer<typeof CreatePostInputSchema>;
 
 // 記事更新時の入力データ
 export type UpdatePostInput = z.infer<typeof UpdatePostInputSchema>;
-
-// ロック操作の入力データ
-export type LockOperationInput = {
-  slug: string;
-  reason?: string;
-};
-
-// ステータス変更の入力データ
-export type StatusChangeInput = {
-  slug: string;
-  status: "draft" | "published" | "archived";
-  reason?: string;
-};
-
-// 所有者変更の入力データ
-export type OwnershipTransferInput = {
-  slug: string;
-  newOwnerId: string;
-  reason?: string;
-};
 
 // 履歴アイテム
 export type PostHistoryItem = {

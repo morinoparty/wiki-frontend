@@ -4,7 +4,6 @@ import { ApiResult, PostHistoryItem } from "./types";
 import { WikiPostDetail } from "@/types/wiki";
 import { GitHubService } from "./services/github-service";
 import { AuthService } from "./services/auth-service";
-import { PermissionService } from "./services/permission-service";
 
 /**
  * 記事の履歴を取得
@@ -19,26 +18,7 @@ export async function getPostHistory(
       return { success: false, error: "認証が必要です" };
     }
 
-    // 2. 記事の存在チェック
-    const post = await GitHubService.getPost(slug);
-    if (!post) {
-      return { success: false, error: "記事が見つかりません" };
-    }
-
-    // 3. 権限チェック
-    const hasPermission = await PermissionService.checkPostPermission(
-      session.user.id,
-      post,
-      "read"
-    );
-    if (!hasPermission) {
-      return {
-        success: false,
-        error: "この記事の履歴を閲覧する権限がありません",
-      };
-    }
-
-    // 4. GitHubから履歴を取得
+    // 2. GitHubから履歴を取得
     const history = await GitHubService.getPostHistory(slug);
     if (!history.success) {
       return { success: false, error: history.error };
@@ -79,25 +59,7 @@ export async function restorePostVersion(
       return { success: false, error: "記事が見つかりません" };
     }
 
-    // 3. 権限チェック
-    const hasPermission = await PermissionService.checkPostPermission(
-      session.user.id,
-      currentPost,
-      "write"
-    );
-    if (!hasPermission) {
-      return { success: false, error: "この記事を復元する権限がありません" };
-    }
-
-    // 4. ロックチェック
-    if (currentPost.isLocked && currentPost.documentOwner !== session.user.id) {
-      return {
-        success: false,
-        error: "ロックされた記事は所有者のみが復元できます",
-      };
-    }
-
-    // 5. 指定されたバージョンのデータを取得
+    // 3. 指定されたバージョンのデータを取得
     const versionData = await GitHubService.getPostAtCommit(slug, commitId);
     if (!versionData.success) {
       return { success: false, error: versionData.error };
@@ -107,20 +69,8 @@ export async function restorePostVersion(
       return { success: false, error: "指定されたバージョンが見つかりません" };
     }
 
-    // 6. 復元データの準備
-    const now = new Date().toISOString();
-    const restoredPost: WikiPostDetail = {
-      ...versionData.data,
-      updatedAt: now,
-      lastModifiedBy: session.user.id,
-      version: (currentPost.version || 1) + 1,
-      // メタデータは現在のものを保持
-      createdAt: currentPost.createdAt,
-      createdBy: currentPost.createdBy,
-      documentOwner: currentPost.documentOwner,
-    };
-
-    // 7. GitHubに保存
+    // 4. GitHubに保存
+    const restoredPost: WikiPostDetail = versionData.data;
     const commitResult = await GitHubService.updatePost(
       restoredPost,
       `Restore post to version ${commitId}: ${currentPost.title} (${reason || "No reason provided"})`,
@@ -161,26 +111,7 @@ export async function getPostDiff(
       return { success: false, error: "認証が必要です" };
     }
 
-    // 2. 記事の存在チェック
-    const post = await GitHubService.getPost(slug);
-    if (!post) {
-      return { success: false, error: "記事が見つかりません" };
-    }
-
-    // 3. 権限チェック
-    const hasPermission = await PermissionService.checkPostPermission(
-      session.user.id,
-      post,
-      "read"
-    );
-    if (!hasPermission) {
-      return {
-        success: false,
-        error: "この記事の差分を閲覧する権限がありません",
-      };
-    }
-
-    // 4. GitHubから差分を取得
+    // 2. GitHubから差分を取得
     const diff = await GitHubService.getPostDiff(slug, fromCommit, toCommit);
     if (!diff.success) {
       return { success: false, error: diff.error };

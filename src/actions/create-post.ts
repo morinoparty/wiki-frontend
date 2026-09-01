@@ -39,6 +39,8 @@ export async function createPost(
     }
 
     // 4. スラッグの重複チェック
+    // 配信中の slug-index 経由なので draft のスラッグまでは見えない。
+    // 公開記事同士の重複は生成側 (hagaki generate) が fail して防ぐ。
     const exists = await GitHubService.checkPostExists(input.slug);
     if (exists) {
       return { success: false, error: "このスラッグは既に使用されています" };
@@ -68,7 +70,6 @@ export async function createPost(
     }
 
     // 6. 記事データの準備
-    const now = new Date().toISOString();
     const postData: WikiPostDetail = {
       ...input,
       body: input.body,
@@ -76,15 +77,9 @@ export async function createPost(
       thumbnail: input.thumbnail ?? null,
       created: null,
       updated: null,
-      createdAt: now,
-      updatedAt: now,
-      createdBy: session.user.id,
-      documentOwner: session.user.id,
-      lastModifiedBy: session.user.id,
-      status: "draft", // 新規作成時は常にdraftステータス
-      visibility: input.visibility || "public",
-      version: 1,
-      isLocked: false,
+      // 新規作成は下書きから始める。配信されるのはエディタで下書きを
+      // 外して保存したあと (draft は frontmatter に永続化される)。
+      draft: input.draft ?? true,
       // 座標を宣言しているカテゴリのときだけ座標情報を含める
       ...(hasPositionOption(category) && {
         x: input.x,

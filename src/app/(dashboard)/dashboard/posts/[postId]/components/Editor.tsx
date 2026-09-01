@@ -30,6 +30,8 @@ export interface EditorProps {
   editorRef?: MutableRefObject<MDXEditorMethods | null>;
   /** 編集中の記事の uuid。画像の一時置き場のキーと表示 URL に使う。 */
   articleId: string;
+  /** 下書き記事か。コミット済み画像を CDN でなくリポジトリ経由で表示する。 */
+  draft?: boolean;
   /** ファイルを受け取って `<Image />` の属性を返す (analyze + pending 開始)。 */
   onInsertImage: (file: File) => Promise<ImageComponentAttrs>;
   /** 既にコミット済みの画像 id。これ以外は一時置き場から表示する。 */
@@ -41,6 +43,7 @@ export default function Editor({
   onChange,
   editorRef,
   articleId,
+  draft,
   onInsertImage,
   committedImageIds,
 }: EditorProps) {
@@ -60,7 +63,7 @@ export default function Editor({
         // id だけ CDN を見て、それ以外は一時置き場から引く。
         getPending(id)?.previewUrl ??
         (committedImageIds.has(id)
-          ? committedImageUrl(id, articleId)
+          ? committedImageUrl(id, articleId, draft)
           : pendingImagePreviewUrl(articleId, id))
       }
       // 旧形式 `![alt](/article/...)` の画像は CDN URL に解決する。

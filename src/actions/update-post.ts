@@ -30,13 +30,14 @@ export async function updatePost(
       return { success: false, error: validationResult.error };
     }
 
-    // 3. 既存記事の取得
-    const existingPost = await GitHubService.getPost(input.slug);
+    // 3. 既存記事の取得。draft は slug-index に載らないため、slug ではなく
+    // uuid でリポジトリから直接引く (未配信の変更も見える)。
+    const existingPost = await GitHubService.getPostByUuid(input.uuid);
     if (!existingPost) {
       return { success: false, error: "記事が見つかりません" };
     }
 
-    // 4. 権限チェック（ロック状態も含めて一元管理）
+    // 4. 権限チェック
     const hasPermission = await PermissionService.checkPostPermission(
       session.user.id,
       existingPost,
@@ -45,9 +46,7 @@ export async function updatePost(
     if (!hasPermission) {
       return {
         success: false,
-        error: existingPost.isLocked
-          ? "この記事はロックされています。管理者のみが編集できます"
-          : "この記事を編集する権限がありません",
+        error: "この記事を編集する権限がありません",
       };
     }
 
@@ -76,14 +75,12 @@ export async function updatePost(
       }
     }
 
-    // 6. 更新データの準備
-    const now = new Date().toISOString();
+    // 6. 更新データの準備。draft は「送られなかった」(undefined) と
+    // 「下書きを外した」(false) を区別する — undefined で既存値を保つ。
     const updatedPost: WikiPostDetail = {
       ...existingPost,
       ...input,
-      updatedAt: now,
-      lastModifiedBy: session.user.id,
-      version: (existingPost.version || 1) + 1,
+      draft: typeof input.draft === "boolean" ? input.draft : existingPost.draft,
     };
 
     // 7. GitHubに保存

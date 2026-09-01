@@ -1,8 +1,10 @@
 import { PostEditorClient } from "./components/PostEditorClient";
-import { getPost } from "@/actions/queries";
+import { getPostForEdit } from "@/actions/queries";
 import { notFound } from "next/navigation";
 
 interface PageProps {
+  // 編集対象は uuid で指定する。slug は変わりうるうえ、draft は
+  // slug-index に載らないため slug では解決できない。
   params: Promise<{ postId: string }>;
 }
 
@@ -12,7 +14,7 @@ export default async function Page(props: PageProps) {
 
   if (!postId) return notFound();
 
-  const result = await getPost(postId);
+  const result = await getPostForEdit(postId);
 
   if (!result.success || !result.data) return notFound();
 

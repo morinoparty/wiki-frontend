@@ -36,8 +36,18 @@ export function pendingImagePreviewUrl(
   return `/api/pending-images/${postUuid}/${imageId}`;
 }
 
-/** コミット済み画像の表示 URL (CDN)。 */
-export function committedImageUrl(imageId: string, postUuid: string): string {
+/**
+ * コミット済み画像の表示 URL。公開記事は CDN、draft は配信 worker に
+ * 遮断されるため認証付きの draft-assets ルート経由でリポジトリから読む。
+ */
+export function committedImageUrl(
+  imageId: string,
+  postUuid: string,
+  draft?: boolean
+): string {
+  if (draft) {
+    return `/api/draft-assets/${postUuid}/${imageId}`;
+  }
   return resolveCdnUrl(
     `${imageUrlPrefix(postUuid)}${imageId}.avif`,
     CONTENT_BASE_URL

@@ -1,8 +1,9 @@
 "use client";
 
 import { Editable } from "@ark-ui/react/editable";
+import { Switch } from "@ark-ui/react/switch";
 import { Spinner } from "@morinoparty/chlorophyll-react/components";
-import { Tag, Image } from "lucide-react";
+import { Tag, Image, EyeOff } from "lucide-react";
 import { Button } from "@/components/Button";
 import { postHeaderStyles } from "@/components/PostHeader";
 import { css, cx, sva } from "styled-system/css";
@@ -61,11 +62,14 @@ interface PostHeaderEditProps {
   category: string;
   title: string;
   description: string;
+  /** 下書きか。true の間は配信されない (frontmatter に永続化)。 */
+  draft?: boolean;
   onChange?: (fields: {
-    title: string;
-    description: string;
-    category: string;
+    title?: string;
+    description?: string;
+    category?: string;
     thumbnail?: WikiThumbnail | null;
+    draft?: boolean;
   }) => void;
   disabled?: boolean;
   onSaveComplete?: boolean;
@@ -77,6 +81,7 @@ export function PostHeaderEdit({
   category,
   title,
   description,
+  draft,
   onChange,
   disabled,
   onSaveComplete,
@@ -85,8 +90,12 @@ export function PostHeaderEdit({
   const fileInputRef = useRef<HTMLInputElement>(null);
   // 画像プレビュー用のローカルステート
   const [thumb, setThumb] = useState<WikiThumbnail | null>(thumbnail ?? null);
+  // 下書きのコミット済みサムネイルは CDN に無い (配信 worker が遮断する)
+  // ため、認証付きの draft-assets ルート経由でリポジトリから読む。
   const previewImage = thumb
-    ? `article/${articleId}/assets/${thumb.imageId}.avif`
+    ? draft
+      ? `/api/draft-assets/${articleId}/${thumb.imageId}`
+      : `${CONTENT_BASE_URL}/article/${articleId}/assets/${thumb.imageId}.avif`
     : undefined;
   // アップロード直後のbase64キャッシュ
   const [base64Cache, setBase64Cache] = useState<string | null>(null);
@@ -236,7 +245,7 @@ export function PostHeaderEdit({
       <div
         className={classes.image}
         style={{
-          backgroundImage: `url(${`${CONTENT_BASE_URL}/${previewImage}`})`,
+          backgroundImage: `url(${previewImage})`,
           position: "relative",
         }}
       />
@@ -280,6 +289,60 @@ export function PostHeaderEdit({
               ? "カバー画像を変更"
               : "カバー画像を追加"}
         </Button>
+        <Switch.Root
+          checked={draft === true}
+          onCheckedChange={(details: { checked: boolean }) =>
+            onChange?.({ draft: details.checked })
+          }
+          disabled={disabled}
+          className={css({
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            ml: "8px",
+            cursor: "pointer",
+            opacity: 0.7,
+          })}
+        >
+          <Switch.Control
+            className={css({
+              display: "inline-flex",
+              alignItems: "center",
+              width: "36px",
+              height: "20px",
+              p: "2px",
+              borderRadius: "full",
+              bg: "gray.300",
+              transition: "background 0.15s",
+              _checked: { bg: "colorPalette.default" },
+            })}
+          >
+            <Switch.Thumb
+              className={css({
+                width: "16px",
+                height: "16px",
+                borderRadius: "full",
+                bg: "white",
+                transition: "transform 0.15s",
+                _checked: { transform: "translateX(16px)" },
+              })}
+            />
+          </Switch.Control>
+          <Switch.Label
+            className={css({
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+              textStyle: "body",
+              fontSize: "sm",
+              color: "colorPalette.fg",
+            })}
+          >
+            <EyeOff size={14} aria-hidden />
+            下書き（非公開）
+          </Switch.Label>
+          <Switch.HiddenInput />
+        </Switch.Root>
       </div>
     );
   };

@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import { getAllCategories } from "@/lib/getAllCategories";
 import { getAllPosts } from "@/lib/getAllPosts";
 import { Tag } from "lucide-react";
 import Link from "next/link";
 import { css, sva } from "styled-system/css";
+
+export const metadata: Metadata = {
+  title: "カテゴリ一覧",
+  description:
+    "もりのパーティ公式Wiki「もりぱうぃき!」の記事カテゴリ一覧です。",
+};
 
 /**
  * カテゴリ一覧。サイドバーの「カテゴリ一覧」の遷移先で、

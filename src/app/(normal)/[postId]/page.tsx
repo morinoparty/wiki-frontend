@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getPostBySlug } from "@/lib/getPostBySlug";
 import { getAllPosts } from "@/lib/getAllPosts";
 import { articleImageUrl } from "@/lib/hagaki";
@@ -14,6 +15,32 @@ import { Edit } from "lucide-react";
 // 動的ルートのパラメータ型
 interface PageProps {
   params: Promise<{ postId: string }>;
+}
+
+// 「<記事タイトル> | もりのパーティ公式Wiki もりぱうぃき!」の形になる
+// (接尾辞は root layout の title.template)。
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { postId } = await params;
+  const post = await getPostBySlug(postId);
+  if (!post) return {};
+
+  return {
+    title: post.title,
+    description: post.description || undefined,
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.description || undefined,
+      ...(post.thumbnail
+        ? { images: [articleImageUrl(post.uuid, post.thumbnail.imageId)] }
+        : {}),
+    },
+    twitter: {
+      card: post.thumbnail ? "summary_large_image" : "summary",
+    },
+  };
 }
 
 export default async function Page({ params }: PageProps) {
@@ -86,7 +113,7 @@ export default async function Page({ params }: PageProps) {
             },
           })}
         >
-          <Link href={`/dashboard/posts/${post.slug}`}>
+          <Link href={`/dashboard/posts/${post.uuid}`}>
             <Edit />
             <span
               className={css({
