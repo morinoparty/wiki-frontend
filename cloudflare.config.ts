@@ -28,7 +28,7 @@ export default defineConfig({
 		env: {
 			ASSETS: bindings.assets(),
 			// MineAuth の OAuth クライアント ID (公開値)
-			CLIENT_ID: bindings.text("019fe59c-1673-72f5-a5d2-49cce1d4161f"),
+			CLIENT_ID: bindings.text("01a15d04-65b7-71d3-b069-f9a6d77ad92c"),
 			// 以下は Worker secret。deploy 時に `cf deploy --secrets-file` で渡し、
 			// ローカルでは .env から読む (src/lib/env.ts)
 			// Better Auth の署名鍵
