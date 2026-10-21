@@ -2,9 +2,9 @@
 
 import { useCallback, useRef, useState } from "react";
 import type { DragEvent } from "react";
-import type { MDXEditorMethods } from "hagaki/editor";
-import type { ImageComponentAttrs } from "hagaki/markdown";
-import { imageComponentMarkdown } from "hagaki/markdown";
+import type { MDXEditorMethods } from "@morinoparty/hagaki/editor";
+import type { ImageComponentAttrs } from "@morinoparty/hagaki/markdown";
+import { imageComponentMarkdown } from "@morinoparty/hagaki/markdown";
 import { toaster } from "@/components/ui/toaster";
 
 /**

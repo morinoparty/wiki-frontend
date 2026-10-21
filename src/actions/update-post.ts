@@ -14,7 +14,7 @@ import {
 } from "./services/post-images";
 import { validateOptionValues } from "@/lib/categoryOptions";
 import { getHagakiClient } from "@/lib/hagaki";
-import { toUrlSlug } from "hagaki";
+import { toUrlSlug } from "@morinoparty/hagaki";
 
 /**
  * 既存の記事を更新する

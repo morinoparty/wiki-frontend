@@ -1,4 +1,4 @@
-import { createHagakiClient, type HagakiClient } from "hagaki";
+import { createHagakiClient, type HagakiClient } from "@morinoparty/hagaki";
 import { CONTENT_BASE_URL, WIKI_REPO } from "./content";
 import { getEnv } from "./env";
 

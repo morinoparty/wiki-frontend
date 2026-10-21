@@ -8,7 +8,7 @@ import type {
   WikiPost as HagakiPost,
   WikiPostDetail as HagakiPostDetail,
   WikiThumbnail,
-} from "hagaki";
+} from "@morinoparty/hagaki";
 
 export type {
   CategoryOptionEnumValue,

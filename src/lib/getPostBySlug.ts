@@ -1,4 +1,4 @@
-import { toUrlSlug } from "hagaki";
+import { toUrlSlug } from "@morinoparty/hagaki";
 import type { WikiPostDetail } from "@/types/wiki";
 import { getHagakiClient } from "./hagaki";
 

@@ -11,8 +11,8 @@ import { EditorNav } from "@/components/EditorNav";
 import { Button } from "@/components/Button";
 import { Spinner } from "@morinoparty/chlorophyll-react/components";
 import dynamic from "next/dynamic";
-import type { MDXEditorMethods } from "hagaki/editor";
-import { diffRemovedImagePaths } from "hagaki/markdown";
+import type { MDXEditorMethods } from "@morinoparty/hagaki/editor";
+import { diffRemovedImagePaths } from "@morinoparty/hagaki/markdown";
 import {
   findUncommittedImageIds,
   hasActive,
@@ -20,7 +20,7 @@ import {
   removePending,
   subscribe,
   sweepOrphanedErrors,
-} from "hagaki/pending-images";
+} from "@morinoparty/hagaki/pending-images";
 import {
   buildImageForm,
   handleInsertImage,

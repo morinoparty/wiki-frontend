@@ -3,7 +3,7 @@
 MoripaWiki の閲覧・編集 UI。Next.js の App Router で書いたアプリを
 [vinext](https://vinext.dev) (Vite 上の Next.js 互換実装) でビルドし、
 Cloudflare Workers で動かします。記事の読み書きは
-[hagaki](https://github.com/Nlkomaru/hagaki) 経由です。
+[hagaki](https://github.com/morinoparty/hagaki) 経由です。
 
 - 配信 URL: `https://wiki-frontend.<subdomain>.workers.dev` (Worker 名 `wiki-frontend`。独自ドメインなし)
 - デプロイ: Cloudflare CLI [`cf`](https://developers.cloudflare.com/cf/) (beta)。main への push で GitHub Actions が実行

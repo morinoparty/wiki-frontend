@@ -1,12 +1,12 @@
 "use client";
 
-import type { ImageComponentAttrs } from "hagaki/markdown";
+import type { ImageComponentAttrs } from "@morinoparty/hagaki/markdown";
 import {
   collectPendingImages,
   type PendingImage,
   PendingImageError,
   startPending,
-} from "hagaki/pending-images";
+} from "@morinoparty/hagaki/pending-images";
 import {
   IMAGE_FORM_FIELDS,
   SAVE_REQUEST_LIMIT_BYTES,

@@ -4,13 +4,13 @@
 // いけない。順序に意味があるので他の import の下に動かさないこと。
 import "./prism-global";
 
-import { HagakiEditor, type MDXEditorMethods } from "hagaki/editor";
-import type { ImageComponentAttrs } from "hagaki/markdown";
-import { getPending } from "hagaki/pending-images";
+import { HagakiEditor, type MDXEditorMethods } from "@morinoparty/hagaki/editor";
+import type { ImageComponentAttrs } from "@morinoparty/hagaki/markdown";
+import { getPending } from "@morinoparty/hagaki/pending-images";
 import { ImagePlus } from "lucide-react";
 import type { MutableRefObject } from "react";
 import { css } from "styled-system/css";
-import { resolveCdnUrl } from "hagaki";
+import { resolveCdnUrl } from "@morinoparty/hagaki";
 import { CONTENT_BASE_URL } from "@/lib/content";
 import { committedImageUrl } from "./pending-images";
 import { useImageDrop } from "./useImageDrop";

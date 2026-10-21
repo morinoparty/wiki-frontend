@@ -1,6 +1,6 @@
 "use client";
 
-import { Image, type HagakiImageProps } from "hagaki/react";
+import { Image, type HagakiImageProps } from "@morinoparty/hagaki/react";
 
 /**
  * `hagaki/react` の `<Image>` をクライアント境界に閉じ込めるラッパ。

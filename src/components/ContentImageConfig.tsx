@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { HagakiImageConfig } from "hagaki/react";
+import { HagakiImageConfig } from "@morinoparty/hagaki/react";
 import { articleImageUrl } from "@/lib/content";
 
 /**

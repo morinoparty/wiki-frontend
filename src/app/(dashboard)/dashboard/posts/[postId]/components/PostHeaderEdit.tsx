@@ -41,7 +41,7 @@ const editableStyles = sva({
   },
 });
 import { useRef, useState, useEffect } from "react";
-import { blurhashToBase64 } from "hagaki/markdown";
+import { blurhashToBase64 } from "@morinoparty/hagaki/markdown";
 import type { WikiThumbnail } from "@/types/wiki";
 import { handleInsertImage } from "./pending-images";
 import { toaster } from "@/components/ui/toaster";

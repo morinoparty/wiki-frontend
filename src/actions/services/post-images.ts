@@ -1,5 +1,5 @@
-import type { CommitFile } from "hagaki";
-import { ImageValidationError, validateAvifUpload } from "hagaki/image";
+import type { CommitFile } from "@morinoparty/hagaki";
+import { ImageValidationError, validateAvifUpload } from "@morinoparty/hagaki/image";
 import { articleAssetsDir } from "@/lib/content";
 import { IMAGE_FORM_FIELDS } from "@/lib/post-images";
 

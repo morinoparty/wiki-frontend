@@ -181,15 +181,15 @@ importers:
       '@morinoparty/chlorophyll-react':
         specifier: 0.4.10
         version: 0.4.10(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@morinoparty/hagaki':
+        specifier: ^0.2.0
+        version: 0.2.0(@mdxeditor/editor@4.3.3(@codemirror/language@6.13.1)(@lezer/highlight@1.2.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(yjs@13.6.33))(@mdxeditor/gurx@1.2.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(lexical@0.48.0(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)
       better-auth:
         specifier: ^1.7.11
         version: 1.7.11(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       flexsearch:
         specifier: ^0.8.212
         version: 0.8.212
-      hagaki:
-        specifier: github:Nlkomaru/hagaki#dist
-        version: https://codeload.github.com/Nlkomaru/hagaki/tar.gz/bcdc8a6f672f1a55b2fe29722ff777b23609b834(@mdxeditor/editor@4.3.3(@codemirror/language@6.13.1)(@lezer/highlight@1.2.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(yjs@13.6.33))(@mdxeditor/gurx@1.2.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(lexical@0.48.0(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)
       lexical:
         specifier: ^0.48.0
         version: 0.48.0(typescript@7.0.2)
@@ -1369,6 +1369,17 @@ packages:
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
+
+  '@morinoparty/hagaki@0.2.0':
+    resolution: {integrity: sha512-AC+kZsBDbwo2T2HsEfNXSN82Q99iAMHu9yCVxa+9Nd6xN8QK//xmMY4yvsq0FWB4Q7m0xG6bXfMc92swjFQn8A==, tarball: https://npm.pkg.github.com/download/@morinoparty/hagaki/0.2.0/25ad65c3a330c5b7f3195ffffb569c9de3ede261}
+    engines: {node: '>=26.12.0'}
+    hasBin: true
+    peerDependencies:
+      '@mdxeditor/editor': ^4
+      '@mdxeditor/gurx': ^1.2.4
+      lexical: ^0.48.0
+      react: '>=18'
+      react-dom: '>=18'
 
   '@noble/ciphers@2.4.0':
     resolution: {integrity: sha512-AnjFn0Jv92laAkvMrghlFZq4qQCIN/4DxFV/eooqtC2YTjB7kBeLMS2T9KJX4Dn+ZVXLOwK0lSgqDtx9gvxtiw==}
@@ -3303,29 +3314,6 @@ packages:
   gray-matter@4.0.3:
     resolution: {integrity: sha512-5v6yZd4JK3eMI3FqqCouswVqwugaA9r4dNZB1wwcmrD02QkV5H0y7XBQW8QwQqEaZY1pM9aqORSORhJRdNK44Q==}
     engines: {node: '>=6.0'}
-
-  hagaki@https://codeload.github.com/Nlkomaru/hagaki/tar.gz/bcdc8a6f672f1a55b2fe29722ff777b23609b834:
-    resolution: {gitHosted: true, integrity: sha512-KWktMCv2NavY+Vu3OmkmNw4NaU5EOURjlT1JjVnOVqfLW+/RMCHjU783DpNOlcQorAovLpvbw43PqNAboLt1Jg==, tarball: https://codeload.github.com/Nlkomaru/hagaki/tar.gz/bcdc8a6f672f1a55b2fe29722ff777b23609b834}
-    version: 0.1.0
-    engines: {node: '>=26.12.0'}
-    hasBin: true
-    peerDependencies:
-      '@mdxeditor/editor': ^4
-      '@mdxeditor/gurx': ^1.2.4
-      lexical: ^0.48.0
-      react: '>=18'
-      react-dom: '>=18'
-    peerDependenciesMeta:
-      '@mdxeditor/editor':
-        optional: true
-      '@mdxeditor/gurx':
-        optional: true
-      lexical:
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
 
   harfbuzzjs@0.10.0:
     resolution: {integrity: sha512-SN8LVwCOzvTq3OPNd0+EAghgXugItz56wst567D1vs7LnnKGWprhi3EG58aVOBwhN8HEbQxL4I9NDWkcXUutRw==}
@@ -6237,6 +6225,25 @@ snapshots:
       - immer
       - react-native
 
+  '@morinoparty/hagaki@0.2.0(@mdxeditor/editor@4.3.3(@codemirror/language@6.13.1)(@lezer/highlight@1.2.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(yjs@13.6.33))(@mdxeditor/gurx@1.2.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(lexical@0.48.0(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)':
+    dependencies:
+      '@jsquash/avif': 2.1.1
+      '@mdxeditor/editor': 4.3.3(@codemirror/language@6.13.1)(@lezer/highlight@1.2.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(yjs@13.6.33)
+      '@mdxeditor/gurx': 1.2.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      blurhash: 2.0.5
+      gray-matter: 4.0.3
+      hono: 4.13.13
+      lexical: 0.48.0(typescript@7.0.2)
+      octokit: 5.0.5
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+      remark-mdx: 3.1.1(supports-color@10.2.2)
+      remark-parse: 11.0.0(supports-color@10.2.2)
+      unified: 11.0.5
+      uuid: 14.0.3
+    transitivePeerDependencies:
+      - supports-color
+
   '@noble/ciphers@2.4.0': {}
 
   '@noble/hashes@2.4.0': {}
@@ -8593,26 +8600,6 @@ snapshots:
       kind-of: 6.0.3
       section-matter: 1.0.0
       strip-bom-string: 1.0.0
-
-  hagaki@https://codeload.github.com/Nlkomaru/hagaki/tar.gz/bcdc8a6f672f1a55b2fe29722ff777b23609b834(@mdxeditor/editor@4.3.3(@codemirror/language@6.13.1)(@lezer/highlight@1.2.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(yjs@13.6.33))(@mdxeditor/gurx@1.2.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(lexical@0.48.0(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2):
-    dependencies:
-      '@jsquash/avif': 2.1.1
-      blurhash: 2.0.5
-      gray-matter: 4.0.3
-      hono: 4.13.13
-      octokit: 5.0.5
-      remark-mdx: 3.1.1(supports-color@10.2.2)
-      remark-parse: 11.0.0(supports-color@10.2.2)
-      unified: 11.0.5
-      uuid: 14.0.3
-    optionalDependencies:
-      '@mdxeditor/editor': 4.3.3(@codemirror/language@6.13.1)(@lezer/highlight@1.2.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(yjs@13.6.33)
-      '@mdxeditor/gurx': 1.2.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      lexical: 0.48.0(typescript@7.0.2)
-      react: 19.3.1
-      react-dom: 19.3.1(react@19.3.1)
-    transitivePeerDependencies:
-      - supports-color
 
   harfbuzzjs@0.10.0: {}
 

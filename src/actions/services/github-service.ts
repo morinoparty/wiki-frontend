@@ -1,5 +1,5 @@
-import type { CommitFile, Committer } from "hagaki";
-import { committerFromBetterAuth } from "hagaki/auth/better-auth";
+import type { CommitFile, Committer } from "@morinoparty/hagaki";
+import { committerFromBetterAuth } from "@morinoparty/hagaki/auth/better-auth";
 import { getHagakiClient } from "@/lib/hagaki";
 import { WikiPostDetail } from "@/types/wiki";
 import type { AppSession } from "@/lib/auth";

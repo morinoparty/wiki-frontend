@@ -1,4 +1,4 @@
-import type { WikiHistoryEntry, WikiThumbnail } from "hagaki";
+import type { WikiHistoryEntry, WikiThumbnail } from "@morinoparty/hagaki";
 import { CONTENT_BASE_URL } from "./content";
 
 /**

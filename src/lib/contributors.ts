@@ -1,4 +1,4 @@
-import type { WikiHistoryEntry } from "hagaki";
+import type { WikiHistoryEntry } from "@morinoparty/hagaki";
 import type { ArticleEditor } from "@/types/wiki";
 
 /**
