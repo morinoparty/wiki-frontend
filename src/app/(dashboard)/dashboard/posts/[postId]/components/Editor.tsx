@@ -11,8 +11,8 @@ import { ImagePlus } from "lucide-react";
 import type { MutableRefObject } from "react";
 import { css } from "styled-system/css";
 import { resolveCdnUrl } from "hagaki";
-import { CONTENT_BASE_URL } from "@/lib/hagaki";
-import { committedImageUrl, pendingImagePreviewUrl } from "./pending-images";
+import { CONTENT_BASE_URL } from "@/lib/content";
+import { committedImageUrl } from "./pending-images";
 import { useImageDrop } from "./useImageDrop";
 
 import "@mdxeditor/editor/style.css";
@@ -22,8 +22,8 @@ import "./mdx-editor-custom.css";
  * 記事本文のエディタ。hagaki の `<HagakiEditor>` (MDXEditor ベース) に
  * このプロジェクトのツールバー構成とスタイルを載せたもの。
  *
- * 画像は `<Image imageId="…" />` として挿入され、バイト列は保存されるまで
- * R2 の一時置き場に置かれる (`./pending-images`)。エディタ自身はコミットを
+ * 画像は `<Image imageId="…" />` として挿入され、AVIF の Blob は保存されるまで
+ * ブラウザのメモリに置かれる (`./pending-images`)。エディタ自身はコミットを
  * 打たない — 記事の保存時に本文と同じコミットへまとめて載る。
  *
  * ツールバーの挿入ボタンとドラッグ&ドロップ (`useImageDrop`) はどちらも
@@ -33,14 +33,12 @@ export interface EditorProps {
   markdown: string;
   onChange: (markdown: string) => void;
   editorRef?: MutableRefObject<MDXEditorMethods | null>;
-  /** 編集中の記事の uuid。画像の一時置き場のキーと表示 URL に使う。 */
+  /** 編集中の記事の uuid。コミット済み画像の表示 URL に使う。 */
   articleId: string;
   /** 下書き記事か。コミット済み画像を CDN でなくリポジトリ経由で表示する。 */
   draft?: boolean;
   /** ファイルを受け取って `<Image />` の属性を返す (analyze + pending 開始)。 */
   onInsertImage: (file: File) => Promise<ImageComponentAttrs>;
-  /** 既にコミット済みの画像 id。これ以外は一時置き場から表示する。 */
-  committedImageIds: ReadonlySet<string>;
 }
 
 export default function Editor({
@@ -50,7 +48,6 @@ export default function Editor({
   articleId,
   draft,
   onInsertImage,
-  committedImageIds,
 }: EditorProps) {
   const { isDragOver, dropHandlers } = useImageDrop({
     editorRef,
@@ -87,17 +84,10 @@ export default function Editor({
         editorRef={editorRef}
         onInsertImage={onInsertImage}
         imagePreviewUrlFor={(id) =>
-          // アップロード中は descriptor が pending store を直接見る。ここは
-          // アップロード完了後のプレビュー URL と、コミット済み画像の CDN URL
-          // の解決を担う。
-          //
-          // store に無くてもコミット済みとは限らない: リロードすると store は
-          // 空になるが、バイト列は R2 の一時置き場に残っている。コミット済みの
-          // id だけ CDN を見て、それ以外は一時置き場から引く。
-          getPending(id)?.previewUrl ??
-          (committedImageIds.has(id)
-            ? committedImageUrl(id, articleId, draft)
-            : pendingImagePreviewUrl(articleId, id))
+          // エンコード中は descriptor が pending store を直接見て blurhash を
+          // 出す。ここはエンコード後の object URL と、コミット済み画像の URL
+          // の解決を担う。store に無い id はコミット済みとして扱う。
+          getPending(id)?.previewUrl ?? committedImageUrl(id, articleId, draft)
         }
         // 旧形式 `![alt](/article/...)` の画像は CDN URL に解決する。
         onImagePreview={async (src) => resolveCdnUrl(src, CONTENT_BASE_URL)}

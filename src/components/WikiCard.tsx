@@ -1,7 +1,7 @@
 import { sva } from "styled-system/css";
 import Link from "next/link";
 import { WikiPost } from "@/types/wiki";
-import { articleImageUrl } from "@/lib/hagaki";
+import { articleImageUrl } from "@/lib/content";
 
 const wikiCardStyles = sva({
   slots: [

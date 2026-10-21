@@ -23,9 +23,3 @@ export async function getPostBySlug(
   return posts.getBySlug(normalized);
 }
 
-/** uuid 指定で記事を取得する (ダッシュボードの編集画面など)。 */
-export async function getPostByUuid(
-  uuid: string
-): Promise<WikiPostDetail | null> {
-  return getHagakiClient().posts.getByUuid(uuid);
-}

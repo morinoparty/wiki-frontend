@@ -1,16 +1,10 @@
-import type { Committer } from "hagaki";
+import type { CommitFile, Committer } from "hagaki";
 import { committerFromBetterAuth } from "hagaki/auth/better-auth";
-import { getHagakiClient, WIKI_REPO } from "@/lib/hagaki";
+import { getHagakiClient } from "@/lib/hagaki";
 import { WikiPostDetail } from "@/types/wiki";
 import type { AppSession } from "@/lib/auth";
-import { randomUUID } from "crypto";
-import { ImageValidationError, validateAvifUpload } from "hagaki/image";
-import {
-  assertOwnedAssetPath,
-  collectPendingImages,
-  deletePendingImages,
-  PendingImageError,
-} from "./pending-images";
+import { randomUUID } from "node:crypto";
+import { assertOwnedAssetPath, PostImageError } from "./post-images";
 
 /**
  * GitHub 上の wiki コンテンツを読み書きするサービス。
@@ -24,11 +18,6 @@ import {
  * 配信済みの内容は CDN、編集中の内容はリポジトリから読む。
  */
 export class GitHubService {
-  /** 記事に属する画像のパス。 */
-  private static getAssetPath(uuid: string, imageId: string): string {
-    return `${WIKI_REPO.contentPath}/${uuid}/assets/${imageId}.avif`;
-  }
-
   /**
    * slug から uuid を解決する。配信中の `slug-index.json` を引く hagaki の
    * `posts.getBySlug` に委譲するため、まだ配信されていない記事は解決できない。
@@ -84,15 +73,6 @@ export class GitHubService {
   }
 
   /**
-   * 記事を取得
-   */
-  static async getPost(slug: string): Promise<WikiPostDetail | null> {
-    const uuid = await this.resolveUuid(slug);
-    if (!uuid) return null;
-    return this.getPostByUuid(uuid);
-  }
-
-  /**
    * 新しい記事を作成
    */
   static async createPost(
@@ -132,8 +112,8 @@ export class GitHubService {
     commitMessage: string,
     session: AppSession,
     images?: {
-      /** 本文が参照する未コミット画像の id。R2 から回収して同じコミットに載せる。 */
-      pendingImageIds?: string[];
+      /** 本文が参照する未コミット画像 (post-images の readImageUploads で検証済み)。 */
+      files?: CommitFile[];
       /** 本文から消えた画像のリポジトリパス。同じコミットで削除する。 */
       deletePaths?: string[];
     },
@@ -150,10 +130,7 @@ export class GitHubService {
 
       // 画像は記事本文と同じコミットに載せる。別コミットにすると、
       // エディタで消した画像の孤児コミットが履歴に残り、revert も噛み合わない。
-      const { files, keys } = await collectPendingImages(
-        post.uuid,
-        images?.pendingImageIds ?? [],
-      );
+      const files = images?.files ?? [];
       const deletePaths = images?.deletePaths ?? [];
       for (const path of deletePaths) assertOwnedAssetPath(path, post.uuid);
 
@@ -164,57 +141,14 @@ export class GitHubService {
         deletePaths,
       });
 
-      // バイト列はリポジトリに移った。pending 側はもう不要。
-      await deletePendingImages(keys);
-
       return {
         success: true,
         commitId: result.commitSha,
       };
     } catch (error) {
-      if (error instanceof PendingImageError) {
+      if (error instanceof PostImageError) {
         return { success: false, error: error.message };
       }
-      console.error("GitHub API error:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "GitHub API エラー",
-      };
-    }
-  }
-
-  /**
-   * 記事を削除 (記事ディレクトリごと)
-   */
-  static async deletePost(
-    slug: string,
-    commitMessage: string,
-    session: AppSession,
-  ): Promise<{ success: boolean; error?: string; commitId?: string }> {
-    try {
-      const uuid = await this.resolveUuid(slug);
-      if (!uuid) {
-        return { success: false, error: "ファイルが見つかりません" };
-      }
-
-      // 存在しないパスを deletePaths に積むと createTree が 422 で失敗するため、
-      // 記事ディレクトリ配下の実ファイルを列挙してから消す
-      const paths = await getHagakiClient().posts.repoPaths(uuid);
-      if (paths.length === 0) {
-        return { success: false, error: "ファイルが見つかりません" };
-      }
-
-      const result = await getHagakiClient().commits.commitFiles({
-        deletePaths: paths,
-        committer: this.getCommitter(session),
-        commitMessage,
-      });
-
-      return {
-        success: true,
-        commitId: result.commitSha,
-      };
-    } catch (error) {
       console.error("GitHub API error:", error);
       return {
         success: false,
@@ -273,40 +207,6 @@ export class GitHubService {
   }
 
   /**
-   * 特定のコミットでの記事データを取得
-   */
-  static async getPostAtCommit(
-    slug: string,
-    commitId: string,
-  ): Promise<{ success: boolean; error?: string; data?: WikiPostDetail }> {
-    try {
-      const uuid = await this.resolveUuid(slug);
-      if (!uuid) {
-        return { success: false, error: "記事が見つかりません" };
-      }
-
-      const post = await getHagakiClient().posts.getFromRepo(uuid, {
-        ref: commitId,
-      });
-
-      if (!post) {
-        return { success: false, error: "ファイルが見つかりません" };
-      }
-
-      return { success: true, data: post };
-    } catch (error) {
-      console.error("GitHub API error:", error);
-      return {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "指定されたバージョンの取得に失敗しました",
-      };
-    }
-  }
-
-  /**
    * 記事の差分を取得
    */
   static async getPostDiff(
@@ -340,131 +240,6 @@ export class GitHubService {
         success: false,
         error:
           error instanceof Error ? error.message : "差分の取得に失敗しました",
-      };
-    }
-  }
-
-  /**
-   * すべての記事を取得
-   *
-   * 一覧は配信中の `article.json` を使う (GitHub のディレクトリ走査より安く、
-   * created / updated も付く)。本文が要る呼び出し側は getPost を使うこと。
-   */
-  static async getAllPosts(): Promise<{
-    success: boolean;
-    error?: string;
-    data?: WikiPostDetail[];
-  }> {
-    try {
-      const posts = await getHagakiClient().posts.list({
-        sortBy: "updated",
-        order: "desc",
-      });
-
-      return {
-        success: true,
-        data: posts.map((post) => ({ ...post, body: "" })),
-      };
-    } catch (error) {
-      console.error("Content fetch error:", error);
-      return {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "記事一覧の取得に失敗しました",
-      };
-    }
-  }
-
-  /**
-   * すべての記事を取得（認証なし、ビルド時用）
-   */
-  static async getAllPostsForBuild(): Promise<{
-    success: boolean;
-    error?: string;
-    data?: { slug: string }[];
-  }> {
-    try {
-      const posts = await getHagakiClient().posts.list();
-      return {
-        success: true,
-        data: posts.map((post) => ({ slug: post.slug })),
-      };
-    } catch (error) {
-      console.error("Content fetch error:", error);
-      return {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "記事一覧の取得に失敗しました",
-      };
-    }
-  }
-
-  /**
-   * 画像を記事の assets 配下にアップロードする。
-   *
-   * コンテンツフォーマット上、記事画像は AVIF 固定で
-   * `content/article/<articleId>/assets/<imageId>.avif` に置かれる。
-   * AVIF への変換は投稿側 (ブラウザの `hagaki/image`) が行う。
-   */
-  static async uploadImage(
-    file: File,
-    session: AppSession,
-    articleId: string,
-  ): Promise<{
-    success: boolean;
-    error?: string;
-    imageId?: string;
-    url?: string;
-    commitId?: string;
-  }> {
-    try {
-      if (!articleId) {
-        return { success: false, error: "記事 (articleId) が指定されていません" };
-      }
-      const arrayBuffer = await file.arrayBuffer();
-      // 記事画像は AVIF 固定。変換は投稿側 (hagaki/image の processImage) の
-      // 責務なので、ここでは形式とサイズだけ弾く。
-      try {
-        validateAvifUpload(new Uint8Array(arrayBuffer));
-      } catch (error) {
-        if (error instanceof ImageValidationError) {
-          return {
-            success: false,
-            error:
-              error.code === "size"
-                ? "画像が大きすぎます (500KB 以下の AVIF にしてください)"
-                : "画像は AVIF 形式のみ受け付けます",
-          };
-        }
-        throw error;
-      }
-      const imageId = randomUUID();
-      const filePath = this.getAssetPath(articleId, imageId);
-
-      const result = await getHagakiClient().commits.commitFiles({
-        files: [{ path: filePath, content: arrayBuffer }],
-        committer: this.getCommitter(session),
-        commitMessage: `🖼️ Upload image: ${imageId}`,
-      });
-
-      return {
-        success: true,
-        imageId,
-        url: `/article/${articleId}/assets/${imageId}.avif`,
-        commitId: result.commitSha,
-      };
-    } catch (error) {
-      console.error("GitHub image upload error:", error);
-      return {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "画像アップロードに失敗しました",
       };
     }
   }

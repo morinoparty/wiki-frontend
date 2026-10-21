@@ -1,12 +1,12 @@
 import { EditorNav } from "@/components/EditorNav";
-import { GithubIcon } from "lucide-react";
+import { GitCommitHorizontal } from "lucide-react";
 import { css } from "styled-system/css";
 import { sva } from "styled-system/css";
 import { ReactNode } from "react";
 import { getCommitWithChecks } from "@/lib/getCommitWithChecks";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { WIKI_REPO } from "@/lib/hagaki";
+import { WIKI_REPO } from "@/lib/content";
 
 /** wiki-content の deploy workflow (.github/workflows/deploy.yml) のジョブ名。 */
 const DEPLOY_CHECK_NAME = "deploy";
@@ -159,7 +159,7 @@ export default async function Home({ params }: PageProps) {
         })}
       >
         <CommitCard
-          icon={<GithubIcon />}
+          icon={<GitCommitHorizontal />}
           title={"GitHubにCommitされました"}
           description={
             commitData && commitData.commit ? (
@@ -199,7 +199,7 @@ export default async function Home({ params }: PageProps) {
             if (buildRuns.length === 0) {
               return (
                 <CommitCard
-                  icon={<GithubIcon />}
+                  icon={<GitCommitHorizontal />}
                   title={DEPLOY_CHECK_NAME}
                   description={<>CIチェック情報がありません</>}
                 />
@@ -224,7 +224,7 @@ export default async function Home({ params }: PageProps) {
               cards.push(
                 <CommitCard
                   key="started"
-                  icon={<GithubIcon />}
+                  icon={<GitCommitHorizontal />}
                   title="デプロイ作業開始"
                   description={
                     <>
@@ -263,7 +263,7 @@ export default async function Home({ params }: PageProps) {
               cards.push(
                 <CommitCard
                   key="completed"
-                  icon={<GithubIcon />}
+                  icon={<GitCommitHorizontal />}
                   title="全ての作業が完了"
                   description={
                     <>
@@ -302,7 +302,7 @@ export default async function Home({ params }: PageProps) {
           }
           return (
             <CommitCard
-              icon={<GithubIcon />}
+              icon={<GitCommitHorizontal />}
               title={DEPLOY_CHECK_NAME}
               description={<>CIチェック情報がありません</>}
             />

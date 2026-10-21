@@ -1,5 +1,6 @@
 import { getSession } from "@/lib/auth";
-import { articleImageUrl, getHagakiClient, WIKI_REPO } from "@/lib/hagaki";
+import { articleAssetsDir, articleImageUrl } from "@/lib/content";
+import { getHagakiClient } from "@/lib/hagaki";
 
 /**
  * エディタ用の記事画像。CDN が持っていればそこへ、無ければリポジトリから返す。
@@ -8,7 +9,7 @@ import { articleImageUrl, getHagakiClient, WIKI_REPO } from "@/lib/hagaki";
  *   - 下書き: 配信 worker が draft の assets を 404 にするので永続的に無い
  *   - 保存直後: コミットは済んでいるが wiki-content のデプロイ待ち (数十秒)
  *
- * 保存が成功した時点で R2 の一時置き場は消えるため、この二つの窓では
+ * 保存が成功するとブラウザ側の画像 (Blob) は破棄されるため、この二つの窓では
  * リポジトリだけが画像を持っている。配信済みなら CDN へリダイレクトして
  * ブラウザキャッシュに乗せ、無いときだけリポジトリの実体を返す。
  *
@@ -47,7 +48,7 @@ export async function GET(request: Request, { params }: Params) {
   }
 
   const bytes = await getHagakiClient().files.getBinary(
-    `${WIKI_REPO.contentPath}/${uuid}/assets/${imageId}.avif`
+    `${articleAssetsDir(uuid)}${imageId}.avif`
   );
   if (!bytes) {
     return new Response("Not found", { status: 404 });

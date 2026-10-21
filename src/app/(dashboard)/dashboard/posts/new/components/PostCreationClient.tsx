@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardPostAddModal } from "./DashboardPostAddModal";
+import type { PostFormValues } from "./DashboardPostFormModal";
 import { createPost } from "@/actions/create-post";
 import { WikiCategory } from "@/types/wiki";
 import { CreatePostInput } from "@/actions/types";
@@ -18,14 +19,9 @@ export function PostCreationClient({
 }: PostCreationClientProps) {
   const router = useRouter();
 
-  const handleCreatePost = async (data: {
-    title: string;
-    url: string;
-    description: string;
-    category: string;
-    x?: number;
-    y?: number;
-  }) => {
+  const handleCreatePost = async (
+    data: PostFormValues & { category: string }
+  ) => {
     try {
       const createPostInput: CreatePostInput = {
         title: data.title,
@@ -33,9 +29,9 @@ export function PostCreationClient({
         body: data.description || "",
         category: data.category,
         description: data.description || "",
-        // 座標情報が存在する場合のみ追加
-        ...(data.x !== undefined && { x: data.x }),
-        ...(data.y !== undefined && { y: data.y }),
+        // カテゴリが宣言した option の値 (座標・enum など)。空なら送らない
+        ...(data.option &&
+          Object.keys(data.option).length > 0 && { option: data.option }),
       };
 
       const result = await createPost(createPostInput, {

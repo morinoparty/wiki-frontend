@@ -7,7 +7,7 @@ import { ValidationService } from "./services/validation-service";
 import { AuthService } from "./services/auth-service";
 import { PermissionService } from "./services/permission-service";
 import { getAllCategories } from "@/lib/getAllCategories";
-import { hasPositionOption } from "@/lib/categoryOptions";
+import { validateOptionValues } from "@/lib/categoryOptions";
 
 /**
  * 新しい記事を作成する
@@ -46,27 +46,17 @@ export async function createPost(
       return { success: false, error: "このスラッグは既に使用されています" };
     }
 
-    // 5. カテゴリの座標要件チェック
+    // 5. カテゴリが option で宣言したフィールドの検証
     const categories = await getAllCategories();
     const category = categories.find((cat) => cat.slug === input.category);
     if (!category) {
       return { success: false, error: "指定されたカテゴリが見つかりません" };
     }
 
-    // カテゴリが option で x / y を宣言している場合、座標情報が必須
-    if (hasPositionOption(category)) {
-      if (input.x === undefined || input.y === undefined) {
-        return {
-          success: false,
-          error: "このカテゴリでは座標情報（X座標、Y座標）の入力が必要です",
-        };
-      }
-      if (!Number.isInteger(input.x) || !Number.isInteger(input.y)) {
-        return {
-          success: false,
-          error: "座標は整数で入力してください",
-        };
-      }
+    // 必須・型・enum の選択肢を宣言と突き合わせる（座標もこの経路）
+    const optionError = validateOptionValues(category, input.option);
+    if (optionError) {
+      return { success: false, error: optionError };
     }
 
     // 6. 記事データの準備
@@ -80,11 +70,6 @@ export async function createPost(
       // 新規作成は下書きから始める。配信されるのはエディタで下書きを
       // 外して保存したあと (draft は frontmatter に永続化される)。
       draft: input.draft ?? true,
-      // 座標を宣言しているカテゴリのときだけ座標情報を含める
-      ...(hasPositionOption(category) && {
-        x: input.x,
-        y: input.y,
-      }),
     };
 
     // 7. GitHubに保存

@@ -7,17 +7,26 @@ import { ValidationService } from "./services/validation-service";
 import { AuthService } from "./services/auth-service";
 import { PermissionService } from "./services/permission-service";
 import { getAllCategories } from "@/lib/getAllCategories";
-import { postCommitMessage } from "./services/pending-images";
-import { hasPositionOption } from "@/lib/categoryOptions";
+import {
+  PostImageError,
+  postCommitMessage,
+  readImageUploads,
+} from "./services/post-images";
+import { validateOptionValues } from "@/lib/categoryOptions";
 import { getHagakiClient } from "@/lib/hagaki";
 import { toUrlSlug } from "hagaki";
 
 /**
  * 既存の記事を更新する
+ *
+ * @param images 本文 (とサムネイル) が新しく参照する画像。ブラウザでエンコード
+ *   した AVIF を `src/lib/post-images.ts` の取り決めで詰めた FormData。
+ *   本文と同じコミットに入る。
  */
 export async function updatePost(
   input: UpdatePostInput,
-  context: OperationContext = {}
+  context: OperationContext = {},
+  images?: FormData
 ): Promise<ApiResult<WikiPostDetail>> {
   try {
     // 1. 認証チェック
@@ -68,7 +77,7 @@ export async function updatePost(
       }
     }
 
-    // 6. カテゴリの座標要件チェック（カテゴリが更新される場合）
+    // 6. カテゴリが option で宣言したフィールドの検証（カテゴリが更新される場合）
     if (input.category && input.category !== existingPost.category) {
       const categories = await getAllCategories();
       const newCategory = categories.find((cat) => cat.slug === input.category);
@@ -76,20 +85,14 @@ export async function updatePost(
         return { success: false, error: "指定されたカテゴリが見つかりません" };
       }
 
-      // カテゴリが option で x / y を宣言している場合、座標情報が必須
-      if (hasPositionOption(newCategory)) {
-        if (input.x === undefined || input.y === undefined) {
-          return {
-            success: false,
-            error: "このカテゴリでは座標情報（X座標、Y座標）の入力が必要です",
-          };
-        }
-        if (!Number.isInteger(input.x) || !Number.isInteger(input.y)) {
-          return {
-            success: false,
-            error: "座標は整数で入力してください",
-          };
-        }
+      // 送られてこなかったキーは既存記事の値がそのまま残るので、
+      // マージ後の値を新カテゴリの宣言と突き合わせる
+      const optionError = validateOptionValues(newCategory, {
+        ...existingPost.option,
+        ...input.option,
+      });
+      if (optionError) {
+        return { success: false, error: optionError };
       }
     }
 
@@ -99,21 +102,24 @@ export async function updatePost(
       ...existingPost,
       ...input,
       draft: typeof input.draft === "boolean" ? input.draft : existingPost.draft,
+      // option はキー単位でマージする。丸ごと差し替えると、送らなかった
+      // フィールド (エディタが編集しない座標など) が消える
+      ...(input.option
+        ? { option: { ...existingPost.option, ...input.option } }
+        : {}),
     };
 
-    // 8. GitHubに保存
-    const pendingImageIds = context.pendingImageIds ?? [];
+    // 8. 画像の検証 (形式・サイズ・id)。パスはサーバー側で組み立てる
+    const files = await readImageUploads(input.uuid, images);
+
+    // 9. GitHubに保存
     const deletePaths = context.deletePaths ?? [];
     const commitResult = await GitHubService.updatePost(
       updatedPost,
       context.commitMessage ||
-        postCommitMessage(
-          updatedPost.slug,
-          pendingImageIds.length,
-          deletePaths.length
-        ),
+        postCommitMessage(updatedPost.slug, files.length, deletePaths.length),
       session,
-      { pendingImageIds, deletePaths }
+      { files, deletePaths }
     );
 
     if (!commitResult.success) {
@@ -126,6 +132,9 @@ export async function updatePost(
       commitId: commitResult.commitId,
     };
   } catch (error) {
+    if (error instanceof PostImageError) {
+      return { success: false, error: error.message };
+    }
     console.error("Error updating post:", error);
     return {
       success: false,

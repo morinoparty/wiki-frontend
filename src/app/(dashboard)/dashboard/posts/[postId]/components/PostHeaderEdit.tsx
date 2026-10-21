@@ -178,9 +178,9 @@ export function PostHeaderEdit({
       const base64 = await convertToBase64(file);
       setBase64Cache(base64);
 
-      // 本文の画像と同じ pending フロー。バイト列は R2 の一時置き場に入り、
-      // 記事の保存時に本文と同じコミットへ移る。
-      const attrs = await handleInsertImage(file, articleId);
+      // 本文の画像と同じ pending フロー。AVIF の Blob はブラウザに置かれ、
+      // 記事の保存時に本文と同じコミットへ入る。
+      const attrs = await handleInsertImage(file);
       const next: WikiThumbnail = {
         imageId: attrs.id,
         blurhash64: attrs.blurhash ? blurhashToBase64(attrs.blurhash) : "",
@@ -194,7 +194,7 @@ export function PostHeaderEdit({
         meta: { closable: true },
       });
     } catch (error) {
-      console.error("画像アップロード中にエラーが発生しました:", error);
+      console.error("画像の読み込み中にエラーが発生しました:", error);
       setBase64Cache(null); // エラー時もキャッシュをクリア
       toaster.error({
         title: "エラー",
@@ -281,7 +281,7 @@ export function PostHeaderEdit({
             <Image size={16} aria-label="カバー画像アイコン" />
           )}
           {isUploading
-            ? "アップロード中..."
+            ? "画像を準備中..."
             : previewImage || base64Cache
               ? "カバー画像を変更"
               : "カバー画像を追加"}

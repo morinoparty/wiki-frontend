@@ -1,61 +1,35 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# vinext
+# cf / vinext の生成物 (Build Output, 型, ローカル state, route 型)
+.cloudflare/
 /dist/
 .vinext/
+/.next/
+next-env.d.ts
 
-# production
-/build
+# 環境変数と認証情報 (.env.example だけはコミットする)
+.env
+.env.*
+!.env.example
+.dev.vars*
+
+# typescript
+*.tsbuildinfo
+
+# Panda CSS (prepare で生成)
+styled-system
+styled-system-studio
+
+# build 前に生成するもの (pnpm run generate)
+/public/search-index.json
+/src/app/(normal)/license/data.json
 
 # misc
 .DS_Store
 *.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+*.swp
 .pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-## Panda
-styled-system
-styled-system-studio
-
-
-public/search-index.json
-
-.wrangler/Users/yahiro/Documents/working/wiki-frontend/.env.local
-
-.wrangler
-
-/src/app/(normal)/license/data.json
 
 # Playwright MCP のスナップショット出力
 .playwright-mcp/

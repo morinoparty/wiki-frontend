@@ -4,107 +4,71 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-### Development
-- `pnpm install` - Install dependencies
-- `pnpm dev` - Start development server with Turbopack (auto-runs panda codegen)
-- `pnpm build` - Production build (includes license generation and search indexing)
-- `pnpm lint` - Run ESLint
-- `pnpm prepare` - Generate Panda CSS (run after adding new styles)
+Use pnpm (never npm / npx; use `pnpm exec` / `pnpm dlx`). Node.js 26.12+, pnpm 12.
 
-### Deployment
-- `pnpm deploy` - Full deployment to Cloudflare Workers via OpenNext
-- `pnpm preview` - Preview build locally
-- `pnpm upload` - Upload build to Cloudflare
+- `pnpm install` - Install dependencies (runs `panda codegen` via `prepare`)
+- `pnpm run dev` - Generate license list + search index, then `cf dev`
+- `pnpm run build` - Generate, then `cf build --mode production` (Vite + vinext, output in `.cloudflare/output`)
+- `pnpm run typecheck` - `cf workers types && tsc --noEmit`
+- `pnpm run generate` - `generate:license` + `generate:index` (must run before `cf build`; `cf` does not run package scripts)
+- `pnpm exec cf deploy --dry-run` - Validate a deploy without credentials
 
-### Utilities
-- `pnpm index` - Generate search index for posts
-- `pnpm generate:license` - Generate license information
-- `pnpm cf-typegen` - Generate Cloudflare types
+Never run `cf dev` / `cf build` / `cf deploy` in a directory without `cloudflare.config.ts`.
+Deploys normally happen from `.github/workflows/deploy.yml` on push to main.
 
 ## Architecture
 
-### Core Structure
-This is a Next.js 15 Wiki application using App Router with GitHub as the CMS backend. Content lives in a separate repository (`Nlkomaru/wiki-content`) in the hagaki content format:
+A Next.js App Router application built with **vinext** (Next.js API on Vite) and
+deployed to Cloudflare Workers as Worker `wiki-frontend` (workers.dev only) with the
+`cf` CLI. The `next` package is not installed; vinext provides `next/*` and its types
+(`src/vinext-env.d.ts`). Worker settings and bindings live in `cloudflare.config.ts`.
+
+Content lives in a separate repository (`morinoparty/wiki-content`) in the hagaki content format:
 - `/content/article/<uuid>/index.mdx` - article body (frontmatter + MDX)
 - `/content/article/<uuid>/assets/<imageId>.avif` - images owned by that article
 - `/content/categories/<slug>.json` - category definitions
 
 Paths are uuid-based because a slug can change. Reads go through the deployed
-copy at <https://wiki-content.moripa.nikomaru.dev> (manifests: `article.json`,
-`slug-index.json`, per-article `info.json`); writes are commits to the
-repository via hagaki.
+copy at `CONTENT_BASE_URL` (`src/lib/content.ts`, Worker `wiki-content` on workers.dev;
+manifests: `article.json`, `slug-index.json`, per-article `info.json`); writes are
+commits to the repository via hagaki (`src/lib/hagaki.ts`, server only).
 
 ### Key Technologies
-- **Next.js 15** with App Router and React Server Components
-- **chlorophyll + Panda CSS** for styling system (`colorPalette: mori`)
-- **vinext** for Cloudflare Workers deployment
-- **hagaki** for content reads/writes (GitHub + CDN)
-- **better-auth** for authentication
-- **MDX Editor** for content editing
-- **FlexSearch** for client-side search
+- **vinext** + Vite 8 + `@cloudflare/vite-plugin` (v2 beta) + `cf`
+- **chlorophyll + Panda CSS** for styling (`colorPalette: mori`)
+- **hagaki** for content reads/writes, the editor, and in-browser image encoding
+- **better-auth** (DB-less, generic OAuth against MineAuth)
+- **FlexSearch** for client-side search (`public/search-index.json`, generated at build)
+
+### Environment
+Read Worker env through `getEnv()` (`src/lib/env.ts`): `cloudflare:workers` on workerd,
+`process.env` in Node scripts.
+- `CLIENT_ID` - plain var in `cloudflare.config.ts`
+- `AUTH_SECRET`, `SERVER_URL`, `HAGAKI_GITHUB_TOKEN` - Worker secrets
+  (`bindings.secret()`; local values from `.env`, deploy via `cf deploy --secrets-file`)
+- MineAuth server: `src/lib/server-list.ts` fetches `${SERVER_URL}servers` and uses the first
+  server whose `/.well-known/openid-configuration` responds (`getAuthServerUrl()`, cached 60s
+  per isolate). Use `getServerUrl(server)` for a specific server; never hardcode a server URL.
+- `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` - for the `cf` CLI only (`.env` / GitHub secrets)
 
 ### Application Layers
+- `src/actions/` - Server Actions (`createPost`, `updatePost`, history, `getPostForEdit`).
+  All return `ApiResult<T>`. See `src/actions/README.md`.
+- `src/actions/services/` - `GitHubService` (hagaki wrapper), `AuthService`,
+  `PermissionService`, `ValidationService` (Zod), `post-images` (uploaded image checks)
+- `src/app/` - `(normal)/` public pages, `(dashboard)/` editor, `@modal/` parallel routes,
+  `api/auth/` (better-auth), `api/article-assets/` (committed images, CDN or repo)
+- `src/proxy.ts` - redirects `/dashboard` to sign-in when there is no session cookie
 
-#### Server Actions (`src/actions/`)
-The primary API layer using Next.js Server Actions. All data operations go through these functions:
-- **Core**: `createPost`, `updatePost`, `deletePost`, `lockPost`, `changePostStatus`
-- **Query**: `getAllPosts`, `getPost`, `searchPosts`, `getUserPosts`
-- **Batch**: `batchDeletePosts`, `batchChangePostsStatus`, `duplicatePost`
-- **History**: `getPostHistory`, `restorePostVersion`, `getPostDiff`
-
-All actions return `ApiResult<T>` with consistent error handling.
-
-#### Services (`src/actions/services/`)
-- **GitHubService**: Handles all GitHub API interactions and content management
-- **AuthService**: User authentication and session management
-- **PermissionService**: Role-based access control (admin/editor/viewer)
-- **ValidationService**: Input validation using Zod schemas
-
-#### App Router Structure (`src/app/`)
-- `(normal)/` - Public-facing pages
-- `(dashboard)/` - Admin interface with post management
-- `@modal/` - Parallel routes for modal dialogs
-- `api/auth/` - NextAuth.js authentication endpoints
-
-#### Components (`src/components/`)
-React components using Panda CSS styling. Key components:
-- **Editor.tsx** - MDX content editor
-- **PostBody.tsx** - Markdown content renderer
-- **Sidebar.tsx** - Navigation and category filtering
-- **AuthConditional.tsx** - Conditional rendering based on auth state
-
-#### Styling (`src/theme/`)
-Comprehensive Panda CSS theme system with:
-- Custom color tokens and semantic tokens
-- Component recipes and slot recipes
-- Text styles and responsive breakpoints
-- Theme configuration in `panda.config.ts`
-
-### Content Management Flow
-1. Users create/edit posts through the web interface
-2. Server Actions validate and process the content
-3. GitHubService commits changes to the content repository
-4. Content is automatically deployed to Cloudflare Workers
-5. Static assets are served from the deployed content
-
-### Authentication & Permissions
-- NextAuth.js with custom providers
-- Three-tier permission system: admin/editor/viewer
-- Post-level visibility controls: public/private/restricted
-- GitHub integration for commit attribution
+### Editor images
+Images inserted in the editor are encoded to AVIF in the browser and kept in memory
+(`hagaki/pending-images`); nothing is uploaded until save. On save the client sends the
+blobs as `FormData` (third argument of `updatePost`) and they land in the same commit as
+the body. The request limit is `SAVE_REQUEST_LIMIT_BYTES` (`src/lib/post-images.ts`,
+also `serverActions.bodySizeLimit` in `next.config.ts`).
 
 ### Development Patterns
-- Use Server Actions for all data operations, avoid API routes
-- Components should use Panda CSS `sva` function for styling
-- Follow the existing theme token system in `src/theme/`
-- Keep components pure and extract logic to custom hooks
+- Use Server Actions for data operations; route handlers only where raw bytes are needed
+- Style with Panda CSS (`sva` / `css`) and chlorophyll components
+- Keep client components free of server-only imports (`@/lib/hagaki`, `@/lib/env`)
 - Use TypeScript strictly with Zod schemas for validation
-
-### Environment Variables Required
-```
-GITHUB_TOKEN - GitHub API access token
-ADMIN_USERS - Comma-separated list of admin user IDs
-MAIN_SERVER_URL - Authentication server URL
-CLIENT_ID - OAuth client ID
-AUTH_SECRET - Better Auth signing secret
-```

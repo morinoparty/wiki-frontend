@@ -6,6 +6,7 @@ import { WikiCategory } from "@/types/wiki";
 import { useState } from "react";
 import { sva } from "styled-system/css";
 import { DashboardPostFormModal } from "./DashboardPostFormModal";
+import type { PostFormValues } from "./DashboardPostFormModal";
 
 const postAddModalStyles = sva({
   slots: [
@@ -118,12 +119,7 @@ const postAddModalStyles = sva({
 export const DashboardPostAddModal: React.FC<{
   categories: WikiCategory[];
   existingSlugs: string[];
-  onCreatePost?: (data: {
-    title: string;
-    url: string;
-    description: string;
-    category: string;
-  }) => void;
+  onCreatePost?: (data: PostFormValues & { category: string }) => void;
 }> = ({ categories, existingSlugs, onCreatePost }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<"category" | "form">(
@@ -142,11 +138,7 @@ export const DashboardPostAddModal: React.FC<{
     setCurrentStep("category");
   };
 
-  const handleSubmit = (formData: {
-    title: string;
-    url: string;
-    description: string;
-  }) => {
+  const handleSubmit = (formData: PostFormValues) => {
     if (selectedCategory && onCreatePost) {
       onCreatePost({
         ...formData,

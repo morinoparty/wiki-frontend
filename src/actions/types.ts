@@ -9,18 +9,13 @@ export type ApiResult<T = void> = {
 };
 
 // 操作権限の種類
-export type Permission = "read" | "write" | "delete";
+export type Permission = "read" | "write";
 
 // 操作のコンテキスト
 export type OperationContext = {
   userId?: string;
   userName?: string;
   commitMessage?: string;
-  /**
-   * 本文が参照する未コミット画像の id。編集中は R2 の一時置き場にあり、
-   * 保存時に記事本文と同じコミットへ移す。
-   */
-  pendingImageIds?: string[];
   /** 本文から消えた画像のリポジトリパス。同じコミットで削除する。 */
   deletePaths?: string[];
 };
@@ -57,9 +52,12 @@ export const CreatePostInputSchema = z.object({
       blurhash64: z.string().default(""),
     })
     .nullish(),
-  // 座標情報（option で x / y を宣言しているカテゴリで必須）
-  x: z.number().int("X座標は整数で入力してください").optional(),
-  y: z.number().int("Y座標は整数で入力してください").optional(),
+  // カテゴリが option で宣言したフィールドの値。座標 (x / y) もここに入り、
+  // frontmatter の `option.<key>` に保存される。enum は選択肢の id が入る。
+  // 宣言との突き合わせ (必須・型・選択肢) は categoryOptions 側で行う
+  option: z
+    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+    .optional(),
   // 下書きフラグ。frontmatter に永続化され、true の間は配信されない
   draft: z.boolean().optional(),
 });

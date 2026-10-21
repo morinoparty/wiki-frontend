@@ -1,5 +1,5 @@
 import { Button } from "@/components/Button";
-import { articleImageUrl } from "@/lib/hagaki";
+import { articleImageUrl } from "@/lib/content";
 import { Edit } from "lucide-react";
 import Link from "next/link";
 import { css } from "styled-system/css";

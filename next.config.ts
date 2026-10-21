@@ -1,38 +1,14 @@
-import path from "node:path";
 import type { NextConfig } from "next";
+import { SAVE_REQUEST_LIMIT_BYTES } from "./src/lib/post-images";
 
-// chlorophyll は生の TypeScript ソースで配布され、その中から `styled-system/*` を
-// 参照している。tsconfig の paths は型解決にしか効かず、node_modules 配下の
-// ソースに対しては bundler が解決できないため、明示的に alias を張る。
-const styledSystemDir = path.join(process.cwd(), "styled-system");
-
+// vinext が読む Next.js 互換の設定。ビルドや alias の設定は vite.config.ts にある。
 const nextConfig: NextConfig = {
-  // chlorophyll is published as raw TypeScript sources, so Next has to
-  // compile it together with the app.
-  transpilePackages: ["@morinoparty/chlorophyll-react"],
-  turbopack: {
-    resolveAlias: {
-      "styled-system/css": "./styled-system/css",
-      "styled-system/recipes": "./styled-system/recipes",
-      "styled-system/patterns": "./styled-system/patterns",
-      "styled-system/tokens": "./styled-system/tokens",
-      "styled-system/jsx": "./styled-system/jsx",
+  experimental: {
+    serverActions: {
+      // 記事の保存は本文と画像 (AVIF, 1 枚 500KB まで) を 1 回の Server Action で
+      // 送るので、既定の 1MB では足りない (src/lib/post-images.ts)
+      bodySizeLimit: SAVE_REQUEST_LIMIT_BYTES,
     },
-  },
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "styled-system": styledSystemDir,
-    };
-    // chlorophyll の package.json には sideEffects: false が無いため、
-    // barrel(`/components`)を import すると SkinViewer 経由で three.js まで
-    // バンドルに残ってしまう。ソースは純粋なコンポーネント定義だけなので、
-    // 利用側から副作用なしと宣言して tree shaking を効かせる。
-    config.module.rules.push({
-      test: /[\\/]@morinoparty[\\/]chlorophyll-react[\\/]src[\\/].*\.tsx?$/,
-      sideEffects: false,
-    });
-    return config;
   },
 };
 

@@ -1,16 +1,24 @@
 "use client";
 
 import { Button } from "@/components/Button";
-import { ModalDialog } from "@morinoparty/chlorophyll-react/components";
-import { WikiCategory } from "@/types/wiki";
+import {
+  ModalDialog,
+  Portal,
+  Select,
+  createListCollection,
+} from "@morinoparty/chlorophyll-react/components";
+import { PostOptionValues, WikiCategory } from "@/types/wiki";
 import type { PositionKey } from "@/lib/categoryOptions";
 import {
   POSITION_KEYS,
+  defaultOptionValues,
+  enumOptionFields,
   hasPositionOption,
   positionLabel,
   positionPlaceholder,
+  validateOptionValues,
 } from "@/lib/categoryOptions";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { sva } from "styled-system/css";
 
 const postFormModalStyles = sva({
@@ -24,6 +32,7 @@ const postFormModalStyles = sva({
     "labelRow",
     "label",
     "required",
+    "description",
     "inputGroup",
     "input",
     "urlPrefix",
@@ -88,6 +97,12 @@ const postFormModalStyles = sva({
       fontWeight: "bold",
       color: "colorPalette.fg",
       lineHeight: "1.7",
+    },
+    description: {
+      fontSize: "14px",
+      fontWeight: "500",
+      color: "colorPalette.fg.subtle",
+      lineHeight: "1.5",
     },
     inputGroup: {
       display: "flex",
@@ -183,12 +198,16 @@ const postFormModalStyles = sva({
   },
 });
 
-interface PostFormData {
+/** このダイアログが集める記事の入力値。option の中身はカテゴリの宣言次第。 */
+export interface PostFormValues {
   title: string;
   url: string;
   description: string;
-  x?: number;
-  y?: number;
+  /**
+   * カテゴリが option で宣言したフィールドの値。座標もここに入り、enum は
+   * 選択肢の id を入れる（記事の frontmatter `option.<key>` に保存される）。
+   */
+  option?: PostOptionValues;
 }
 
 type SlugCheckStatus =
@@ -203,25 +222,51 @@ export const DashboardPostFormModal: React.FC<{
   categories: WikiCategory[];
   existingSlugs: string[];
   onBack: () => void;
-  onSubmit: (data: PostFormData) => void;
+  onSubmit: (data: PostFormValues) => void;
 }> = ({ selectedCategory, categories, existingSlugs, onSubmit }) => {
-  const [formData, setFormData] = useState<PostFormData>({
+  // 選択されたカテゴリの情報を取得
+  const currentCategory = categories.find(
+    (cat) => cat.slug === selectedCategory
+  );
+
+  // 宣言に default があるフィールドは初期値を入れておく。カテゴリを選び直すと
+  // この画面はいったん閉じて (アンマウントされて) 開き直るので、初期化は 1 回でよい
+  const [formData, setFormData] = useState<PostFormValues>(() => ({
     title: "",
     url: "",
     description: "",
-  });
+    option: defaultOptionValues(currentCategory),
+  }));
 
   const [slugCheckStatus, setSlugCheckStatus] =
     useState<SlugCheckStatus>("idle");
 
   const styles = postFormModalStyles();
 
-  // 選択されたカテゴリの情報を取得
-  const currentCategory = categories.find(
-    (cat) => cat.slug === selectedCategory
-  );
   // 座標入力を出すかどうかはカテゴリの option 宣言から決まる
   const requiresPosition = hasPositionOption(currentCategory);
+
+  // カテゴリが宣言した enum フィールド。選択肢は Select の collection に変換する
+  const enumFields = useMemo(
+    () => enumOptionFields(currentCategory),
+    [currentCategory]
+  );
+  const enumCollections = useMemo(
+    () =>
+      new Map(
+        enumFields.map(({ key, values }) => [
+          key,
+          createListCollection({
+            // value が frontmatter に保存される id、label が表示名
+            items: values.map((value) => ({
+              label: value.display,
+              value: value.id,
+            })),
+          }),
+        ])
+      ),
+    [enumFields]
+  );
 
   // Slugの重複チェック
   const checkSlugAvailability = useCallback(
@@ -269,15 +314,11 @@ export const DashboardPostFormModal: React.FC<{
     formData.title.trim() !== "" &&
     formData.url.trim() !== "" &&
     slugCheckStatus === "available" &&
-    // 座標が必要な場合は座標も入力必須
-    (!requiresPosition ||
-      (formData.x !== undefined &&
-        formData.y !== undefined &&
-        Number.isInteger(formData.x) &&
-        Number.isInteger(formData.y)));
+    // 座標・enum など、カテゴリの宣言を満たしているか
+    validateOptionValues(currentCategory, formData.option) === null;
 
   const handleInputChange = (
-    field: keyof PostFormData,
+    field: keyof PostFormValues,
     value: string | number
   ) => {
     setFormData((prev) => ({
@@ -286,11 +327,26 @@ export const DashboardPostFormModal: React.FC<{
     }));
   };
 
-  const handleCoordinateChange = (field: PositionKey, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value === "" ? undefined : parseInt(value, 10),
-    }));
+  // option の 1 フィールド分を更新する。未入力・選択解除（ClearTrigger）では
+  // キーごと落として、frontmatter にも書かれないようにする
+  const handleOptionChange = (
+    key: string,
+    value: string | number | boolean | undefined
+  ) => {
+    setFormData((prev) => {
+      const option = { ...prev.option };
+      if (value === undefined || value === "") {
+        delete option[key];
+      } else {
+        option[key] = value;
+      }
+      return { ...prev, option };
+    });
+  };
+
+  const handleCoordinateChange = (key: PositionKey, value: string) => {
+    const parsed = Number.parseInt(value, 10);
+    handleOptionChange(key, Number.isNaN(parsed) ? undefined : parsed);
   };
 
   const handleSubmit = () => {
@@ -401,7 +457,11 @@ export const DashboardPostFormModal: React.FC<{
               <div className={styles.inputGroup}>
                 <input
                   type="number"
-                  value={formData[key] ?? ""}
+                  value={
+                    typeof formData.option?.[key] === "number"
+                      ? formData.option[key]
+                      : ""
+                  }
                   onChange={(e) => {
                     handleCoordinateChange(key, e.target.value);
                   }}
@@ -411,6 +471,57 @@ export const DashboardPostFormModal: React.FC<{
               </div>
             </div>
           ))}
+
+        {/* Enum Fields - カテゴリが option で宣言した選択式のフィールド */}
+        {enumFields.map(({ key, field }) => {
+          const collection = enumCollections.get(key);
+          if (!collection) return null;
+          // enum の値は選択肢の id（文字列）。それ以外が入っていたら未選択扱い
+          const selected = formData.option?.[key];
+          const value = typeof selected === "string" ? [selected] : [];
+          return (
+            <div key={key} className={styles.formGroup}>
+              <Select.Root
+                collection={collection}
+                value={value}
+                onValueChange={(details) =>
+                  handleOptionChange(key, details.value[0])
+                }
+              >
+                <div className={styles.labelRow}>
+                  {/* ラベル・説明・プレースホルダーはカテゴリの宣言に従う */}
+                  <Select.Label className={styles.label}>
+                    {field.label ?? key}
+                  </Select.Label>
+                  {field.required && <span className={styles.required}>*</span>}
+                </div>
+                <Select.Control>
+                  <Select.Trigger>
+                    <Select.ValueText
+                      placeholder={field.placeholder ?? "選択してください"}
+                    />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                </Select.Control>
+                <Portal>
+                  <Select.Positioner>
+                    <Select.Content>
+                      {collection.items.map((item) => (
+                        <Select.Item key={item.value} item={item}>
+                          <Select.ItemText>{item.label}</Select.ItemText>
+                          <Select.ItemIndicator />
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Positioner>
+                </Portal>
+              </Select.Root>
+              {field.description && (
+                <p className={styles.description}>{field.description}</p>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Bottom navigation */}

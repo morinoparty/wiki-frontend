@@ -1,38 +1,45 @@
 import { headers } from "next/headers";
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
-import { genericOAuth } from "better-auth/plugins";
-import { getSecret } from "./secrets";
+import {
+  genericOAuth,
+  type GenericOAuthUserInfo,
+} from "better-auth/plugins/generic-oauth";
+import { getEnv } from "./env";
+import { getAuthServerUrl } from "./server-list";
 
 // buildAuth の戻り値から型を推論する。better-auth 1.6 以降は betterAuth() が
 // 渡したオプションにジェネリックなため、ReturnType<typeof betterAuth> だと
 // genericOAuth プラグインのエンドポイント型 (signInWithOAuth2 など) が失われる
 type Auth = Awaited<ReturnType<typeof buildAuth>>;
 
-// baseURL(= リクエストの origin)ごとに BetterAuth インスタンスをメモ化する。
-// 固定の AUTH_URL を持たないことで、production / preview / ローカル開発の
-// どの origin でもそのまま動く
+// baseURL(= リクエストの origin)と認証サーバーの組ごとに BetterAuth インスタンスを
+// メモ化する。固定の AUTH_URL を持たないことで、production / preview / ローカル開発の
+// どの origin でもそのまま動く。認証サーバーがフォールバックで切り替わった場合は
+// 別インスタンスを作り直す
 const authCache = new Map<string, Promise<Auth>>();
 
-/**
- * MineAuth の `/oauth2/userinfo` レスポンス。
- * OIDC 標準クレーム (`sub` / `preferred_username` / `picture`) と、
- * 旧実装が参照していた独自クレーム (`id` / `username`) の両方を受け付ける。
- */
-interface MineAuthProfile extends Record<string, unknown> {
-  sub?: string;
-  id?: string;
-  username?: string;
-  preferred_username?: string;
+/** 文字列か数値のクレームを文字列にそろえる (null / 未設定は undefined)。 */
+function claim(value: unknown): string | undefined {
+  return typeof value === "string" || typeof value === "number"
+    ? String(value)
+    : undefined;
 }
 
-async function buildAuth(baseURL: string) {
-  // AUTH_SECRET / MAIN_SERVER_URL は Cloudflare Secrets Store バインディング経由の
-  // 非同期読み出しが必要なため、モジュールトップレベルではなく初回リクエスト時に
-  // 解決してキャッシュする。
-  const [secret, mainServerUrl] = await Promise.all([
-    getSecret("AUTH_SECRET"),
-    getSecret("MAIN_SERVER_URL"),
+/**
+ * MineAuth の `/oauth2/userinfo` から Minecraft UUID を取り出す。OIDC 標準の
+ * `sub` と、旧実装の独自クレーム `id` の両方を受け付ける。
+ */
+function minecraftIdOf(profile: GenericOAuthUserInfo): string {
+  return claim(profile.id) ?? claim(profile.sub) ?? "";
+}
+
+async function buildAuth(baseURL: string, authServerUrl: string) {
+  // Worker の env はリクエスト処理中に読む (モジュール初期化時ではなく、
+  // 初回リクエストで解決してインスタンスごとキャッシュする)。
+  const [secret, clientId] = await Promise.all([
+    getEnv("AUTH_SECRET"),
+    getEnv("CLIENT_ID"),
   ]);
 
   // database を渡さない DB-less 構成: セッションと MineAuth のトークンは
@@ -95,17 +102,22 @@ async function buildAuth(baseURL: string) {
         config: [
           {
             providerId: "MineAuth",
-            clientId: process.env.CLIENT_ID as string,
-            // token_endpoint_auth_method: "none" のため空文字列
+            clientId: clientId ?? "",
+            // public client (token_endpoint_auth_method: "none") + PKCE のため空文字列
             clientSecret: "",
+            tokenEndpointAuth: { method: "none" },
             pkce: true,
-            discoveryUrl: `${mainServerUrl}/.well-known/openid-configuration`,
+            // サーバーリストの上から順に解決した認証サーバーの discovery を使う
+            discoveryUrl: `${authServerUrl}/.well-known/openid-configuration`,
             scopes: ["openid", "profile", "email"],
-            mapProfileToUser: (profile: MineAuthProfile) => {
-              const minecraftId = profile.id ?? profile.sub ?? "";
+            // アカウントの同一性も Minecraft UUID で持つ
+            accountSubject: ({ profile }) => minecraftIdOf(profile),
+            // `preferred_username` (OIDC) と `username` (旧実装) の両方を受け付ける
+            mapProfileToUser: (profile: GenericOAuthUserInfo) => {
+              const minecraftId = minecraftIdOf(profile);
               return {
-                id: minecraftId,
-                name: profile.username ?? profile.preferred_username,
+                name:
+                  claim(profile.username) ?? claim(profile.preferred_username),
                 image: `https://crafthead.net/avatar/${minecraftId}`,
                 minecraftId,
               };
@@ -128,18 +140,20 @@ async function buildAuth(baseURL: string) {
 export async function getAuth(): Promise<Auth> {
   const headerList = await headers();
   const host =
-    headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:3000";
+    headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:5173";
   const proto =
     headerList.get("x-forwarded-proto") ??
     (host.startsWith("localhost") || host.startsWith("127.0.0.1")
       ? "http"
       : "https");
   const origin = `${proto}://${host}`;
+  const authServerUrl = await getAuthServerUrl();
+  const cacheKey = `${origin}|${authServerUrl}`;
 
-  let auth = authCache.get(origin);
+  let auth = authCache.get(cacheKey);
   if (!auth) {
-    auth = buildAuth(origin);
-    authCache.set(origin, auth);
+    auth = buildAuth(origin, authServerUrl);
+    authCache.set(cacheKey, auth);
   }
   return auth;
 }

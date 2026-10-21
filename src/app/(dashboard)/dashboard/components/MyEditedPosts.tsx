@@ -6,7 +6,7 @@ import { NotLoginNote } from "@/components/NotLoginNote";
 import { getSession } from "@/lib/auth";
 import { formatDateTime } from "@/lib/formatDateTime";
 import { getPostsEditedBy } from "@/lib/getEditedPosts";
-import { articleImageUrl } from "@/lib/hagaki";
+import { articleImageUrl } from "@/lib/content";
 
 const myEditedPosts = sva({
   slots: [

@@ -1,5 +1,5 @@
 import type { WikiHistoryEntry, WikiThumbnail } from "hagaki";
-import { CONTENT_BASE_URL } from "./hagaki";
+import { CONTENT_BASE_URL } from "./content";
 
 /**
  * 生成物 `article/<uuid>/info.json` の中身。

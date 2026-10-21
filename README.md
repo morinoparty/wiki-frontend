@@ -1,79 +1,95 @@
-# MoripaWiki
+# wiki-frontend
 
-MoripaWiki は Next.js 15 で構築された Wiki アプリケーションです。Chakra UI と Panda CSS を組み合わせ、OpenNext を介して Cloudflare Workers 上で動作します。
+MoripaWiki の閲覧・編集 UI。Next.js の App Router で書いたアプリを
+[vinext](https://vinext.dev) (Vite 上の Next.js 互換実装) でビルドし、
+Cloudflare Workers で動かします。記事の読み書きは
+[hagaki](https://github.com/Nlkomaru/hagaki) 経由です。
 
-## ディレクトリ構成
+- 配信 URL: `https://wiki-frontend.<subdomain>.workers.dev` (Worker 名 `wiki-frontend`。独自ドメインなし)
+- デプロイ: Cloudflare CLI [`cf`](https://developers.cloudflare.com/cf/) (beta)。main への push で GitHub Actions が実行
+- コンテンツ: [morinoparty/wiki-content](https://github.com/morinoparty/wiki-content)
+  (`https://wiki-content.<subdomain>.workers.dev` から配信)
 
-- `src/actions/` – サーバーサイド API を Server Actions として実装
-- `src/app/` – App Router によるページ群
-- `src/components/` – 再利用可能な UI コンポーネント
-- `src/lib/` – 認証やデータ取得のユーティリティ
-- `src/theme/` – Chakra/Panda のテーマ定義
-- `tokens/` – Panda CSS 用カラープリセット
-
-## CMS の概要
-
-GitHub リポジトリ [`Nlkomaru/wiki-content`](https://github.com/Nlkomaru/wiki-content) が CMS で、
-[hagaki のコンテンツフォーマット](https://github.com/Nlkomaru/hagaki/blob/main/sample/README.md)に従います。
-
-- `/content/article/<uuid>/index.mdx` – 記事本体 (frontmatter + MDX)
-- `/content/article/<uuid>/assets/<imageId>.avif` – その記事の画像 (AVIF 固定)
-- `/content/categories/<slug>.json` – カテゴリ定義
-
-記事の同一性は **uuid** で持ちます (slug は変わりうる)。コミットが main に入ると
-コンテンツ側の GitHub Actions が `article.json` / `slug-index.json` / `info.json` を
-生成して Cloudflare Workers Assets にデプロイし、
-<https://wiki-content.moripa.nikomaru.dev> から配信されます。
-
-記事の作成・更新は `src/actions` から hagaki 経由で GitHub へコミットする仕組みで、
-履歴やレビューも GitHub 上で管理されます。
-
-## Actions API
-
-`src/actions` には記事管理用の Server Actions がまとまっています。主な機能は次のとおりです。
-
-- **Core**: `createPost` `updatePost` `deletePost` `lockPost` `unlockPost` `changePostStatus` `transferPostOwnership`
-- **Query**: `getAllPosts` `getPost` `getPostsByCategory` `searchPosts` `getUserPosts`
-- **Batch**: `batchDeletePosts` `batchChangePostsStatus` `duplicatePost`
-- **History**: `getPostHistory` `restorePostVersion` `getPostDiff`
-- **Stats**: `getSystemStats` `getUserStats` `healthCheck`
-
-どの関数も `ApiResult<T>` 型を返し、`success` と `error`、必要に応じて `data` や `commitId` を含みます。詳細な使用例や拡張方法、権限制御の仕組みは [`src/actions/README.md`](src/actions/README.md) を参照してください。
-
-## 必要な環境変数
-
-`.env.local` に下記を設定する必要があります。
+## 構成
 
 ```
-GITHUB_TOKEN=your_token
-ADMIN_USERS=user1,user2
-MAIN_SERVER_URL=https://auth.example.com
-CLIENT_ID=your_client_id
-AUTH_URL=https://your.app/auth
-AUTH_SECRET=your_auth_secret
+.
+├── cloudflare.config.ts        # Worker 定義 (名前、バインディング、secret)
+├── vite.config.ts              # vinext + Cloudflare Vite plugin
+├── next.config.ts              # vinext が読む Next.js 互換設定 (Server Action の body 上限)
+├── panda.config.ts             # Panda CSS (chlorophyll のプリセット)
+├── .github/workflows/deploy.yml
+└── src/
+    ├── app/                    # App Router のページと route handler
+    ├── actions/                # Server Actions (記事の作成・更新・履歴)
+    ├── components/
+    ├── lib/                    # hagaki client, 認証 (better-auth), env の読み出し
+    ├── proxy.ts                # 未ログインで /dashboard に来たらサインインへ
+    └── generate-search-index.ts
 ```
 
-## 開発手順
+- 公開ページは配信中の wiki-content (`article.json` など) を読みます。
+  配信元は `src/lib/content.ts` の `CONTENT_BASE_URL`。
+- 編集はダッシュボードから行い、保存すると hagaki が wiki-content へコミットします。
+  wiki-content の Actions がデプロイすると公開ページに反映されます。
+- エディタに入れた画像はブラウザで AVIF にし、保存時に本文と同じコミットへ入れます
+  (詳細は [`src/actions/README.md`](src/actions/README.md))。
 
-1. **依存関係のインストール** – `pnpm install`
-2. **開発サーバー起動** – `pnpm dev` (初回は `panda codegen` が実行されます)
-3. **コード確認** – `src/actions/services/github-service.ts` を中心に Server Actions の実装を把握し、`src/app` や `src/components` を閲覧します
-4. **デプロイ** – `pnpm deploy` で OpenNext ビルド後、wrangler を使って Cloudflare にデプロイ
+### Worker の env
 
-## コンポーネント実装ガイド
+| 名前 | 種類 | 内容 |
+|---|---|---|
+| `CLIENT_ID` | var (`cloudflare.config.ts`) | MineAuth の OAuth クライアント ID |
+| `AUTH_SECRET` | secret | Better Auth の署名鍵 |
+| `SERVER_URL` | secret | サーバー API のベース URL (例: `https://api.morino.party/`)。`<値>servers` の一覧を上から順に試し、OIDC discovery が応答した最初のサーバーを MineAuth の認証サーバーにする |
+| `HAGAKI_GITHUB_TOKEN` | secret | wiki-content を読み書きする GitHub トークン |
 
-1. `src/components` 配下にコンポーネントファイルを作成し、必ず `export` する
-2. スタイルは PandaCSS の `sva` 関数を用いて記述し、`src/theme` のトークンを参照する
-3. ロジックはカスタムフックやユーティリティに切り出し、表示コンポーネントはシンプルに保つ
-4. グローバル CSS は極力使わず、Panda の Recipe/Token を活用して一貫したデザインを維持する
+MineAuth には `https://wiki-frontend.<subdomain>.workers.dev/api/auth/callback/MineAuth`
+(ローカルでは `http://localhost:5173/api/auth/callback/MineAuth`) をコールバックとして登録します。
 
-新規参加者はまず `src/actions/README.md` を読み、API の利用方法と拡張方法を把握することを推奨します。React Server Components を主体に実装し、API Route でのロジックは必要最小限に留めてください。
+## 初回セットアップ
 
-## 新規参加者向けガイド
+1. `.env.example` を `.env` にコピーし、値を埋める (`.env` は git 管理外)
+   - `CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_API_TOKEN`: cf CLI 用。Worker には渡りません
+   - `AUTH_SECRET` / `SERVER_URL` / `HAGAKI_GITHUB_TOKEN`: Worker secret
+2. GitHub Actions の secrets にまとめて登録する
 
-- `src` ディレクトリ内の各フォルダを確認し、アプリ全体の構造を把握します。
-- CMS は GitHub 上の `/content` 配下ファイルで管理され、コミットがそのまま Cloudflare にデプロイされます。
-- 環境変数を `.env.local` に設定したら `pnpm install` → `pnpm dev` で開発を始めます。
-- `src/actions/README.md` で Server Actions の詳細や GitHubService の実装を確認します。
-- デザインは PandaCSS の `sva` とトークン/レシピを活用してください。
-- デプロイは `pnpm deploy` 実行後、wrangler で Cloudflare Workers へ公開します。
+   ```sh
+   gh secret set -f .env
+   ```
+
+`@morinoparty/chlorophyll-react` は GitHub Packages から入れるため、
+`~/.npmrc` に `//npm.pkg.github.com/:_authToken=<read:packages の PAT>` が必要です。
+
+## ローカル開発
+
+Node.js 26.12 以上 (`.node-version`) と pnpm 12 (`packageManager`) を使います。
+
+```sh
+pnpm install          # prepare で panda codegen も走る
+pnpm run dev          # ライセンス一覧と検索 index を作ってから cf dev
+```
+
+`cf dev` は Worker secret を `.env` から読みます。生成物だけ作り直すときは
+`pnpm run generate`、型チェックは `pnpm run typecheck` です。
+
+## デプロイ
+
+main に push すると `.github/workflows/deploy.yml` が
+`pnpm run generate` → `cf build --mode production` → `cf deploy --prebuilt --mode production` を実行します。
+pull request では dry-run まで行います。Worker secret は GitHub secrets から
+ファイルを作り、`cf deploy --secrets-file` で渡します。
+
+検索 index は配信中の wiki-content から作ります。取得に失敗したとき、push (本番 deploy)
+では build を止め、PR やローカルでは空の index で続けます。
+
+手元から deploy するときは `.env` の `CLOUDFLARE_*` が使われます。
+
+```sh
+pnpm run generate
+pnpm exec cf deploy --mode production
+```
+
+Worker secret を設定・変更するときは、`--secrets-file` に JSON か `.env` 形式の
+ファイルを渡します。`.env` をそのまま渡すと `CLOUDFLARE_*` まで Worker に入るので、
+secret 3 つだけのファイルを別に作ってください。

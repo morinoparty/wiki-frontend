@@ -4,7 +4,7 @@ import {
   ContentImage,
   type HagakiImageProps,
 } from "./ContentImage";
-import { CONTENT_BASE_URL } from "@/lib/hagaki";
+import { CONTENT_BASE_URL } from "@/lib/content";
 
 /**
  * 本文中の hagaki `<Image />` に対応するカスタム要素名。

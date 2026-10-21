@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getPostBySlug } from "@/lib/getPostBySlug";
 import { getAllPosts } from "@/lib/getAllPosts";
-import { articleImageUrl } from "@/lib/hagaki";
+import { articleImageUrl } from "@/lib/content";
 import { notFound } from "next/navigation";
 import { css } from "styled-system/css";
 import { PostHeader } from "@/components/PostHeader";

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { writeFile } from "node:fs/promises";
-import { getAllPosts } from "@/lib/getAllPosts";
+import { getHagakiClient } from "./lib/hagaki";
 import { getPostBySlug } from "./lib/getPostBySlug";
 import { postDate } from "./types/wiki";
 
@@ -32,7 +32,12 @@ export const tokenizeJapanese = (text: string): string => {
 };
 
 export const generateSearchIndex = async () => {
-  const slugs = (await getAllPosts()).map((post) => post.slug);
+  // getAllPosts はネットワークエラーを空配列に丸めるので使わず、失敗を main() まで上げる
+  const posts = await getHagakiClient().posts.list({
+    sortBy: "updated",
+    order: "desc",
+  });
+  const slugs = posts.map((post) => post.slug);
   const searchIndex: PostDocument[] = [];
 
   for (const slug of slugs) {
@@ -70,9 +75,33 @@ export const generateSearchIndex = async () => {
   );
 };
 
-
-function main() {
-  generateSearchIndex();
+/**
+ * `pnpm run generate:index` (cf build の前) から呼ばれる。
+ *
+ * 検索 index は配信中の wiki-content から作るので、wiki-content がまだ
+ * deploy されていない・落ちているときは取得に失敗する。
+ *
+ * - 本番 deploy (GitHub Actions の push) では失敗をそのまま build の失敗にする。
+ *   検索が黙って空になった版を出さないため
+ * - それ以外 (PR の dry-run、ローカル) では空の index を書いて警告だけ出し、
+ *   build は続ける
+ */
+async function main() {
+  try {
+    await generateSearchIndex();
+  } catch (error) {
+    const isProductionDeploy =
+      process.env.CI === "true" && process.env.GITHUB_EVENT_NAME === "push";
+    if (isProductionDeploy) {
+      console.error("::error::検索インデックスを生成できませんでした", error);
+      process.exit(1);
+    }
+    console.warn(
+      "::warning::検索インデックスを生成できなかったため、空のインデックスを書き出します",
+      error
+    );
+    await writeFile(path.join(baseDir, "search-index.json"), "[]");
+  }
 }
 
-main();
+await main();

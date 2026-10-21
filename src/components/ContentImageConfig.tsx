@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { HagakiImageConfig } from "hagaki/react";
-import { articleImageUrl } from "@/lib/hagaki";
+import { articleImageUrl } from "@/lib/content";
 
 /**
  * 記事本文中の `<Image imageId="…" />` の URL 解決を与えるクライアント境界。

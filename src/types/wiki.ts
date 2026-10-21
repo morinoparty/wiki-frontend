@@ -1,6 +1,8 @@
 import type {
+  CategoryOptionEnumValue,
   CategoryOptionField,
   EditorSummary,
+  PostOptionValues,
   GetAllPostsOptions as HagakiGetAllPostsOptions,
   WikiCategory as HagakiCategory,
   WikiPost as HagakiPost,
@@ -8,16 +10,11 @@ import type {
   WikiThumbnail,
 } from "hagaki";
 
-export type { CategoryOptionField, WikiThumbnail };
-
-// 記事のメタデータ。hagaki のコンテンツフォーマット
-// (content/article/<uuid>/index.mdx) が正で、以下は wiki-frontend の
-// ダッシュボード機能だけが使う補助フィールド。
-// 公開状態は hagaki 本体の `draft` (frontmatter に永続化される) を使う。
-type DashboardMetadata = {
-  // 座標情報（カテゴリが option で x / y を integer 宣言している場合に使用）
-  x?: number;
-  y?: number;
+export type {
+  CategoryOptionEnumValue,
+  CategoryOptionField,
+  PostOptionValues,
+  WikiThumbnail,
 };
 
 /**
@@ -32,11 +29,12 @@ type GeneratedMetadata = {
   editors?: ArticleEditor[];
 };
 
-// 投稿データの型定義
-export type WikiPost = HagakiPost & DashboardMetadata & GeneratedMetadata;
+// 投稿データの型定義。カテゴリ固有の値 (座標など) は hagaki 側の
+// `option` (frontmatter の `option.<key>`) に入る
+export type WikiPost = HagakiPost & GeneratedMetadata;
 
 // 詳細取得時（bodyあり）
-export type WikiPostDetail = HagakiPostDetail & DashboardMetadata;
+export type WikiPostDetail = HagakiPostDetail;
 
 export type GetAllPostsOptions = HagakiGetAllPostsOptions;
 

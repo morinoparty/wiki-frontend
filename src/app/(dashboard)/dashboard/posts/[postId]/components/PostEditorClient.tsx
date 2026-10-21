@@ -1,16 +1,8 @@
 "use client";
 import { toaster } from "@/components/ui/toaster";
 
-import {
-  useState,
-  useEffect,
-  Suspense,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
+import { useState, useEffect, Suspense, useRef, useCallback } from "react";
 import { PostHeaderEdit } from "./PostHeaderEdit";
-// import { MilkdownCrepeEditor } from "./Editor";
 import { css } from "styled-system/css";
 import { useTransition } from "react";
 import { updatePost } from "@/actions/update-post";
@@ -20,18 +12,22 @@ import { Button } from "@/components/Button";
 import { Spinner } from "@morinoparty/chlorophyll-react/components";
 import dynamic from "next/dynamic";
 import type { MDXEditorMethods } from "hagaki/editor";
+import { diffRemovedImagePaths } from "hagaki/markdown";
 import {
-  diffRemovedImagePaths,
-  extractImageComponentIds,
-} from "hagaki/markdown";
-import { hasActive, hasErrors, removePending, subscribe } from "hagaki/pending-images";
+  findUncommittedImageIds,
+  hasActive,
+  hasErrors,
+  removePending,
+  subscribe,
+  sweepOrphanedErrors,
+} from "hagaki/pending-images";
 import {
-  collectPendingImageIds,
+  buildImageForm,
   handleInsertImage,
   imageUrlPrefix,
-  sweepOrphanedImageErrors,
+  SaveImagesError,
 } from "./pending-images";
-import { WIKI_REPO } from "@/lib/hagaki";
+import { articleAssetsDir } from "@/lib/content";
 
 interface PostEditorClientProps {
   post: WikiPostDetail;
@@ -45,7 +41,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
   const [committedBody, setCommittedBody] = useState(post.body);
   // 直近でコミット済みのサムネイル id。post は保存しても更新されないので、
   // これを持たないと 2 回目以降の保存で「既にコミット済みのサムネイル」を
-  // 未コミット扱いで送ってしまい、R2 に無くて保存が落ちる。
+  // 未コミット扱いにしてしまい、ブラウザに Blob が無くて保存が落ちる。
   const [committedThumbnailId, setCommittedThumbnailId] = useState(
     post.thumbnail?.imageId
   );
@@ -61,7 +57,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
     setIsDirty(JSON.stringify(form) !== JSON.stringify(post));
   }, [form, post]);
 
-  // MilkdownEditorやPostHeaderEditから値を受け取るためのコールバックを用意
+  // Editor や PostHeaderEdit から値を受け取るためのコールバック
   const handleHeaderChange = (fields: Partial<WikiPostDetail>) => {
     setForm((prev) => ({ ...prev, ...fields }));
   };
@@ -70,11 +66,11 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
   const handleEditorChange = useCallback((body: string) => {
     // 本文から消えた失敗画像のエントリを回収する。放置すると hasErrors() が
     // 真のままになり、保存ボタンが永久に無効化される。
-    sweepOrphanedImageErrors(body);
+    sweepOrphanedErrors(body);
     setForm((prev) => ({ ...prev, body }));
   }, []);
 
-  // 画像のアップロード中・失敗中は保存させない。
+  // 画像のエンコード中・失敗中は保存させない。
   const [imageBusy, setImageBusy] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   useEffect(() => {
@@ -86,66 +82,74 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
     return subscribe(update);
   }, []);
 
-  const onInsertImage = useCallback(
-    (file: File) => handleInsertImage(file, post.uuid),
-    [post.uuid]
-  );
-
-  // コミット済みの画像 id。エディタはこれ以外を一時置き場から表示するので、
-  // リロード後 (pending store が空) でも未コミット画像が見える。
-  const committedImageIds = useMemo(
-    () => new Set(extractImageComponentIds(committedBody)),
-    [committedBody]
-  );
   const handleSave = () => {
     startTransition(async () => {
-      // 本文が参照する未コミット画像を集め、アップロードの完了を待つ。
-      // 本文から消えた画像は同じコミットで削除する。
-      let pendingImageIds: string[];
-      try {
-        pendingImageIds = await collectPendingImageIds(form.body, committedBody);
-      } catch (error) {
-        toaster.error({
-          title: "保存に失敗しました",
-          description:
-            error instanceof Error
-              ? error.message
-              : "画像のアップロードに失敗しました",
-        });
-        return;
-      }
-      // サムネイルは本文に現れないので、未コミットなら個別に足す。
+      // 本文が新しく参照する画像。サムネイルは本文に現れないので、
+      // 未コミットなら個別に足す。
+      const imageIds = findUncommittedImageIds(form.body, committedBody);
       const thumbId = form.thumbnail?.imageId;
       if (
         thumbId &&
         thumbId !== committedThumbnailId &&
-        !pendingImageIds.includes(thumbId)
+        !imageIds.includes(thumbId)
       ) {
-        pendingImageIds.push(thumbId);
+        imageIds.push(thumbId);
       }
-      const assetsDir = `${WIKI_REPO.contentPath}/${post.uuid}/assets/`;
-      // サムネイルが指している画像は消さない。diffRemovedImagePaths は本文
-      // しか見ないので、カバーと本文で同じ画像を使っている記事 (wiki-content
-      // に実在する) で本文からだけ消すと、カバーの参照先ごと削除されてしまう。
+
+      // エンコードの完了を待って Blob を集める。失敗・欠落・サイズ超過は
+      // 送る前にここで止める。
+      let images: Awaited<ReturnType<typeof buildImageForm>>;
+      try {
+        images = await buildImageForm(imageIds, form.body);
+      } catch (error) {
+        toaster.error({
+          title: "保存できません",
+          description:
+            error instanceof SaveImagesError
+              ? error.message
+              : "画像の準備に失敗しました",
+        });
+        return;
+      }
+
+      // 本文から消えた画像は同じコミットで削除する。ただしサムネイルが
+      // 指している画像は消さない。diffRemovedImagePaths は本文しか見ないので、
+      // カバーと本文で同じ画像を使っている記事で本文からだけ消すと、
+      // カバーの参照先ごと削除されてしまう。
+      const assetsDir = articleAssetsDir(post.uuid);
       const keepPath = thumbId ? `${assetsDir}${thumbId}.avif` : undefined;
       const deletePaths = diffRemovedImagePaths(committedBody, form.body, {
         urlPrefix: imageUrlPrefix(post.uuid),
         repoDir: assetsDir,
       }).filter((path) => path !== keepPath);
 
-      const result = await updatePost(
-        {
-          uuid: post.uuid,
-          slug: form.slug,
-          title: form.title,
-          body: form.body,
-          category: form.category,
-          description: form.description,
-          thumbnail: form.thumbnail,
-          draft: form.draft === true,
-        },
-        { pendingImageIds, deletePaths }
-      );
+      let result: Awaited<ReturnType<typeof updatePost>>;
+      try {
+        result = await updatePost(
+          {
+            uuid: post.uuid,
+            slug: form.slug,
+            title: form.title,
+            body: form.body,
+            category: form.category,
+            description: form.description,
+            thumbnail: form.thumbnail,
+            draft: form.draft === true,
+          },
+          { deletePaths },
+          images.images.length > 0 ? images.form : undefined
+        );
+      } catch (error) {
+        // サーバーまで届かなかった (通信エラーや Server Action の
+        // サイズ上限超過など) 場合はここに来る
+        console.error("Error saving post:", error);
+        toaster.error({
+          title: "保存に失敗しました",
+          description:
+            error instanceof Error ? error.message : "もう一度お試しください。",
+        });
+        return;
+      }
 
       if (!result.success) {
         console.error("Error saving post:", result.error);
@@ -161,12 +165,13 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
         description: "記事が正常に保存されました。",
       });
 
-      // コミットに載った分だけ破棄する。clearAll だと、この保存が走っている
-      // 間に挿入された (= 今回のコミットに入っていない) 画像のエントリまで
-      // 消えて、次の保存で復元できなくなる。
-      for (const id of pendingImageIds) removePending(id);
+      // 先にコミット済みの本文を更新して、表示をコミット済みの URL へ
+      // 切り替えてから、コミットに載せた分だけ破棄する (object URL も
+      // revoke される)。clearAll だと、この保存が走っている間に挿入された
+      // (= 今回のコミットに入っていない) 画像まで消えてしまう。
       setCommittedBody(form.body);
       setCommittedThumbnailId(thumbId);
+      for (const { imageId } of images.images) removePending(imageId);
       setIsDirty(false); // 保存後にダーティフラグをリセット
     });
   };
@@ -208,8 +213,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
             onChange={handleEditorChange}
             articleId={post.uuid}
             draft={isDraft}
-            onInsertImage={onInsertImage}
-            committedImageIds={committedImageIds}
+            onInsertImage={handleInsertImage}
           />
         </Suspense>
       </div>

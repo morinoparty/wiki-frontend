@@ -1,33 +1,26 @@
 import { Permission } from "../types";
 import { WikiPostDetail } from "@/types/wiki";
-import { AuthService } from "./auth-service";
 
 /**
- * role ベースの権限チェック。
+ * 権限チェック。
  *
  * 記事の公開状態は hagaki の `draft` (配信側で遮断される) が担うため、
- * ここでは「誰が何を操作できるか」だけを見る。
+ * ここでは「誰が何を操作できるか」だけを見る。現状はログイン済みの
+ * ユーザー全員が読み書きでき、ロール (管理者など) の区別は無い。
+ * 削除のような権限の要る操作を足すときに、ここへ判定を加える。
  */
 export class PermissionService {
   /**
    * ユーザーの基本権限をチェック
    */
   static async checkPermission(
-    userId: string,
+    _userId: string,
     permission: Permission
   ): Promise<boolean> {
-    const userRole = await AuthService.getUserRole(userId);
-
     switch (permission) {
       case "read":
-        return true; // すべてのユーザーが読み取り可能
-
       case "write":
-        return true; // 全てのユーザーが書き込み可能
-
-      case "delete":
-        return userRole === "admin";
-
+        return true;
       default:
         return false;
     }
