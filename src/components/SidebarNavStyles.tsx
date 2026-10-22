@@ -74,6 +74,9 @@ export const SidebarNavListItem: React.FC<{
             pr: "36px",
             gap: "16px",
             textStyle: "body",
+            // textStyle body は文字色 (colorPalette.fg) も持ち、recipe の文字色を上書きしてしまう。
+            // 塗りの上で読めるよう、primary の文字色に戻す
+            color: "colorPalette.contrast",
           })}
         >
           <Link to={href}>
