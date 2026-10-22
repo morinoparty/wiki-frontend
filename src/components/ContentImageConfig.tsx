@@ -1,14 +1,10 @@
-"use client";
-
 import type { ReactNode } from "react";
 import { HagakiImageConfig } from "@morinoparty/hagaki/react";
 import { articleImageUrl } from "@/lib/content";
 
 /**
- * 記事本文中の `<Image imageId="…" />` の URL 解決を与えるクライアント境界。
- *
- * `HagakiImageConfig` は `urlFor` に関数を取るため、Server Component から
- * 直接渡すとシリアライズできない。ここでクライアント側に閉じ込める。
+ * 記事本文中の `<Image imageId="…" />` の URL 解決を与える。
+ * 画像は配信元 (`CONTENT_BASE_URL`) の `article/<uuid>/assets/` から読む。
  */
 export function ContentImageConfig({
   articleId,

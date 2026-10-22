@@ -23,7 +23,7 @@ styled-system-studio
 
 # build 前に生成するもの (pnpm run generate)
 /public/search-index.json
-/src/app/(normal)/license/data.json
+/src/generated/license.json
 
 # misc
 .DS_Store

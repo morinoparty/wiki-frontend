@@ -1,5 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSession } from "@/lib/auth";
+import { WIKI_REPO } from "@/lib/content";
+import {
+  getCommitWithChecks,
+  type CheckRunsResult,
+  type CommitDetail,
+} from "@/lib/getCommitWithChecks";
 import {
   getDashboardPosts,
   getDashboardPostsEditedBy,
@@ -21,3 +27,26 @@ export const fetchMyEditedPosts = createServerFn({ method: "GET" }).handler(
     return getDashboardPostsEditedBy(playerId);
   }
 );
+
+/**
+ * 保存完了ページ用に、wiki-content のコミット内容とチェックラン (deploy) を取得する。
+ * 取得できなければ null (ルート側で notFound にする)。
+ */
+export const fetchCommitWithChecks = createServerFn({ method: "GET" })
+  .validator((commitId: string) => commitId)
+  .handler(
+    async ({
+      data: commitId,
+    }): Promise<{ commit: CommitDetail; checks: CheckRunsResult } | null> => {
+      try {
+        return await getCommitWithChecks({
+          owner: WIKI_REPO.owner,
+          repo: WIKI_REPO.repo,
+          commitSha: commitId,
+        });
+      } catch (error) {
+        console.error("Error fetching commit data:", error);
+        return null;
+      }
+    }
+  );

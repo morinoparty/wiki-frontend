@@ -1,5 +1,3 @@
-"use client";
-
 import { ThemeProvider, type ThemeProviderProps } from "next-themes";
 
 // chlorophyll はランタイムの Provider を必要としない(トークンは Panda が CSS に焼く)ため、

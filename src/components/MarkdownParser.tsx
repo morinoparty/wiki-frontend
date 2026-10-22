@@ -8,9 +8,8 @@ import rehypeReact from "rehype-react";
 import { visit } from "unist-util-visit";
 import type { Node, Parent } from "unist";
 import { components, HAGAKI_IMAGE_TAG } from "./MDXRemoteComponents";
-import React from "react";
-import { jsxDEV } from "react/jsx-dev-runtime";
-import { jsxs, jsx } from "react/jsx-runtime";
+import { useMemo } from "react";
+import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 
 /**
  * 本文中の `<Image imageId="…" blurHash64="…" width="…" height="…" alt="…" />`
@@ -67,30 +66,21 @@ const schema = {
   },
 };
 
-export function MarkdownParser({ body }: { body: string }) {
-  const isDev = process.env.NODE_ENV === "development";
-  const rehypeReactOptions: Record<string, unknown> = {
-    createElement: React.createElement,
-    Fragment: React.Fragment,
-    components,
-  };
-  if (isDev) {
-    rehypeReactOptions.development = true;
-    rehypeReactOptions.jsxDEV = jsxDEV;
-  } else {
-    // production環境ではjsxs, jsxを指定
-    rehypeReactOptions.jsxs = jsxs;
-    rehypeReactOptions.jsx = jsx;
-  }
-  const file = unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkHagakiImage)
-    .use(remarkRehype, { allowDangerousHtml: false, skipHtml: true })
-    .use(rehypeRaw)
-    .use(rehypeSanitize, schema)
-    .use(rehypeReact, rehypeReactOptions)
-    .processSync(body);
+// SSR とクライアント遷移の両方で同じ処理系を使う。jsx-runtime の jsx / jsxs は
+// 開発ビルドでもそのまま動くので、jsxDEV への切り替えはしない
+const processor = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkHagakiImage)
+  .use(remarkRehype, { allowDangerousHtml: false, skipHtml: true })
+  .use(rehypeRaw)
+  .use(rehypeSanitize, schema)
+  .use(rehypeReact, { Fragment, jsx, jsxs, components });
 
-  return file.result;
+/**
+ * 記事本文 (markdown) を React 要素にする。サーバー (SSR) でもブラウザ
+ * (クライアント遷移) でも動く。本文が変わらない限り再パースしない。
+ */
+export function MarkdownParser({ body }: { body: string }) {
+  return useMemo(() => processor.processSync(body).result, [body]);
 }

@@ -1,5 +1,3 @@
-"use client";
-
 import { ark, type HTMLArkProps } from "@ark-ui/react/factory";
 import { cva, cx } from "styled-system/css";
 

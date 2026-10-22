@@ -12,9 +12,18 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as NormalRouteImport } from './routes/_normal'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as NormalIndexRouteImport } from './routes/_normal/index'
+import { Route as NormalPostIdRouteImport } from './routes/_normal/$postId'
+import { Route as NormalLicenseRouteImport } from './routes/_normal/license'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as NormalAuthSignInRouteImport } from './routes/_normal/auth/sign-in'
+import { Route as NormalCategoryIndexRouteImport } from './routes/_normal/category/index'
+import { Route as NormalCategoryCategoryIdRouteImport } from './routes/_normal/category/$categoryId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as DashboardCommitCommitIdRouteImport } from './routes/dashboard/commit/$commitId'
+import { Route as DashboardPostsIndexRouteImport } from './routes/dashboard/posts/index'
+import { Route as DashboardPostsPostIdRouteImport } from './routes/dashboard/posts/$postId'
+import { Route as DashboardPostsNewRouteImport } from './routes/dashboard/posts/new'
+import { Route as ApiArticleAssetsUuidImageIdRouteImport } from './routes/api/article-assets/$uuid/$imageId'
 
 const NormalRoute = NormalRouteImport.update({
   id: '/_normal',
@@ -30,6 +39,16 @@ const NormalIndexRoute = NormalIndexRouteImport.update({
   path: '/',
   getParentRoute: () => NormalRoute,
 } as any)
+const NormalPostIdRoute = NormalPostIdRouteImport.update({
+  id: '/$postId',
+  path: '/$postId',
+  getParentRoute: () => NormalRoute,
+} as any)
+const NormalLicenseRoute = NormalLicenseRouteImport.update({
+  id: '/license',
+  path: '/license',
+  getParentRoute: () => NormalRoute,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -40,54 +59,154 @@ const NormalAuthSignInRoute = NormalAuthSignInRouteImport.update({
   path: '/auth/sign-in',
   getParentRoute: () => NormalRoute,
 } as any)
+const NormalCategoryIndexRoute = NormalCategoryIndexRouteImport.update({
+  id: '/category/',
+  path: '/category/',
+  getParentRoute: () => NormalRoute,
+} as any)
+const NormalCategoryCategoryIdRoute =
+  NormalCategoryCategoryIdRouteImport.update({
+    id: '/category/$categoryId',
+    path: '/category/$categoryId',
+    getParentRoute: () => NormalRoute,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardCommitCommitIdRoute = DashboardCommitCommitIdRouteImport.update({
+  id: '/commit/$commitId',
+  path: '/commit/$commitId',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardPostsIndexRoute = DashboardPostsIndexRouteImport.update({
+  id: '/posts/',
+  path: '/posts/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardPostsPostIdRoute = DashboardPostsPostIdRouteImport.update({
+  id: '/posts/$postId',
+  path: '/posts/$postId',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardPostsNewRoute = DashboardPostsNewRouteImport.update({
+  id: '/posts/new',
+  path: '/posts/new',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const ApiArticleAssetsUuidImageIdRoute =
+  ApiArticleAssetsUuidImageIdRouteImport.update({
+    id: '/api/article-assets/$uuid/$imageId',
+    path: '/api/article-assets/$uuid/$imageId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/': typeof NormalIndexRoute
+  '/$postId': typeof NormalPostIdRoute
+  '/license': typeof NormalLicenseRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/auth/sign-in': typeof NormalAuthSignInRoute
+  '/category/$categoryId': typeof NormalCategoryCategoryIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/dashboard/commit/$commitId': typeof DashboardCommitCommitIdRoute
+  '/dashboard/posts/$postId': typeof DashboardPostsPostIdRoute
+  '/dashboard/posts/new': typeof DashboardPostsNewRoute
+  '/category/': typeof NormalCategoryIndexRoute
+  '/dashboard/posts/': typeof DashboardPostsIndexRoute
+  '/api/article-assets/$uuid/$imageId': typeof ApiArticleAssetsUuidImageIdRoute
 }
 export interface FileRoutesByTo {
+  '/$postId': typeof NormalPostIdRoute
+  '/license': typeof NormalLicenseRoute
   '/': typeof NormalIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/auth/sign-in': typeof NormalAuthSignInRoute
+  '/category/$categoryId': typeof NormalCategoryCategoryIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/dashboard/commit/$commitId': typeof DashboardCommitCommitIdRoute
+  '/dashboard/posts/$postId': typeof DashboardPostsPostIdRoute
+  '/dashboard/posts/new': typeof DashboardPostsNewRoute
+  '/category': typeof NormalCategoryIndexRoute
+  '/dashboard/posts': typeof DashboardPostsIndexRoute
+  '/api/article-assets/$uuid/$imageId': typeof ApiArticleAssetsUuidImageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/_normal': typeof NormalRouteWithChildren
+  '/_normal/$postId': typeof NormalPostIdRoute
+  '/_normal/license': typeof NormalLicenseRoute
   '/_normal/': typeof NormalIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/_normal/auth/sign-in': typeof NormalAuthSignInRoute
+  '/_normal/category/$categoryId': typeof NormalCategoryCategoryIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/dashboard/commit/$commitId': typeof DashboardCommitCommitIdRoute
+  '/dashboard/posts/$postId': typeof DashboardPostsPostIdRoute
+  '/dashboard/posts/new': typeof DashboardPostsNewRoute
+  '/_normal/category/': typeof NormalCategoryIndexRoute
+  '/dashboard/posts/': typeof DashboardPostsIndexRoute
+  '/api/article-assets/$uuid/$imageId': typeof ApiArticleAssetsUuidImageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/dashboard' | '/' | '/dashboard/' | '/auth/sign-in' | '/api/auth/$'
+    | '/dashboard'
+    | '/'
+    | '/$postId'
+    | '/license'
+    | '/dashboard/'
+    | '/auth/sign-in'
+    | '/category/$categoryId'
+    | '/api/auth/$'
+    | '/dashboard/commit/$commitId'
+    | '/dashboard/posts/$postId'
+    | '/dashboard/posts/new'
+    | '/category/'
+    | '/dashboard/posts/'
+    | '/api/article-assets/$uuid/$imageId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/auth/sign-in' | '/api/auth/$'
+  to:
+    | '/$postId'
+    | '/license'
+    | '/'
+    | '/dashboard'
+    | '/auth/sign-in'
+    | '/category/$categoryId'
+    | '/api/auth/$'
+    | '/dashboard/commit/$commitId'
+    | '/dashboard/posts/$postId'
+    | '/dashboard/posts/new'
+    | '/category'
+    | '/dashboard/posts'
+    | '/api/article-assets/$uuid/$imageId'
   id:
     | '__root__'
     | '/dashboard'
     | '/_normal'
+    | '/_normal/$postId'
+    | '/_normal/license'
     | '/_normal/'
     | '/dashboard/'
     | '/_normal/auth/sign-in'
+    | '/_normal/category/$categoryId'
     | '/api/auth/$'
+    | '/dashboard/commit/$commitId'
+    | '/dashboard/posts/$postId'
+    | '/dashboard/posts/new'
+    | '/_normal/category/'
+    | '/dashboard/posts/'
+    | '/api/article-assets/$uuid/$imageId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   NormalRoute: typeof NormalRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiArticleAssetsUuidImageIdRoute: typeof ApiArticleAssetsUuidImageIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -113,6 +232,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NormalIndexRouteImport
       parentRoute: typeof NormalRoute
     }
+    '/_normal/$postId': {
+      id: '/_normal/$postId'
+      path: '/$postId'
+      fullPath: '/$postId'
+      preLoaderRoute: typeof NormalPostIdRouteImport
+      parentRoute: typeof NormalRoute
+    }
+    '/_normal/license': {
+      id: '/_normal/license'
+      path: '/license'
+      fullPath: '/license'
+      preLoaderRoute: typeof NormalLicenseRouteImport
+      parentRoute: typeof NormalRoute
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/'
@@ -127,6 +260,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NormalAuthSignInRouteImport
       parentRoute: typeof NormalRoute
     }
+    '/_normal/category/': {
+      id: '/_normal/category/'
+      path: '/category'
+      fullPath: '/category/'
+      preLoaderRoute: typeof NormalCategoryIndexRouteImport
+      parentRoute: typeof NormalRoute
+    }
+    '/_normal/category/$categoryId': {
+      id: '/_normal/category/$categoryId'
+      path: '/category/$categoryId'
+      fullPath: '/category/$categoryId'
+      preLoaderRoute: typeof NormalCategoryCategoryIdRouteImport
+      parentRoute: typeof NormalRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -134,15 +281,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/commit/$commitId': {
+      id: '/dashboard/commit/$commitId'
+      path: '/commit/$commitId'
+      fullPath: '/dashboard/commit/$commitId'
+      preLoaderRoute: typeof DashboardCommitCommitIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/posts/': {
+      id: '/dashboard/posts/'
+      path: '/posts'
+      fullPath: '/dashboard/posts/'
+      preLoaderRoute: typeof DashboardPostsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/posts/$postId': {
+      id: '/dashboard/posts/$postId'
+      path: '/posts/$postId'
+      fullPath: '/dashboard/posts/$postId'
+      preLoaderRoute: typeof DashboardPostsPostIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/posts/new': {
+      id: '/dashboard/posts/new'
+      path: '/posts/new'
+      fullPath: '/dashboard/posts/new'
+      preLoaderRoute: typeof DashboardPostsNewRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/api/article-assets/$uuid/$imageId': {
+      id: '/api/article-assets/$uuid/$imageId'
+      path: '/api/article-assets/$uuid/$imageId'
+      fullPath: '/api/article-assets/$uuid/$imageId'
+      preLoaderRoute: typeof ApiArticleAssetsUuidImageIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardCommitCommitIdRoute: typeof DashboardCommitCommitIdRoute
+  DashboardPostsPostIdRoute: typeof DashboardPostsPostIdRoute
+  DashboardPostsNewRoute: typeof DashboardPostsNewRoute
+  DashboardPostsIndexRoute: typeof DashboardPostsIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardCommitCommitIdRoute: DashboardCommitCommitIdRoute,
+  DashboardPostsPostIdRoute: DashboardPostsPostIdRoute,
+  DashboardPostsNewRoute: DashboardPostsNewRoute,
+  DashboardPostsIndexRoute: DashboardPostsIndexRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
@@ -150,13 +340,21 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
 )
 
 interface NormalRouteChildren {
+  NormalPostIdRoute: typeof NormalPostIdRoute
+  NormalLicenseRoute: typeof NormalLicenseRoute
   NormalIndexRoute: typeof NormalIndexRoute
   NormalAuthSignInRoute: typeof NormalAuthSignInRoute
+  NormalCategoryCategoryIdRoute: typeof NormalCategoryCategoryIdRoute
+  NormalCategoryIndexRoute: typeof NormalCategoryIndexRoute
 }
 
 const NormalRouteChildren: NormalRouteChildren = {
+  NormalPostIdRoute: NormalPostIdRoute,
+  NormalLicenseRoute: NormalLicenseRoute,
   NormalIndexRoute: NormalIndexRoute,
   NormalAuthSignInRoute: NormalAuthSignInRoute,
+  NormalCategoryCategoryIdRoute: NormalCategoryCategoryIdRoute,
+  NormalCategoryIndexRoute: NormalCategoryIndexRoute,
 }
 
 const NormalRouteWithChildren =
@@ -166,6 +364,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   NormalRoute: NormalRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiArticleAssetsUuidImageIdRoute: ApiArticleAssetsUuidImageIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

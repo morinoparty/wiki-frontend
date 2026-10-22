@@ -1,5 +1,3 @@
-"use client";
-
 import { Drawer, Portal } from "@morinoparty/chlorophyll-react/components";
 import { Menu } from "lucide-react";
 import { IconButton } from "@/components/IconButton";
