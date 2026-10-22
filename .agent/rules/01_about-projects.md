@@ -26,6 +26,10 @@ slug は変わりうるため、パスは uuid ベースです。
 (マニフェスト: `article.json`、`slug-index.json`、記事ごとの `info.json`)。
 書き込みは hagaki (`src/lib/hagaki.ts`、サーバー専用) によるリポジトリへのコミットです。
 
+Minecraft のモデル・テクスチャ・アイテム定義は、別リポジトリ [morinoparty/mc-assets](https://github.com/morinoparty/mc-assets) の Worker
+(`MINECRAFT_ASSETS_URL`、`src/lib/minecraft-assets.ts`) から読みます。最新リリースの client.jar の `assets/minecraft/` と同じ構成で、
+`src/components/ui/provider.tsx` の `MinecraftProvider` に渡しているので、chlorophyll の `MinecraftItem` などは個別に URL を渡さずに使えます。
+
 ## 主な技術スタック
 - **TanStack Start / Router** + Vite 8 + `@cloudflare/vite-plugin` (v2 beta) + `cf` (Cloudflare CLI, beta)
 - React 19 / TypeScript
