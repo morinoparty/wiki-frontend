@@ -16,8 +16,10 @@ import { SAVE_REQUEST_LIMIT_BYTES } from "@/lib/post-images";
 const serverFnBodyLimit = createMiddleware({ type: "request" }).server(
   ({ request, handlerType, next }) => {
     if (handlerType !== "serverFn" || request.method !== "POST") return next();
-    const length = Number(request.headers.get("content-length"));
-    // ブラウザの fetch(FormData / JSON) は必ず Content-Length を付ける
+    // ブラウザの fetch(FormData / JSON) は必ず Content-Length を付けるので、
+    // 無いもの (chunked) は読まずに断る。Number(null) は 0 になる点に注意
+    const header = request.headers.get("content-length");
+    const length = header === null ? NaN : Number(header);
     if (!Number.isFinite(length) || length > SAVE_REQUEST_LIMIT_BYTES) {
       return new Response("Payload Too Large", { status: 413 });
     }
