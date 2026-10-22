@@ -1,115 +1,72 @@
-import { Button } from "@/components/Button";
-import { ModalDialog } from "@morinoparty/chlorophyll-react/components";
+import {
+  Button,
+  ModalDialog,
+  RadioGroup,
+} from "@morinoparty/chlorophyll-react/components";
 import { WikiCategory } from "@/types/wiki";
 import { useState } from "react";
-import { sva } from "styled-system/css";
+import { css, cx, sva } from "styled-system/css";
 import { DashboardPostFormModal } from "./DashboardPostFormModal";
+import { postDialogStyles } from "./postDialogStyles";
 import type { PostFormValues } from "./DashboardPostFormModal";
+import { buttonSize } from "@/components/buttonSize";
 
+// 枠・見出し・区切り線は postDialogStyles で 2/2 と共通にし、ここではカテゴリ一覧の中身だけを持つ
 const postAddModalStyles = sva({
   slots: [
-    "container",
-    "title",
-    "heading",
-    "subtitle",
     "main",
+    "radioGroup",
     "categoryItem",
-    "radioButton",
-    "radioChecked",
     "categoryContent",
     "categoryTitle",
     "categoryDescription",
-    "footer",
-    "navigationArea",
   ],
   base: {
-    container: {
-      height: "100vh",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      bgColor: "colorPalette.surface",
-    },
-    title: {
-      gridArea: "title",
-    },
-    subtitle: {
-      textStyle: "body",
-      fontWeight: "bold",
-      color: "colorPalette.fg.subtle",
-      mb: "8px",
-    },
-    heading: {
-      textStyle: "heading2",
-      color: "colorPalette.fg",
-      fontSize: "26px",
-    },
+    // カテゴリが多いときは一覧の中だけをスクロールさせる
     main: {
-      gridArea: "main",
-      display: "flex",
-      flexDirection: "column",
-      gap: "32px",
       maxHeight: "440px",
       overflowY: "auto",
-      py: "32px",
-      borderTop: "1px solid",
-      borderBottom: "1px solid",
-      borderColor: "border.subtle",
     },
+    // 行そのものに面を持たせるので、行と行の間はわずかに空けるだけにする
+    radioGroup: {
+      gap: "4px",
+    },
+    // 1 行を押しやすい面にする。hover と選択中で地色を付け、
+    // 左右に 16px はみ出させて丸の位置を見出しの左端に揃える
     categoryItem: {
-      display: "flex",
-      alignItems: "center",
-      gap: "24px",
-      cursor: "pointer",
+      gap: "16px",
+      alignItems: "flex-start",
+      px: "16px",
+      py: "12px",
+      mx: "-16px",
       borderRadius: "12px",
-      px: "38px",
+      transition: "background-color 0.15s ease",
+      _hover: {
+        bg: "colorPalette.surface.subtle",
+      },
+      _checked: {
+        bg: "colorPalette.surface",
+      },
     },
-    radioButton: {
-      width: "24px",
-      height: "24px",
-      position: "relative",
-      borderRadius: "12px",
-      border: "2px solid",
-      borderColor: "border.muted",
-      bgColor: "colorPalette.surface",
-      flexShrink: 0,
-    },
-    radioChecked: {
-      position: "absolute",
-      top: "3px",
-      left: "3px",
-      width: "14px",
-      height: "14px",
-      borderRadius: "7px",
-      bgColor: "colorPalette.solid",
-    },
+    // Item は <label> なので、中身は span を block 化して縦に積む
     categoryContent: {
       display: "flex",
       flexDirection: "column",
-      gap: "8px",
+      gap: "2px",
       flex: 1,
     },
+    // ItemText の文字色はレシピが持つため、見出しとしての大きさと太さだけを上書きする
     categoryTitle: {
-      fontSize: "18px",
+      fontSize: "16px",
       fontWeight: "bold",
-      color: "colorPalette.fg",
-      lineHeight: "1em",
+      lineHeight: "1.5",
     },
     categoryDescription: {
+      display: "block",
       fontSize: "14px",
       fontWeight: "500",
       color: "colorPalette.fg.subtle",
       lineHeight: "1.5",
-    },
-    footer: {
-      gridArea: "footer",
-      position: "relative",
-    },
-    navigationArea: {
-      display: "flex",
-      justifyContent: "flex-end",
-      alignItems: "center",
-      gap: "20px",
     },
   },
 });
@@ -125,6 +82,7 @@ export const DashboardPostAddModal: React.FC<{
   );
 
   const styles = postAddModalStyles();
+  const dialog = postDialogStyles();
 
   const handleNext = () => {
     if (selectedCategory) {
@@ -132,9 +90,28 @@ export const DashboardPostAddModal: React.FC<{
     }
   };
 
-  const handleBack = () => {
+  // 戻ったときに、フォームに入力していた値を保持しておく
+  const [draftValues, setDraftValues] = useState<{
+    category: string;
+    values: PostFormValues;
+  } | null>(null);
+
+  const handleBack = (values: PostFormValues) => {
+    if (selectedCategory) setDraftValues({ category: selectedCategory, values });
     setCurrentStep("category");
   };
+
+  // タイトル・URL・説明はカテゴリに関係なく引き継ぐ。
+  // option (enum など) はカテゴリごとに中身が違うので、同じカテゴリに戻ったときだけ引き継ぐ
+  const initialValues: Partial<PostFormValues> | undefined = draftValues
+    ? draftValues.category === selectedCategory
+      ? draftValues.values
+      : {
+          title: draftValues.values.title,
+          url: draftValues.values.url,
+          description: draftValues.values.description,
+        }
+    : undefined;
 
   const handleSubmit = (formData: PostFormValues) => {
     if (selectedCategory && onCreatePost) {
@@ -153,48 +130,64 @@ export const DashboardPostAddModal: React.FC<{
         existingSlugs={existingSlugs}
         onBack={handleBack}
         onSubmit={handleSubmit}
+        initialValues={initialValues}
       />
     );
   }
 
   return (
-    <ModalDialog.Container>
-      <div className={styles.title}>
-        <p className={styles.subtitle}>Wikiの新規作成 1/2</p>
-        <h2 className={styles.heading}>カテゴリを選びましょう</h2>
-      </div>
+    <ModalDialog.Container className={dialog.container}>
+      <ModalDialog.Title>
+        <p className={dialog.subtitle}>Wikiの新規作成 1/2</p>
+        <h2 className={dialog.heading}>カテゴリを選びましょう</h2>
+      </ModalDialog.Title>
 
-      <div className={styles.main}>
-        {categories.map((category) => (
-          <div
-            key={category.slug}
-            onClick={() => setSelectedCategory(category.slug)}
-            className={styles.categoryItem}
-          >
-            {/* Radio button / Choice box */}
-            <div className={styles.radioButton}>
-              {selectedCategory === category.slug && (
-                <div className={styles.radioChecked} />
-              )}
-            </div>
+      <ModalDialog.Content className={cx(dialog.main, styles.main)}>
+        {/* カテゴリの選択。RadioGroup にすることで矢印キーでの移動や role="radio" による読み上げに対応する */}
+        <RadioGroup.Root
+          className={styles.radioGroup}
+          aria-label="カテゴリ"
+          value={selectedCategory}
+          onValueChange={(details) => setSelectedCategory(details.value)}
+        >
+          {categories.map((category) => (
+            <RadioGroup.Item
+              key={category.slug}
+              value={category.slug}
+              className={styles.categoryItem}
+            >
+              {/* 1 行目 (カテゴリ名) の高さに丸を揃える */}
+              <RadioGroup.ItemControl className={css({ mt: "2px" })} />
+              {/* タイトルと説明を縦に並べる。説明は選択肢の名前 (ItemText) には含めない */}
+              <span className={styles.categoryContent}>
+                <RadioGroup.ItemText className={styles.categoryTitle}>
+                  {category.title}
+                </RadioGroup.ItemText>
+                <span className={styles.categoryDescription}>
+                  {category.body}
+                </span>
+              </span>
+              {/* フォーカスとキーボード操作を担うネイティブの radio */}
+              <RadioGroup.ItemHiddenInput />
+            </RadioGroup.Item>
+          ))}
+        </RadioGroup.Root>
+      </ModalDialog.Content>
 
-            {/* Category content */}
-            <div className={styles.categoryContent}>
-              <h3 className={styles.categoryTitle}>{category.title}</h3>
-              <p className={styles.categoryDescription}>{category.body}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Bottom navigation with separator lines */}
-      <div className={styles.footer}>
-        <div className={styles.navigationArea}>
-          <Button size={"md"} disabled={!selectedCategory} onClick={handleNext}>
-            次に進む
-          </Button>
-        </div>
-      </div>
+      {/* 右寄せの並びは ModalDialog.Footer が持つ */}
+      <ModalDialog.Footer>
+        {/* ダイアログの主操作なので primary の lg */}
+        <Button
+          type="button"
+          intent="primary"
+          size="lg"
+          className={buttonSize({ size: "md" })}
+          disabled={!selectedCategory}
+          onClick={handleNext}
+        >
+          次に進む
+        </Button>
+      </ModalDialog.Footer>
     </ModalDialog.Container>
   );
 };

@@ -2,7 +2,7 @@ import { NotFound } from "@/components/NotFound";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Edit } from "lucide-react";
 import { css } from "styled-system/css";
-import { Button } from "@/components/Button";
+import { Button } from "@morinoparty/chlorophyll-react/components";
 import { PostHeader } from "@/components/PostHeader";
 import { PostBody } from "@/components/post/PostBody";
 import { PostContributors } from "@/components/post/PostContributors";
@@ -10,6 +10,7 @@ import { PostCta } from "@/components/post/PostCta";
 import { articleImageUrl } from "@/lib/content";
 import { pageTitle } from "@/lib/pageTitle";
 import { fetchPostPage } from "@/server/post";
+import { buttonSize } from "@/components/buttonSize";
 
 export const Route = createFileRoute("/_normal/$postId")({
   loader: async ({ params }) => {
@@ -89,9 +90,15 @@ function Post() {
           },
         })}
       >
+        {/*
+          記事を編集する主導線なので primary の lg。
+          スマホでは丸いフローティングボタンにするため、寸法と角丸だけを上書きする
+        */}
         <Button
           asChild
-          className={css({
+          intent="primary"
+          size="lg"
+          className={css(buttonSize.raw({ size: "md" }), {
             width: {
               base: undefined,
               mdDown: "64px",

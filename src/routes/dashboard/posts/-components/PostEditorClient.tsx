@@ -14,8 +14,7 @@ import { useTransition } from "react";
 import { savePost } from "@/server/posts";
 import { WikiPostDetail } from "@/types/wiki";
 import { EditorNav } from "@/components/EditorNav";
-import { Button } from "@/components/Button";
-import { Spinner } from "@morinoparty/chlorophyll-react/components";
+import { Button, Spinner } from "@morinoparty/chlorophyll-react/components";
 import { ClientOnly, useRouter } from "@tanstack/react-router";
 import type { MDXEditorMethods } from "@morinoparty/hagaki/editor";
 import { diffRemovedImagePaths } from "@morinoparty/hagaki/markdown";
@@ -34,6 +33,7 @@ import {
   SaveImagesError,
 } from "./pending-images";
 import { articleAssetsDir } from "@/lib/content";
+import { buttonSize } from "@/components/buttonSize";
 
 interface PostEditorClientProps {
   post: WikiPostDetail;
@@ -199,8 +199,12 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
       })}
     >
       <EditorNav title="ページの編集">
+        {/* ツールバー内の保存ボタン。目立たせたいので primary だが、ナビの高さに収まる sm にする */}
         <Button
+          type="button"
+          intent="primary"
           size="sm"
+          className={buttonSize({ size: "sm" })}
           onClick={handleSave}
           disabled={!isDirty || isPending || imageBusy || imageFailed}
         >
@@ -220,8 +224,21 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
       />
 
       <div className={css({})}>
-        <ClientOnly fallback={<div>Loading...</div>}>
-          <Suspense fallback={<div>Loading...</div>}>
+        {/* エディタの読み込み中は chlorophyll の Spinner を中央に表示する */}
+        <ClientOnly
+          fallback={
+            <div className={css({ display: "flex", justifyContent: "center", py: "48px" })}>
+              <Spinner size="md" />
+            </div>
+          }
+        >
+          <Suspense
+            fallback={
+              <div className={css({ display: "flex", justifyContent: "center", py: "48px" })}>
+                <Spinner size="md" />
+              </div>
+            }
+          >
             <EditorComp
               markdown={form.body}
               editorRef={editorRef}

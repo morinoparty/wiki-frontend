@@ -1,5 +1,6 @@
+import { Table } from "@morinoparty/chlorophyll-react/components";
 import { Link } from "@tanstack/react-router";
-import { sva } from "styled-system/css";
+import { cx, sva } from "styled-system/css";
 import {
   ContentImage,
   type HagakiImageProps,
@@ -31,11 +32,8 @@ export const mdxStyles = sva({
     "pre",
     "img",
     "hr",
+    "tableWrapper",
     "table",
-    "thead",
-    "tr",
-    "th",
-    "td",
   ],
   base: {
     p: {
@@ -153,29 +151,14 @@ export const mdxStyles = sva({
       borderTop: "1px solid token(colors.border.subtle)",
       my: "32px",
     },
-    table: {
-      width: "100%",
-      borderCollapse: "collapse",
+    // 表の見た目 (枠線・見出し行の地色・罫線・セルの余白) は chlorophyll の Table が持つ。
+    // ここでは記事本文としての前後の余白だけを足す。
+    // Table.Root は className を <table> に渡すため、余白は外側のラッパーに付ける
+    tableWrapper: {
       my: "24px",
-      textStyle: "body",
     },
-    thead: {
-      background: "colorPalette.surface",
-    },
-    tr: {
-      borderBottom: "1px solid token(colors.border.subtle)",
-    },
-    th: {
-      fontWeight: "bold",
-      textAlign: "left",
-      px: "12px",
-      py: "8px",
-      background: "colorPalette.surface",
-      textStyle: "body",
-    },
-    td: {
-      px: "12px",
-      py: "8px",
+    // 本文のセルは記事の地の文と同じ大きさで読ませる (recipe 既定の sm より大きくする)
+    table: {
       textStyle: "body",
     },
   },
@@ -272,20 +255,20 @@ export const components = {
   hr: (props: React.ComponentProps<"hr">) => (
     <hr className={mdxStyles().hr} {...props} />
   ),
-  table: (props: React.ComponentProps<"table">) => (
-    <table className={mdxStyles().table} {...props} />
+  // 表は chlorophyll の Table に繋ぐ。各パーツは props をそのまま要素へ渡すので、
+  // GFM の列揃え (rehype-react が `style={{ textAlign }}` に変換したもの) や colSpan、children もそのまま効く。
+  // thead / tbody が無い表 (生 HTML で書かれた表など) でも、Table.Row は <table> 直下にそのまま描画される
+  table: ({ className, ...props }: React.ComponentProps<"table">) => (
+    <div className={mdxStyles().tableWrapper}>
+      <Table.Root
+        {...props}
+        className={cx(mdxStyles().table, className)}
+      />
+    </div>
   ),
-  thead: (props: React.ComponentProps<"thead">) => (
-    <thead className={mdxStyles().thead} {...props} />
-  ),
-  tbody: (props: React.ComponentProps<"tbody">) => <tbody {...props} />, // tbodyは特別なスタイルなし
-  tr: (props: React.ComponentProps<"tr">) => (
-    <tr className={mdxStyles().tr} {...props} />
-  ),
-  th: (props: React.ComponentProps<"th">) => (
-    <th className={mdxStyles().th} {...props} />
-  ),
-  td: (props: React.ComponentProps<"td">) => (
-    <td className={mdxStyles().td} {...props} />
-  ),
+  thead: (props: React.ComponentProps<"thead">) => <Table.Header {...props} />,
+  tbody: (props: React.ComponentProps<"tbody">) => <Table.Body {...props} />,
+  tr: (props: React.ComponentProps<"tr">) => <Table.Row {...props} />,
+  th: (props: React.ComponentProps<"th">) => <Table.Head {...props} />,
+  td: (props: React.ComponentProps<"td">) => <Table.Cell {...props} />,
 };

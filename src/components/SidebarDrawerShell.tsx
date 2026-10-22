@@ -1,6 +1,5 @@
-import { Drawer, Portal } from "@morinoparty/chlorophyll-react/components";
+import { Drawer, IconButton, Portal } from "@morinoparty/chlorophyll-react/components";
 import { Menu } from "lucide-react";
-import { IconButton } from "@/components/IconButton";
 
 /**
  * Drawer の開閉まわりだけを担うクライアント境界。

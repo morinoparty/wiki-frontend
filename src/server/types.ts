@@ -56,8 +56,7 @@ export const CreatePostInputSchema = z.object({
       blurhash64: z.string().default(""),
     })
     .nullish(),
-  // カテゴリが option で宣言したフィールドの値。座標 (x / y) もここに入り、
-  // frontmatter の `option.<key>` に保存される。enum は選択肢の id が入る。
+  // カテゴリが option で宣言したフィールドの値。frontmatter の `option.<key>` に保存される。enum は選択肢の id が入る。
   // 宣言との突き合わせ (必須・型・選択肢) は categoryOptions 側で行う
   option: z
     .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))

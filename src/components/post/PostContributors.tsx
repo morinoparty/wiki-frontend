@@ -1,4 +1,4 @@
-import { PlayerMap } from "@morinoparty/chlorophyll-react/components";
+import { Card, PlayerMap } from "@morinoparty/chlorophyll-react/components";
 import { sva } from "styled-system/css";
 import { formatDateTime } from "@/lib/formatDateTime";
 import type { PostContributorsData } from "@/server/post";
@@ -6,8 +6,6 @@ import type { PostContributorsData } from "@/server/post";
 const postContributors = sva({
   slots: [
     "root",
-    "card",
-    "heading",
     "list",
     "item",
     "itemDate",
@@ -26,17 +24,6 @@ const postContributors = sva({
       mb: "90px",
       maxWidth: "980px",
       mx: "auto",
-    },
-    card: {
-      bg: "bg.panel",
-      borderRadius: "24px",
-      padding: "24px",
-    },
-    heading: {
-      textStyle: "heading2",
-      fontSize: "18px",
-      color: "colorPalette.fg",
-      mb: "16px",
     },
     list: {
       display: "flex",
@@ -64,7 +51,8 @@ const postContributors = sva({
       gridTemplateColumns: "auto 1fr",
       columnGap: "16px",
       rowGap: "4px",
-      mt: "24px",
+      // Card.Body の gap (component.gap.sm = 8px) と合わせて、一覧との間を 24px 空ける
+      mt: "16px",
       pt: "16px",
       borderTop: "1px solid",
       borderColor: "border.subtle",
@@ -109,42 +97,50 @@ export function PostContributors({ data }: PostContributorsProps) {
 
   return (
     <section className={styles.root}>
-      <div className={styles.card}>
-        <h2 className={styles.heading}>この記事の編集者</h2>
-        {contributors.length > 0 ? (
-          <ul className={styles.list}>
-            {contributors.map((contributor) => (
-              <li key={contributor.player} className={styles.item}>
-                <PlayerMap
-                  playerId={contributor.player}
-                  playerName={contributor.playerName}
-                />
-                <span className={styles.itemDate}>
-                  {formatDateTime(contributor.lastEditedAt)} ・{" "}
-                  {contributor.edits}回編集
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className={styles.empty}>編集者の記録がありません</p>
-        )}
+      {/* 面と余白は chlorophyll の Card が持つ。ページの地色の上に置くので elevated */}
+      <Card.Root variant="elevated">
+        <Card.Header>
+          {/* 文書構造は従来どおり h2 のまま (Card.Title の既定は h3) */}
+          <Card.Title asChild>
+            <h2>この記事の編集者</h2>
+          </Card.Title>
+        </Card.Header>
+        <Card.Body>
+          {contributors.length > 0 ? (
+            <ul className={styles.list}>
+              {contributors.map((contributor) => (
+                <li key={contributor.player} className={styles.item}>
+                  <PlayerMap
+                    playerId={contributor.player}
+                    playerName={contributor.playerName}
+                  />
+                  <span className={styles.itemDate}>
+                    {formatDateTime(contributor.lastEditedAt)} ・{" "}
+                    {contributor.edits}回編集
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={styles.empty}>編集者の記録がありません</p>
+          )}
 
-        <dl className={styles.dates}>
-          {created && (
-            <div className={styles.dateRow}>
-              <dt className={styles.dateLabel}>作成日時</dt>
-              <dd className={styles.dateValue}>{created}</dd>
-            </div>
-          )}
-          {updated && (
-            <div className={styles.dateRow}>
-              <dt className={styles.dateLabel}>最終更新日時</dt>
-              <dd className={styles.dateValue}>{updated}</dd>
-            </div>
-          )}
-        </dl>
-      </div>
+          <dl className={styles.dates}>
+            {created && (
+              <div className={styles.dateRow}>
+                <dt className={styles.dateLabel}>作成日時</dt>
+                <dd className={styles.dateValue}>{created}</dd>
+              </div>
+            )}
+            {updated && (
+              <div className={styles.dateRow}>
+                <dt className={styles.dateLabel}>最終更新日時</dt>
+                <dd className={styles.dateValue}>{updated}</dd>
+              </div>
+            )}
+          </dl>
+        </Card.Body>
+      </Card.Root>
     </section>
   );
 }

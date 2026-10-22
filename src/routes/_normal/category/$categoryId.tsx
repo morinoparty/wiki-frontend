@@ -5,7 +5,6 @@ import { css, sva } from "styled-system/css";
 import { PaginationWrapper } from "./-components/PaginationWrapper";
 import WikiCard from "@/components/WikiCard";
 import { WikiCardGrid } from "@/components/WikiCardGrid";
-import { hasPositionOption } from "@/lib/categoryOptions";
 import { pageTitle } from "@/lib/pageTitle";
 import { fetchCategoryPage } from "@/server/content";
 import type { WikiCategory, WikiPost } from "@/types/wiki";
@@ -75,26 +74,6 @@ const categoryPostsPageStyles = sva({
     },
   },
   variants: {
-    hasPosition: {
-      true: {
-        container: {
-          gridTemplateRows: "48px auto 48px 500px 72px 1fr 128px auto 200px",
-          gridTemplateAreas: {
-            base: `
-              ". . ."
-              ". header ."
-              ". . ."
-              "map map map"
-              ". . ."
-              ". posts ."
-              ". . ."
-              ". pagination ."
-              ". . ."
-            `,
-          },
-        },
-      },
-    },
     isEmpty: {
       true: {
         container: {
@@ -120,26 +99,13 @@ function CategoryPostsPage() {
     page,
     totalPages,
   } = Route.useLoaderData();
-  const hasPosition = hasPositionOption(category);
-
   const classes = categoryPostsPageStyles({
-    hasPosition,
     isEmpty: pagedPosts.length === 0,
   });
 
   return (
     <div className={classes.container}>
       <CategoryHeader {...category} />
-      {hasPosition && pagedPosts.length > 0 && (
-        <iframe
-          src="https://maps.morino.party/?world=minecraft_overworld&x=5140&z=4007"
-          className={css({
-            width: "100%",
-            height: "100%",
-            gridArea: "map",
-          })}
-        />
-      )}
       <CategoryPosts posts={pagedPosts} />
 
       {totalPages > 1 && (

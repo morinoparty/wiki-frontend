@@ -15,6 +15,9 @@ export default defineConfig({
 		entrypoint: "@tanstack/react-start/server-entry",
 		// 独自ドメインは持たず、https://wiki-frontend.<subdomain>.workers.dev で配信する
 		workersDev: true,
+		// PR ごとの preview (`cf workers versions create --preview-alias pr-<番号>`) を
+		// https://pr-<番号>-wiki-frontend.<subdomain>.workers.dev で開けるようにする
+		previewUrls: true,
 		observability: {
 			enabled: true,
 			headSamplingRate: 1,

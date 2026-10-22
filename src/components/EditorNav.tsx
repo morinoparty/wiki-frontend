@@ -1,10 +1,11 @@
 import { sva } from "styled-system/css";
 import { Link } from "@tanstack/react-router";
-import { Button } from "@/components/Button";
+import { Button } from "@morinoparty/chlorophyll-react/components";
 import { ChevronLeft } from "lucide-react";
+import { buttonSize } from "@/components/buttonSize";
 
 const editorNavStyles = sva({
-  slots: ["nav", "backButton", "title", "saveButton"],
+  slots: ["nav", "title"],
   base: {
     nav: {
       position: "sticky",
@@ -23,20 +24,10 @@ const editorNavStyles = sva({
       backgroundColor: "white",
       textStyle: "body",
     },
-    backButton: {
-      textStyle: "body",
-      color: "colorPalette.fg",
-      display: "flex",
-      alignItems: "center",
-      gap: "4px",
-    },
     title: {
       textStyle: "body",
       color: "colorPalette.fg",
       fontWeight: "bold",
-    },
-    saveButton: {
-      textStyle: "body",
     },
   },
 });
@@ -57,7 +48,8 @@ export function EditorNav({ title, children }: EditorNavProps) {
           gap: "4px",
         }}
       >
-        <Button asChild className={styles.backButton} variant="ghost" size="sm">
+        {/* ツールバーの補助操作なので plain の sm。並び・文字サイズ・アイコンの大きさはレシピに任せる */}
+        <Button asChild intent="plain" size="sm" className={buttonSize({ size: "sm" })}>
           <Link to="/dashboard">
             <ChevronLeft />
             戻る

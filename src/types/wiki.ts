@@ -29,7 +29,7 @@ type GeneratedMetadata = {
   editors?: ArticleEditor[];
 };
 
-// 投稿データの型定義。カテゴリ固有の値 (座標など) は hagaki 側の
+// 投稿データの型定義。カテゴリ固有の値 (enum の選択など) は hagaki 側の
 // `option` (frontmatter の `option.<key>`) に入る
 export type WikiPost = HagakiPost & GeneratedMetadata;
 

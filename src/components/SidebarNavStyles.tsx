@@ -1,12 +1,11 @@
+import { Button } from "@morinoparty/chlorophyll-react/components";
 import { Link } from "@tanstack/react-router";
-import { sva } from "styled-system/css";
+import { css, sva } from "styled-system/css";
 
 export const sidebarNavStyles = sva({
   slots: ["item", "link", "categoryList", "categoryItem", "categoryLink"],
   base: {
-    item: {
-      position: "relative",
-    },
+    item: {},
     link: {
       display: "flex",
       alignItems: "center",
@@ -40,47 +39,54 @@ export const sidebarNavStyles = sva({
       opacity: 0.7,
     },
   },
-  variants: {
-    asButton: {
-      true: {
-        item: {
-          _before: {
-            content: '""',
-            position: "absolute",
-            left: "-8px",
-            top: "0",
-            width: "calc(100% + 16px)",
-            height: "100%",
-            bgColor: "colorPalette.solid",
-            zIndex: "-1",
-            borderRadius: "16px",
-            transition: "background-color 0.2s ease",
-          },
-          _hover: {
-            _before: {
-              bgColor: "colorPalette.solid.emphasized",
-            },
-          },
-        },
-        link: {
-          color: "white",
-          padding: "14px 28px 14px 12px",
-          justifyContent: "center",
-        },
-      },
-    },
-  },
 });
 
+/**
+ * サイドバーのナビ項目。`asButton` を付けると、chlorophyll の Button (primary / lg) で
+ * リンクをボタンの見た目にする (「新規作成」などの主導線向け)。
+ */
 export const SidebarNavListItem: React.FC<{
   href: string;
   icon: React.ReactNode;
   children: React.ReactNode;
   asButton?: boolean;
 }> = ({ href, icon, children, asButton }) => {
-  const navClasses = sidebarNavStyles({
-    asButton: asButton,
-  });
+  const navClasses = sidebarNavStyles();
+
+  if (asButton) {
+    return (
+      <li className={navClasses.item}>
+        {/*
+          塗り・hover・角丸は Button のレシピに任せる。大きさは以前の見た目に揃え、
+          上下 14px の余白と本文サイズの文字にして、面を左右 8px ずつ外へ広げる
+          (左右の余白は 12px / 28px + はみ出した 8px)
+        */}
+        <Button
+          asChild
+          intent="primary"
+          size="lg"
+          className={css({
+            width: "calc(100% + 16px)",
+            mx: "-8px",
+            height: "auto",
+            py: "14px",
+            pl: "20px",
+            pr: "36px",
+            gap: "16px",
+            // 以前と同じ高さ (上下 14px + 16px × 1.75 の行) にするため、文字の大きさと行の高さだけ揃える。
+            // 文字色やフォントは Button のレシピに任せる
+            fontSize: "16px",
+            lineHeight: "1.75",
+          })}
+        >
+          <Link to={href}>
+            {icon}
+            {children}
+          </Link>
+        </Button>
+      </li>
+    );
+  }
 
   return (
     <li className={navClasses.item}>

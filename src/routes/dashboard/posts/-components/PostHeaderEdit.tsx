@@ -1,8 +1,6 @@
 import { Editable } from "@ark-ui/react/editable";
-import { Switch } from "@ark-ui/react/switch";
-import { Spinner } from "@morinoparty/chlorophyll-react/components";
+import { Button, Spinner, Switch } from "@morinoparty/chlorophyll-react/components";
 import { Tag, Image, EyeOff } from "lucide-react";
-import { Button } from "@/components/Button";
 import { postHeaderStyles } from "@/components/PostHeader";
 import { css, cx, sva } from "styled-system/css";
 
@@ -43,6 +41,7 @@ import { blurhashToBase64 } from "@morinoparty/hagaki/markdown";
 import type { WikiThumbnail } from "@/types/wiki";
 import { handleInsertImage } from "./pending-images";
 import { toaster } from "@/components/ui/toaster";
+import { buttonSize } from "@/components/buttonSize";
 
 // 定数
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -258,18 +257,21 @@ export function PostHeaderEdit({
           css({ mb: "24px !important", gap: "0px !important", ml: "-14px" })
         )}
       >
+        {/* ヘッダー上の補助操作なので plain の sm。本文より目立たないよう少し薄くする */}
         <Button
+          type="button"
+          intent="plain"
           size="sm"
-          variant="ghost"
-          className={css({ opacity: 0.5 })}
+          className={css(buttonSize.raw({ size: "sm" }), { opacity: 0.5 })}
         >
           <Tag size={16} />
           カテゴリ
         </Button>
         <Button
+          type="button"
+          intent="plain"
           size="sm"
-          variant="ghost"
-          className={css({ opacity: 0.5 })}
+          className={css(buttonSize.raw({ size: "sm" }), { opacity: 0.5 })}
           onClick={handleImageIconClick}
           disabled={disabled || isUploading}
         >
@@ -284,55 +286,27 @@ export function PostHeaderEdit({
               ? "カバー画像を変更"
               : "カバー画像を追加"}
         </Button>
+        {/*
+          下書き（非公開）の切り替え。トラック・つまみ・ラベルの寸法と色は chlorophyll の
+          switchRecipe(md = 36x20 / つまみ 16 / ラベル sm)が持つので、ここでは
+          ボタン列との間隔と、補助的な操作として少し薄く見せる外側の指定だけを残す。
+        */}
         <Switch.Root
+          size="md"
           checked={draft === true}
           onCheckedChange={(details: { checked: boolean }) =>
             onChange?.({ draft: details.checked })
           }
           disabled={disabled}
           className={css({
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            ml: "8px",
-            cursor: "pointer",
+            ml: "2",
             opacity: 0.7,
           })}
         >
-          <Switch.Control
-            className={css({
-              display: "inline-flex",
-              alignItems: "center",
-              width: "36px",
-              height: "20px",
-              p: "2px",
-              borderRadius: "full",
-              bg: "gray.300",
-              transition: "background 0.15s",
-              _checked: { bg: "colorPalette.default" },
-            })}
-          >
-            <Switch.Thumb
-              className={css({
-                width: "16px",
-                height: "16px",
-                borderRadius: "full",
-                bg: "white",
-                transition: "transform 0.15s",
-                _checked: { transform: "translateX(16px)" },
-              })}
-            />
+          <Switch.Control>
+            <Switch.Thumb />
           </Switch.Control>
-          <Switch.Label
-            className={css({
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-              textStyle: "body",
-              fontSize: "sm",
-              color: "colorPalette.fg",
-            })}
-          >
+          <Switch.Label>
             <EyeOff size={14} aria-hidden />
             下書き（非公開）
           </Switch.Label>

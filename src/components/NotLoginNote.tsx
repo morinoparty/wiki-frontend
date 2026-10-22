@@ -1,7 +1,8 @@
 import { css } from "styled-system/css";
-import { Button } from "@/components/Button";
+import { Button } from "@morinoparty/chlorophyll-react/components";
 import { startSignIn } from "@/server/auth";
 import { Link } from "@tanstack/react-router";
+import { buttonSize } from "@/components/buttonSize";
 
 export const NotLoginNote = () => {
   return (
@@ -53,19 +54,15 @@ export const NotLoginNote = () => {
           width: "100%",
         })}
       >
+        {/*
+          ログインへの主導線なので primary にする (secondary は bg.panel でカードの地と同化するため使わない)。
+          リンクで遷移するだけなのでフォームの送信ボタンにはならない (asChild で <a> を描く)。幅だけカードに合わせて広げる
+        */}
         <Button
-          // type="submit"
-          style={{
-            background: "colorPalette.surface",
-            color: "colorPalette.fg",
-            fontWeight: 700,
-            fontSize: "14px",
-            borderRadius: "10px",
-            padding: "0 32px",
-            height: "40px",
-            width: "100%",
-          }}
           asChild
+          intent="primary"
+          size="md"
+          className={css(buttonSize.raw({ size: "md" }), { width: "100%" })}
         >
           <Link to="/auth/sign-in">ログイン</Link>
         </Button>
