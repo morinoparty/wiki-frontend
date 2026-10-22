@@ -1,7 +1,6 @@
 import { sva } from "styled-system/css";
-import Link from "next/link";
+import { Link, useLoaderData } from "@tanstack/react-router";
 import { Tag } from "lucide-react";
-import { getAllCategories } from "@/lib/getAllCategories";
 
 export const postHeaderStyles = sva({
   slots: ["container", "info", "image", "category", "title", "description"],
@@ -77,15 +76,18 @@ interface PostHeaderProps {
   description: string;
 }
 
-export async function PostHeader({
+/** 記事ページのヘッダー。カテゴリは公開レイアウト (`/_normal`) の loader から読む。 */
+export function PostHeader({
   image,
   category,
   title,
   description,
 }: PostHeaderProps) {
   const classes = postHeaderStyles();
-  const allCategories = await getAllCategories();
-  const categoryData = allCategories.find((cat) => cat.slug === category);
+  const categoryData = useLoaderData({
+    from: "/_normal",
+    select: ({ categories }) => categories.find((cat) => cat.slug === category),
+  });
 
   return (
     <header className={classes.container}>
@@ -107,7 +109,10 @@ export async function PostHeader({
       <div className={classes.info}>
         <p className={classes.category}>
           <Tag width={16} />
-          <Link href={`/category/${categoryData?.slug}`}>
+          <Link
+            to="/category/$categoryId"
+            params={{ categoryId: categoryData?.slug ?? "" }}
+          >
             {categoryData?.title}
           </Link>
         </p>

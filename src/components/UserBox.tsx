@@ -1,14 +1,13 @@
-import { getSession } from "@/lib/auth";
+import { useSessionUser } from "@/hooks/useSessionUser";
 import { UserBoxMenu } from "@/components/UserBoxMenu";
 import { IconButton } from "@/components/IconButton";
 import { Ellipsis } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { css } from "styled-system/css";
 
-export const UserBox: React.FC = async () => {
-  const session = await getSession();
-
-  if (!session) {
+export const UserBox: React.FC = () => {
+  const user = useSessionUser();
+  if (!user) {
     return;
   }
 
@@ -22,7 +21,7 @@ export const UserBox: React.FC = async () => {
       })}
     >
       <img
-        src={session?.user?.image || ""}
+        src={user.image || ""}
         alt="User Avatar"
         width={36}
         height={36}
@@ -38,8 +37,8 @@ export const UserBox: React.FC = async () => {
           color: "colorPalette.fg",
         })}
       >
-        <Link href={"/dashboard/"}>
-          {session?.user?.name || "Unknown User"}
+        <Link to="/dashboard">
+          {user.name || "Unknown User"}
         </Link>
       </p>
       <UserBoxMenu>

@@ -1,20 +1,12 @@
-"use client";
-
 import { Menu, Portal } from "@morinoparty/chlorophyll-react/components";
-import { startTransition } from "react";
-import { signOutFromMineAuth } from "@/actions/auth-actions";
+import { useRouter } from "@tanstack/react-router";
+import { signOutFromMineAuth } from "@/server/auth";
 
-/**
- * ユーザーボックスのドロップダウンメニュー。
- *
- * Server Action をそのまま `onClick` に渡すと React がクリックイベントを
- * 引数としてシリアライズしようとして失敗するため、クライアント側で
- * 引数なしに呼び直す。Server Action 内の `redirect()` を
- * ルーター遷移として処理させるため startTransition で包む。
- */
+/** ユーザーボックスのドロップダウンメニュー。 */
 export const UserBoxMenu: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
+  const router = useRouter();
   return (
     <Menu.Root>
       <Menu.Trigger asChild>{children}</Menu.Trigger>
@@ -23,10 +15,11 @@ export const UserBoxMenu: React.FC<{
           <Menu.Content>
             <Menu.Item
               value="logout"
-              onClick={() => {
-                startTransition(() => {
-                  void signOutFromMineAuth();
-                });
+              onClick={async () => {
+                await signOutFromMineAuth();
+                // root の beforeLoad でセッションを読み直してからトップへ
+                await router.invalidate();
+                await router.navigate({ to: "/" });
               }}
             >
               ログアウト

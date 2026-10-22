@@ -1,4 +1,4 @@
-# vinext アプリを cf でビルドし、Worker "wiki-frontend" として deploy する。
+# TanStack Start アプリを cf でビルドし、Worker "wiki-frontend" として deploy する。
 #
 # PR と main への push で build + dry-run を行い、main への push のときだけ本番 deploy する。
 # 必要な secret:
@@ -55,7 +55,8 @@ jobs:
 
       - run: pnpm run typecheck
 
-      - run: pnpm exec cf build --mode production
+      # cf build は検出した vite build に --mode を渡せないので付けない
+      - run: pnpm exec cf build
 
       - run: pnpm exec cf deploy --prebuilt --mode production --dry-run
 

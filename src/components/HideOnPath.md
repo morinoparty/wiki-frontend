@@ -61,7 +61,7 @@ import { HideOnPath } from '@/components/HideOnPath';
 
 ## 注意事項
 
-- このコンポーネントは `"use client"` ディレクティブを使用しているため、クライアントサイドでのみ動作します
+- パスは TanStack Router の `useLocation` から読む (SSR とクライアント遷移の両方で動作する)
 - `usePathname` フックを使用してNext.jsのルーターから現在のパスを取得します
 - `exactMatch` が `false`（デフォルト）の場合、`pathname.startsWith()` を使用して部分一致で判定します
 - `exactMatch` が `true` の場合、完全一致で判定します

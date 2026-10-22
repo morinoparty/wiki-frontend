@@ -1,0 +1,302 @@
+import { EditorNav } from "@/components/EditorNav";
+import { GitCommitHorizontal } from "lucide-react";
+import { css } from "styled-system/css";
+import { sva } from "styled-system/css";
+import { ReactNode } from "react";
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { pageTitle } from "@/lib/pageTitle";
+import { fetchCommitWithChecks } from "@/server/dashboard";
+
+// 時刻は toLocaleString で描画する。SSR (Workers) とブラウザでロケール /
+// タイムゾーンが異なるため、その要素だけ hydration 差分を許容している。
+
+/** wiki-content の deploy workflow (.github/workflows/deploy.yml) のジョブ名。 */
+const DEPLOY_CHECK_NAME = "deploy";
+
+const commitCardStyles = sva({
+  slots: ["card", "iconBox", "title", "desc", "inner", "icon"],
+  base: {
+    card: {
+      width: "100%",
+      px: "24px",
+      pt: "20px",
+      pb: "24px",
+      borderRadius: "32px",
+      bgColor: "white",
+    },
+    inner: {
+      display: "grid",
+      gridTemplateColumns: "40px 1fr",
+      gap: "12px",
+      alignItems: "center",
+    },
+    iconBox: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: "40px",
+      height: "40px",
+      borderRadius: "100%",
+      color: "colorPalette.fg",
+    },
+    icon: {},
+    title: {
+      textStyle: "heading2",
+      fontSize: "18px",
+      color: "colorPalette.fg",
+    },
+    desc: {
+      pl: "52px",
+      pt: "4px",
+      textStyle: "body",
+      fontSize: "16px",
+      color: "colorPalette.fg",
+    },
+  },
+});
+
+interface CommitCardProps {
+  icon: ReactNode;
+  title: ReactNode;
+  description: ReactNode;
+}
+
+function CommitCard({ icon, title, description }: CommitCardProps) {
+  const styles = commitCardStyles();
+  return (
+    <div className={styles.card}>
+      <div className={styles.inner}>
+        <div className={styles.iconBox}>
+          <span className={styles.icon}>{icon}</span>
+        </div>
+        <h2 className={styles.title}>{title}</h2>
+      </div>
+      <div className={styles.desc}>{description}</div>
+    </div>
+  );
+}
+
+export const Route = createFileRoute("/dashboard/commit/$commitId")({
+  loader: async ({ params }) => {
+    // コミット内容とチェック情報を取得。取れなければ 404
+    const result = await fetchCommitWithChecks({ data: params.commitId });
+    if (!result) throw notFound();
+    return result;
+  },
+  head: () => ({ meta: [{ title: pageTitle("保存が完了しました") }] }),
+  component: Home,
+});
+
+function Home() {
+  const { commit: commitData, checks: checksData } = Route.useLoaderData();
+
+  return (
+    <div className={css({ position: "relative" })}>
+      <EditorNav title="ページの編集" />
+      <div
+        className={css({
+          maxWidth: "calc(550px + 24px * 2)",
+          px: "24px",
+          mx: "auto",
+          pt: "92px",
+          mb: "72px",
+        })}
+      >
+        <img
+          src={"/assets/icons/party-tada.svg"}
+          alt="保存完了"
+          className={css({
+            mx: "auto",
+            width: "64px",
+            height: "64px",
+            mb: "32px",
+          })}
+        />
+        <h1
+          className={css({
+            textStyle: "heading1",
+            fontSize: "40px",
+            color: "colorPalette.fg",
+            mb: "24px",
+            textAlign: "center",
+          })}
+        >
+          保存が完了しました！
+        </h1>
+        <p
+          className={css({
+            textStyle: "body",
+            color: "colorPalette.fg",
+            mb: "24px",
+            width: "100%",
+          })}
+        >
+          Wikiを投稿・更新いただきありがとうございます！ただいま、反映作業を行っていますので、しばらくお待ちください。この反映作業には、大体5分ぐらいかかります。
+          <br />
+          この画面は閉じても大丈夫です。
+        </p>
+      </div>
+      <div
+        className={css({
+          maxWidth: "calc(570px + 24px * 2)",
+          px: "24px",
+          mx: "auto",
+          mb: "172px",
+          display: "grid",
+          gap: "8px",
+        })}
+      >
+        <CommitCard
+          icon={<GitCommitHorizontal />}
+          title={"GitHubにCommitされました"}
+          description={
+            commitData && commitData.commit ? (
+              <>
+                <div>コミットメッセージ: {commitData.commit.message}</div>
+                <div>コミッター: {commitData.commit.committer?.name}</div>
+                <div>日時: {commitData.commit.committer?.date}</div>
+                {commitData.html_url && (
+                  <a
+                    href={commitData.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={css({
+                      textStyle: "body",
+                      fontSize: "16px",
+                      color: "colorPalette.fg.subtle",
+                      fontWeight: "bold",
+                      mt: "8px",
+                      display: "inline-block",
+                    })}
+                  >
+                    GitHubで確認
+                  </a>
+                )}
+              </>
+            ) : (
+              <>コミット情報の取得に失敗しました。</>
+            )
+          }
+        />
+        {/* コンテンツのデプロイ (GitHub Actions) のチェックランを抽出し、カードを分岐表示 */}
+        {((): React.ReactNode => {
+          if (checksData && Array.isArray(checksData.check_runs)) {
+            const buildRuns = checksData.check_runs.filter(
+              (run) => run.name === DEPLOY_CHECK_NAME
+            );
+            if (buildRuns.length === 0) {
+              return (
+                <CommitCard
+                  icon={<GitCommitHorizontal />}
+                  title={DEPLOY_CHECK_NAME}
+                  description={<>CIチェック情報がありません</>}
+                />
+              );
+            }
+            // 最も古い（開始）と最も新しい（完了）を抽出
+            const sorted = [...buildRuns].sort((a, b) => {
+              const aStart = a.started_at
+                ? new Date(a.started_at).getTime()
+                : 0;
+              const bStart = b.started_at
+                ? new Date(b.started_at).getTime()
+                : 0;
+              return aStart - bStart;
+            });
+            const started = sorted[0];
+            const completed = buildRuns.find(
+              (run) => run.status === "completed"
+            );
+            const cards: React.ReactNode[] = [];
+            if (started) {
+              cards.push(
+                <CommitCard
+                  key="started"
+                  icon={<GitCommitHorizontal />}
+                  title="デプロイ作業開始"
+                  description={
+                    <>
+                      変更に関するビルドが開始されました。
+                      {started.started_at && (
+                        <div suppressHydrationWarning>
+                          開始時刻:{" "}
+                          {new Date(started.started_at).toLocaleString()}
+                        </div>
+                      )}
+                      {started.html_url && (
+                        <span>
+                          <a
+                            href={commitData.html_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={css({
+                              textStyle: "body",
+                              fontSize: "16px",
+                              color: "colorPalette.fg.subtle",
+                              fontWeight: "bold",
+                              mt: "8px",
+                              display: "inline-block",
+                            })}
+                          >
+                            詳細
+                          </a>
+                        </span>
+                      )}
+                    </>
+                  }
+                />
+              );
+            }
+            if (completed) {
+              cards.push(
+                <CommitCard
+                  key="completed"
+                  icon={<GitCommitHorizontal />}
+                  title="全ての作業が完了"
+                  description={
+                    <>
+                      ビルドと展開が完了しました（{completed.conclusion}）。
+                      {completed.completed_at && (
+                        <div suppressHydrationWarning>
+                          完了時刻:{" "}
+                          {new Date(completed.completed_at).toLocaleString()}
+                        </div>
+                      )}
+                      {completed.html_url && (
+                        <span>
+                          <a
+                            href={completed.html_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={css({
+                              textStyle: "body",
+                              fontSize: "16px",
+                              color: "colorPalette.fg.subtle",
+                              fontWeight: "bold",
+                              mt: "8px",
+                              display: "inline-block",
+                            })}
+                          >
+                            詳細
+                          </a>
+                        </span>
+                      )}
+                    </>
+                  }
+                />
+              );
+            }
+            return cards;
+          }
+          return (
+            <CommitCard
+              icon={<GitCommitHorizontal />}
+              title={DEPLOY_CHECK_NAME}
+              description={<>CIチェック情報がありません</>}
+            />
+          );
+        })()}
+      </div>
+    </div>
+  );
+}

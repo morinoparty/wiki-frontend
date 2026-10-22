@@ -1,5 +1,3 @@
-"use client";
-
 import {
   createToaster,
   Toaster as ChlorophyllToaster,

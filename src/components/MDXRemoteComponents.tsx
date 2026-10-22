@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { sva } from "styled-system/css";
 import {
   ContentImage,
@@ -214,7 +214,12 @@ export const components = {
   ),
   a: (props: React.ComponentProps<"a">) => {
     const { href = "#", ...rest } = props;
-    return <Link href={href} className={mdxStyles().a} {...rest} />;
+    // 記事内のリンクは外部・アンカー・サイト内が混ざる。サイト内のパスだけ
+    // クライアント遷移にする (`//host/...` はプロトコル相対の外部リンク)
+    if (!/^\/(?!\/)/.test(href)) {
+      return <a href={href} className={mdxStyles().a} {...rest} />;
+    }
+    return <Link to={href} className={mdxStyles().a} {...rest} />;
   },
   blockquote: (props: React.ComponentProps<"blockquote">) => (
     <blockquote className={mdxStyles().blockquote} {...props} />

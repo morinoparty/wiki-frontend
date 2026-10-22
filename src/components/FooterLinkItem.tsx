@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { cx, sva } from "styled-system/css";
@@ -31,12 +31,23 @@ export function FooterLinkItem({
   withIcon,
 }: FooterLinkItemProps) {
   const styles = footerLinkItemStyles();
+  const content = (
+    <>
+      {children}
+      {withIcon && <ArrowUpRight size={16} />}
+    </>
+  );
   return (
     <li>
-      <Link href={href} className={cx(styles.link, className)}>
-        {children}
-        {withIcon && <ArrowUpRight size={16} />}
-      </Link>
+      {/^https?:\/\//.test(href) ? (
+        <a href={href} className={cx(styles.link, className)}>
+          {content}
+        </a>
+      ) : (
+        <Link to={href} className={cx(styles.link, className)}>
+          {content}
+        </Link>
+      )}
     </li>
   );
 }

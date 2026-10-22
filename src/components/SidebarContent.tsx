@@ -1,4 +1,4 @@
-import { getAllCategories } from "@/lib/getAllCategories";
+import type { WikiCategory } from "@/types/wiki";
 import {
   ChevronLeft,
   Columns2,
@@ -14,7 +14,7 @@ import {
   SidebarNavListCategoryItem,
 } from "./SidebarNavStyles";
 import { IconButton } from "@/components/IconButton";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 
 const sidebarContentStyles = sva({
   slots: ["nav", "list"],
@@ -48,8 +48,9 @@ const sidebarContentStyles = sva({
   },
 });
 
-export const SidebarContentNormal: React.FC = async () => {
-  const categories = await getAllCategories();
+export const SidebarContentNormal: React.FC<{
+  categories: WikiCategory[];
+}> = ({ categories }) => {
   const contentClasses = sidebarContentStyles();
 
   return (
@@ -76,7 +77,7 @@ export const SidebarContentNormal: React.FC = async () => {
   );
 };
 
-export const SidebarContentDashboard: React.FC = async () => {
+export const SidebarContentDashboard: React.FC = () => {
   const contentClasses = sidebarContentStyles();
 
   return (
@@ -99,7 +100,7 @@ export const SidebarContentDashboard: React.FC = async () => {
             })}
           >
             <IconButton asChild>
-              <Link href="/">
+              <Link to="/">
                 <ChevronLeft />
               </Link>
             </IconButton>

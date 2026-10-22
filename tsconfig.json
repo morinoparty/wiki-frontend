@@ -11,7 +11,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"],
       "styled-system/*": ["./styled-system/*"]
@@ -20,7 +20,6 @@
   "include": [
     "src",
     "cloudflare.config.ts",
-    "next.config.ts",
     "vite.config.ts",
     "panda.config.ts",
     "text-styles.ts",

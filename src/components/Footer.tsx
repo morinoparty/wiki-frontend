@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { sva } from "styled-system/css";
 import { FooterLinkItem } from "./FooterLinkItem";
 
@@ -88,7 +88,7 @@ export function Footer() {
   return (
     <footer className={styles.root}>
       <div>
-        <Link href="/">
+        <Link to="/">
           <img
             src={"/assets/logo.svg"}
             alt="MorinoParty"
@@ -121,7 +121,7 @@ export function Footer() {
       </ul>
 
       <ul className={styles.license}>
-        <Link href="/license">オープンソースライセンス</Link>
+        <Link to="/license">オープンソースライセンス</Link>
       </ul>
 
       <p className={styles.copyright}>

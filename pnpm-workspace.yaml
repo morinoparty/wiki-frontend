@@ -17,4 +17,4 @@ minimumReleaseAgeExclude:
   - cf@1.0.0-beta.20
   - '@cloudflare/runtime-types@0.1.14'
   - miniflare@5.20261019.1-beta
-  - '@morinoparty/hagaki@0.2.0'
+  - '@morinoparty/hagaki@0.2.0 || 0.3.0'

@@ -1,5 +1,5 @@
 import { sva } from "styled-system/css";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/Button";
 import { ChevronLeft } from "lucide-react";
 
@@ -58,7 +58,7 @@ export function EditorNav({ title, children }: EditorNavProps) {
         }}
       >
         <Button asChild className={styles.backButton} variant="ghost" size="sm">
-          <Link href="/dashboard">
+          <Link to="/dashboard">
             <ChevronLeft />
             戻る
           </Link>

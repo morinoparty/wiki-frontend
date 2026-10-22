@@ -1,19 +1,18 @@
 /**
  * 記事の保存リクエストに画像を載せるときの取り決め。ブラウザ
- * (PostEditorClient) とサーバー (updatePost) の両方が読む。
+ * (PostEditorClient) とサーバー (`src/server/posts.ts` の updatePost) の両方が読む。
  *
  * エディタに入れた画像は保存までブラウザのメモリ (hagaki/pending-images) に
- * AVIF の Blob として置かれ、保存時に本文と一緒に Server Action へ送られて
+ * AVIF の Blob として置かれ、保存時に本文と一緒に server function へ送られて
  * 1 コミットにまとまる。
  */
 
 /**
- * 保存 1 回で送れる上限 (バイト)。next.config.ts の
- * `experimental.serverActions.bodySizeLimit` にもこの値を渡す。
+ * 保存 1 回で送れる上限 (バイト)。server function には body の上限設定が
+ * 無いため、updatePost のハンドラがこの値で弾く。
  *
- * vinext の Server Action は既定で 1MB までしか受け付けないが、画像は 1 枚
- * 500KB まであるので 2 枚で超えてしまう。Workers のメモリ (128MB) と
- * リクエスト上限 (100MB) に十分収まる範囲で引き上げている。
+ * 画像は 1 枚 500KB まであるので、Workers のメモリ (128MB) と
+ * リクエスト上限 (100MB) に十分収まる範囲で余裕を持たせている。
  */
 export const SAVE_REQUEST_LIMIT_BYTES = 8 * 1024 * 1024;
 

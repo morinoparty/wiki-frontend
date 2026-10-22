@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { sva } from "styled-system/css";
 
 export const sidebarNavStyles = sva({
@@ -84,7 +84,7 @@ export const SidebarNavListItem: React.FC<{
 
   return (
     <li className={navClasses.item}>
-      <Link href={href} className={navClasses.link}>
+      <Link to={href} className={navClasses.link}>
         {icon}
         {children}
       </Link>
@@ -112,7 +112,7 @@ export const SidebarNavListCategoryItem: React.FC<{
 
   return (
     <li className={navClasses.categoryItem}>
-      <Link href={href} className={navClasses.categoryLink}>
+      <Link to={href} className={navClasses.categoryLink}>
         {children}
       </Link>
     </li>

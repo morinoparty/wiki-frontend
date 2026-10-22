@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { sva } from "styled-system/css";
 import { Settings2 } from "lucide-react";
 import { UserBox } from "./UserBox";
@@ -272,7 +272,7 @@ export const SidebarLogo: React.FC<{
   });
 
   return (
-    <Link href="/" className={logoClasses.link}>
+    <Link to="/" className={logoClasses.link}>
       <img
         src="/assets/logo.svg"
         className={logoClasses.image}

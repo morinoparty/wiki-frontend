@@ -1,6 +1,5 @@
 import { css } from "styled-system/css";
 import { Button } from "./Button";
-import Link from "next/link";
 
 export const Cta: React.FC = () => {
   return (
@@ -77,7 +76,7 @@ export const Cta: React.FC = () => {
         </p>
 
         <Button asChild>
-          <Link href="https://morino.party/">ちょっと入ってみる</Link>
+          <a href="https://morino.party/">ちょっと入ってみる</a>
         </Button>
       </div>
 

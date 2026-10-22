@@ -1,7 +1,6 @@
 # wiki-frontend
 
-MoripaWiki の閲覧・編集 UI。Next.js の App Router で書いたアプリを
-[vinext](https://vinext.dev) (Vite 上の Next.js 互換実装) でビルドし、
+MoripaWiki の閲覧・編集 UI。[TanStack Start](https://tanstack.com/start) で書いたアプリを
 Cloudflare Workers で動かします。記事の読み書きは
 [hagaki](https://github.com/morinoparty/hagaki) 経由です。
 
@@ -15,16 +14,15 @@ Cloudflare Workers で動かします。記事の読み書きは
 ```
 .
 ├── cloudflare.config.ts        # Worker 定義 (名前、バインディング、secret)
-├── vite.config.ts              # vinext + Cloudflare Vite plugin
-├── next.config.ts              # vinext が読む Next.js 互換設定 (Server Action の body 上限)
+├── vite.config.ts              # TanStack Start + Cloudflare Vite plugin
 ├── panda.config.ts             # Panda CSS (chlorophyll のプリセット)
 ├── .github/workflows/deploy.yml
 └── src/
-    ├── app/                    # App Router のページと route handler
-    ├── actions/                # Server Actions (記事の作成・更新・履歴)
+    ├── routes/                 # ファイルベースのルート (ページと server route)
+    ├── router.tsx              # ルーター (routeTree.gen.ts は自動生成)
+    ├── server/                 # server function (記事の作成・更新・履歴、データ取得、認証)
     ├── components/
     ├── lib/                    # hagaki client, 認証 (better-auth), env の読み出し
-    ├── proxy.ts                # 未ログインで /dashboard に来たらサインインへ
     └── generate-search-index.ts
 ```
 
@@ -33,7 +31,9 @@ Cloudflare Workers で動かします。記事の読み書きは
 - 編集はダッシュボードから行い、保存すると hagaki が wiki-content へコミットします。
   wiki-content の Actions がデプロイすると公開ページに反映されます。
 - エディタに入れた画像はブラウザで AVIF にし、保存時に本文と同じコミットへ入れます
-  (詳細は [`src/actions/README.md`](src/actions/README.md))。
+  (詳細は [`src/server/README.md`](src/server/README.md))。
+- 未ログインで `/dashboard` に来たら、`src/routes/dashboard/route.tsx` の
+  `beforeLoad` がサインインへ送ります。
 
 ### Worker の env
 
@@ -76,7 +76,7 @@ pnpm run dev          # ライセンス一覧と検索 index を作ってから 
 ## デプロイ
 
 main に push すると `.github/workflows/deploy.yml` が
-`pnpm run generate` → `cf build --mode production` → `cf deploy --prebuilt --mode production` を実行します。
+`pnpm run generate` → `cf build` → `cf deploy --prebuilt --mode production` を実行します。
 pull request では dry-run まで行います。Worker secret は GitHub secrets から
 ファイルを作り、`cf deploy --secrets-file` で渡します。
 
@@ -86,8 +86,7 @@ pull request では dry-run まで行います。Worker secret は GitHub secret
 手元から deploy するときは `.env` の `CLOUDFLARE_*` が使われます。
 
 ```sh
-pnpm run generate
-pnpm exec cf deploy --mode production
+pnpm run deploy       # generate → cf build → cf deploy --prebuilt --mode production
 ```
 
 Worker secret を設定・変更するときは、`--secrets-file` に JSON か `.env` 形式の
