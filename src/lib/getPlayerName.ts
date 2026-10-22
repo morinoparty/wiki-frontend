@@ -6,10 +6,8 @@
  */
 export async function getPlayerName(uuid: string): Promise<string> {
   try {
-    // プレイヤー名の変更は稀なので 1 日キャッシュする
     const res = await fetch(
-      `https://api.ashcon.app/mojang/v2/user/${encodeURIComponent(uuid)}`,
-      { next: { revalidate: 86400 } }
+      `https://api.ashcon.app/mojang/v2/user/${encodeURIComponent(uuid)}`
     );
     if (!res.ok) return uuid.slice(0, 8);
     const profile = (await res.json()) as { username?: unknown };

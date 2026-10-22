@@ -1,14 +1,20 @@
-import type { Metadata } from "next";
+import { createFileRoute } from "@tanstack/react-router";
+import { css } from "styled-system/css";
 import { LoginModal } from "@/components/LoginModal";
 import { ModalDialogRoot } from "@/components/ModalDialogRoot";
-import { css } from "styled-system/css";
+import { pageTitle } from "@/lib/pageTitle";
 
-export const metadata: Metadata = {
-  title: "サインイン",
-  robots: { index: false, follow: false },
-};
+export const Route = createFileRoute("/_normal/auth/sign-in")({
+  head: () => ({
+    meta: [
+      { title: pageTitle("サインイン") },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: SignIn,
+});
 
-export default async function Home() {
+function SignIn() {
   return (
     // isPage の地色は chlorophyll では colorPalette.bg になるため、
     // 従来どおり淡いブランド面を敷き直す

@@ -11,8 +11,8 @@ export default defineConfig({
 			// fetch 先を公開アドレスに限る
 			"global_fetch_strictly_public",
 		],
-		// vinext の Worker エントリ。App Router / Pages Router をビルド時に選ぶ
-		entrypoint: "vinext/server/fetch-handler",
+		// TanStack Start の Worker エントリ (SSR / server functions / server routes)
+		entrypoint: "@tanstack/react-start/server-entry",
 		// 独自ドメインは持たず、https://wiki-frontend.<subdomain>.workers.dev で配信する
 		workersDev: true,
 		observability: {
@@ -22,8 +22,6 @@ export default defineConfig({
 		assets: {
 			htmlHandling: "none",
 			notFoundHandling: "none",
-			// ハッシュ付きのクライアント資産以外はすべて vinext (middleware / ルーティング) を通す
-			runWorkerFirst: ["/*", "!/_next/static/*", "!/*/_next/static/*"],
 		},
 		env: {
 			ASSETS: bindings.assets(),

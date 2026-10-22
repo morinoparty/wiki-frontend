@@ -1,7 +1,17 @@
 import { css } from "styled-system/css";
-import { MyEditedPosts } from "./components/MyEditedPosts";
+import { createFileRoute } from "@tanstack/react-router";
+import { MyEditedPosts } from "@/components/dashboard/MyEditedPosts";
+import { pageTitle } from "@/lib/pageTitle";
+import { fetchMyEditedPosts } from "@/server/dashboard";
 
-export default async function Home() {
+export const Route = createFileRoute("/dashboard/")({
+  loader: () => fetchMyEditedPosts(),
+  head: () => ({ meta: [{ title: pageTitle("ダッシュボード") }] }),
+  component: Home,
+});
+
+function Home() {
+  const editedPosts = Route.useLoaderData();
   return (
     <div
       className={css({
@@ -38,7 +48,7 @@ export default async function Home() {
       </header>
 
       <main>
-        <MyEditedPosts />
+        <MyEditedPosts editedPosts={editedPosts} />
       </main>
     </div>
   );

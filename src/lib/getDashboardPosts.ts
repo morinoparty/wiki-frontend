@@ -1,5 +1,3 @@
-import "server-only";
-
 import { getAllPosts } from "@/lib/getAllPosts";
 import { getPostsEditedBy, type EditedPost } from "@/lib/getEditedPosts";
 import { getHagakiClient } from "@/lib/hagaki";

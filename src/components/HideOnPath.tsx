@@ -1,6 +1,4 @@
-"use client";
-
-import { usePathname } from "next/navigation";
+import { useLocation } from "@tanstack/react-router";
 import { ReactNode } from "react";
 
 interface HideOnPathProps {
@@ -21,7 +19,7 @@ export const HideOnPath: React.FC<HideOnPathProps> = ({
   hidePaths,
   exactMatch = false,
 }) => {
-  const pathname = usePathname();
+  const pathname = useLocation({ select: (location) => location.pathname });
 
   const pathsArray = Array.isArray(hidePaths) ? hidePaths : [hidePaths];
 

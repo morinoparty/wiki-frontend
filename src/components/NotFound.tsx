@@ -1,9 +1,6 @@
 import { Button } from "@/components/Button";
-import Layout from "@/components/Layout";
-import { Sidebar } from "@/components/Sidebar";
-import { SidebarContentNormal } from "@/components/SidebarContent";
 import { TentTree } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { sva } from "styled-system/css";
 
 const notFoundPageStyles = sva({
@@ -74,39 +71,36 @@ const notFoundPageStyles = sva({
   },
 });
 
-export default function NotFound() {
+/**
+ * 404 の中身。公開ページのレイアウト (`/_normal`) の内側で描画する。
+ * 記事やカテゴリが見つからないときは各 loader が `notFound()` を投げ、
+ * `/_normal` の notFoundComponent としてここが出る。
+ */
+export function NotFound() {
   const classes = notFoundPageStyles();
 
   return (
-    <Layout
-      sidebar={
-        <Sidebar>
-          <SidebarContentNormal />
-        </Sidebar>
-      }
-    >
-      <div className={classes.container}>
-        <TentTree size={96} strokeWidth={1.25} className={classes.icon} />
-        <div className={classes.content}>
-          <h1 className={classes.title}>404</h1>
-          <h2 className={classes.subtitle}>ページが見つかりません</h2>
-          <p className={classes.description}>
-            お探しのページは削除されたか、URLが変更された可能性があります。
-            <br />
-            Steveが持っていっちゃったかも...。
-            <br />
-            トップページから再度お探しください🍂
-          </p>
-        </div>
-        <div className={classes.actions}>
-          <Button asChild>
-            <Link href="/">トップページに戻る</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link href="/category">カテゴリ一覧</Link>
-          </Button>
-        </div>
+    <div className={classes.container}>
+      <TentTree size={96} strokeWidth={1.25} className={classes.icon} />
+      <div className={classes.content}>
+        <h1 className={classes.title}>404</h1>
+        <h2 className={classes.subtitle}>ページが見つかりません</h2>
+        <p className={classes.description}>
+          お探しのページは削除されたか、URLが変更された可能性があります。
+          <br />
+          Steveが持っていっちゃったかも...。
+          <br />
+          トップページから再度お探しください🍂
+        </p>
       </div>
-    </Layout>
+      <div className={classes.actions}>
+        <Button asChild>
+          <Link to="/">トップページに戻る</Link>
+        </Button>
+        <Button variant="ghost" asChild>
+          <Link to="/category">カテゴリ一覧</Link>
+        </Button>
+      </div>
+    </div>
   );
 }

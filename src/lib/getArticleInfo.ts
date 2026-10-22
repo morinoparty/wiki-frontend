@@ -27,8 +27,7 @@ export async function getArticleInfo(
 ): Promise<ArticleInfo | null> {
   const url = `${CONTENT_BASE_URL}/article/${encodeURIComponent(uuid)}/info.json`;
   try {
-    // 履歴はデプロイのたびにしか変わらないため、1時間キャッシュする。
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    const res = await fetch(url);
     if (!res.ok) return null;
     const info = (await res.json()) as ArticleInfo;
     return {

@@ -1,14 +1,18 @@
 import { Cta } from "@/components/Cta";
 import WikiCard from "@/components/WikiCard";
 import { WikiCardGrid } from "@/components/WikiCardGrid";
-import { getAllPosts } from "@/lib/getAllPosts";
+import { createFileRoute } from "@tanstack/react-router";
+import { fetchAllPosts } from "@/server/content";
 import { css } from "styled-system/css";
 
-export default async function Home() {
-  const posts = await getAllPosts({
-    sortBy: "updated",
-    order: "desc",
-  });
+export const Route = createFileRoute("/_normal/")({
+  loader: () => fetchAllPosts({ data: { sortBy: "updated", order: "desc" } }),
+  component: Home,
+});
+
+function Home() {
+  // splice で先頭から 6 件ずつ取り出すので、loader のデータは複製してから使う
+  const posts = [...Route.useLoaderData()];
 
   return (
     <div className={css({})}>

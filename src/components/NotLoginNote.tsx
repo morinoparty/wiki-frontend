@@ -1,12 +1,12 @@
 import { css } from "styled-system/css";
 import { Button } from "@/components/Button";
-import { signInWithMineAuth } from "@/actions/auth-actions";
-import Link from "next/link";
+import { startSignIn } from "@/server/auth";
+import { Link } from "@tanstack/react-router";
 
 export const NotLoginNote = () => {
   return (
     <form
-      action={signInWithMineAuth}
+      action={startSignIn}
       className={css({
         background: "bg.panel",
         borderRadius: "18px",
@@ -67,7 +67,7 @@ export const NotLoginNote = () => {
           }}
           asChild
         >
-          <Link href="/auth/sign-in">ログイン</Link>
+          <Link to="/auth/sign-in">ログイン</Link>
         </Button>
       </div>
     </form>

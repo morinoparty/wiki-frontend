@@ -1,15 +1,14 @@
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { Edit } from "lucide-react";
 import { css, cx, sva } from "styled-system/css";
 import { Button } from "@/components/Button";
 import { NotLoginNote } from "@/components/NotLoginNote";
-import { getSession } from "@/lib/auth";
 import { formatDateTime } from "@/lib/formatDateTime";
 import { articleImageUrl } from "@/lib/content";
-import {
-  getDashboardPostsEditedBy,
-  type DashboardPost,
-} from "../posts/getDashboardPosts";
+import type {
+  DashboardEditedPost,
+  DashboardPost,
+} from "@/lib/getDashboardPosts";
 
 const myEditedPosts = sva({
   slots: [
@@ -114,16 +113,17 @@ function thumbnailSrc(post: DashboardPost): string {
  * 公開記事は生成物 `article.json` の `editors`、draft / デプロイ待ちの
  * 記事はリポジトリのコミット履歴から判定する。
  */
-export async function MyEditedPosts() {
-  const session = await getSession();
-  const playerId = session?.user?.id;
-
-  if (!playerId) {
+export function MyEditedPosts({
+  editedPosts,
+}: {
+  /** 未ログインなら null。 */
+  editedPosts: DashboardEditedPost[] | null;
+}) {
+  if (!editedPosts) {
     return <NotLoginNote />;
   }
 
   const styles = myEditedPosts();
-  const editedPosts = await getDashboardPostsEditedBy(playerId);
 
   if (editedPosts.length === 0) {
     return (
@@ -171,7 +171,7 @@ export async function MyEditedPosts() {
           </div>
           <div className={styles.actions}>
             <Button size="sm" variant="ghost" asChild>
-              <Link href={`/dashboard/posts/${post.uuid}`}>
+              <Link to="/dashboard/posts/$postId" params={{ postId: post.uuid }}>
                 <Edit />
                 編集
               </Link>

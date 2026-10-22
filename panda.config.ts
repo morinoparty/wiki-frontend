@@ -14,6 +14,7 @@ export default defineConfig({
   include: [
     "./src/components/**/*.{ts,tsx,js,jsx}",
     "./src/app/**/*.{ts,tsx,js,jsx}",
+    "./src/routes/**/*.{ts,tsx,js,jsx}",
     // Required: chlorophyll is distributed as raw TS sources and some of its
     // components (e.g. Badge) call `css()` directly instead of going through a
     // recipe, so Panda has to statically analyse the package sources as well.

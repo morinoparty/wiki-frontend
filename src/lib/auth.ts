@@ -1,6 +1,6 @@
-import { headers } from "next/headers";
+import { getRequest } from "@tanstack/react-start/server";
 import { betterAuth } from "better-auth";
-import { nextCookies } from "better-auth/next-js";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
 import {
   genericOAuth,
   type GenericOAuthUserInfo,
@@ -125,20 +125,20 @@ async function buildAuth(baseURL: string, authServerUrl: string) {
           },
         ],
       }),
-      // Next.js の cookies() へ Set-Cookie を転送する公式プラグイン。
-      // hooks.after を持つプラグインより後ろ(= 最後)に置く必要がある
-      nextCookies(),
+      // server function から呼んだ API の Set-Cookie をレスポンスへ転送する
+      // 公式プラグイン。hooks.after を持つプラグインより後ろ(= 最後)に置く必要がある
+      tanstackStartCookies(),
     ],
   });
 }
 
 /**
  * 現在のリクエストの origin を baseURL としたメモ化済み BetterAuth インスタンスを返す。
- * リクエストコンテキスト内 (Server Component / Server Action / Route Handler) からのみ
+ * リクエストコンテキスト内 (server function / server route / SSR の loader) からのみ
  * 呼び出せる。
  */
 export async function getAuth(): Promise<Auth> {
-  const headerList = await headers();
+  const headerList = getRequest().headers;
   const host =
     headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:5173";
   const proto =
@@ -163,7 +163,7 @@ export async function getAuth(): Promise<Auth> {
  */
 export async function getSession() {
   const auth = await getAuth();
-  return auth.api.getSession({ headers: await headers() });
+  return auth.api.getSession({ headers: getRequest().headers });
 }
 
 /** `getSession()` の戻り値型 (better-auth のセッション or null)。 */

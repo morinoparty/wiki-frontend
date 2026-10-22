@@ -1,5 +1,5 @@
 import { sva } from "styled-system/css";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { WikiPost } from "@/types/wiki";
 import { articleImageUrl } from "@/lib/content";
 
@@ -64,7 +64,7 @@ export default function WikiCard({ post }: { post: WikiPost }) {
     : "/assets/placeholder.svg";
 
   return (
-    <Link href={`/${link}`}>
+    <Link to="/$postId" params={{ postId: link }}>
       <article className={styles.card}>
         <img
           className={styles.image}
