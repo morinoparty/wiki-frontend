@@ -80,6 +80,17 @@ main に push すると `.github/workflows/deploy.yml` が
 pull request では dry-run まで行います。Worker secret は GitHub secrets から
 ファイルを作り、`cf deploy --secrets-file` で渡します。
 
+pull request では、本番に deploy しない Worker Version を
+`cf workers versions create --preview-alias pr-<番号>` で upload し、
+preview の URL を PR にコメントします (push のたびに同じコメントを書き換えます)。
+
+- `https://pr-<番号>-wiki-frontend.<subdomain>.workers.dev` は、その PR の最新の Version を返します。
+- コメントには commit ごとの Version の URL も載せます。
+- preview URL を返すには `cloudflare.config.ts` の `previewUrls: true` が本番に deploy されている必要があります。
+- secret は本番の Worker のものを引き継ぎます。そのため、preview から保存した記事も wiki-content にコミットされます。
+- MineAuth のコールバックは origin ごとに登録が要ります。preview の origin を登録していなければ、preview ではログインできません。
+- fork と Dependabot の PR には repository secrets が渡らないので、preview を作りません。
+
 検索 index は配信中の wiki-content から作ります。取得に失敗したとき、push (本番 deploy)
 では build を止め、PR やローカルでは空の index で続けます。
 
