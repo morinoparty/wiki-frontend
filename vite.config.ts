@@ -16,6 +16,11 @@ export default defineConfig({
       "styled-system": styledSystemDir,
     },
   },
+  build: {
+    // ハッシュ付きの成果物を public/assets (ハッシュ無しのフォントや画像) と
+    // 別のパスに出し、public/_headers で /_build/* だけ immutable にする
+    assetsDir: "_build",
+  },
   plugins: [
     // Worker の設定 (名前・バインディング) は cloudflare.config.ts にある
     cloudflare({ viteEnvironment: { name: "ssr" } }),

@@ -215,8 +215,8 @@ export const components = {
   a: (props: React.ComponentProps<"a">) => {
     const { href = "#", ...rest } = props;
     // 記事内のリンクは外部・アンカー・サイト内が混ざる。サイト内のパスだけ
-    // クライアント遷移にする
-    if (!href.startsWith("/")) {
+    // クライアント遷移にする (`//host/...` はプロトコル相対の外部リンク)
+    if (!/^\/(?!\/)/.test(href)) {
       return <a href={href} className={mdxStyles().a} {...rest} />;
     }
     return <Link to={href} className={mdxStyles().a} {...rest} />;

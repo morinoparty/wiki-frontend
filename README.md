@@ -86,8 +86,7 @@ pull request では dry-run まで行います。Worker secret は GitHub secret
 手元から deploy するときは `.env` の `CLOUDFLARE_*` が使われます。
 
 ```sh
-pnpm run generate
-pnpm exec cf deploy --mode production
+pnpm run deploy       # generate → cf build → cf deploy --prebuilt --mode production
 ```
 
 Worker secret を設定・変更するときは、`--secrets-file` に JSON か `.env` 形式の

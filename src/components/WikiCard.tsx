@@ -53,11 +53,20 @@ const wikiCardStyles = sva({
   },
 });
 
+function decodeSlug(slug: string): string {
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+}
+
 export default function WikiCard({ post }: { post: WikiPost }) {
   const styles = wikiCardStyles();
-  const link =
-    // 全てを小文字に変換
-    post.slug.toLowerCase();
+  // article.json の slug は percent-encode 済み (hagaki の toUrlSlug)。
+  // パスパラメータはルーターが encode し直すので、復号してから渡す
+  // (そのまま渡すと `%` が `%25` になり、URL が二重にエンコードされる)
+  const link = decodeSlug(post.slug.toLowerCase());
 
   const imageUrl = post.thumbnail
     ? articleImageUrl(post.uuid, post.thumbnail.imageId)

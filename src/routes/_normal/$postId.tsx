@@ -1,3 +1,4 @@
+import { NotFound } from "@/components/NotFound";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Edit } from "lucide-react";
 import { css } from "styled-system/css";
@@ -45,6 +46,8 @@ export const Route = createFileRoute("/_normal/$postId")({
     };
   },
   component: Post,
+  // loader の notFound() をこのルートで受け、公開レイアウトの内側に出す
+  notFoundComponent: NotFound,
 });
 
 function Post() {

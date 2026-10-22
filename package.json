@@ -14,7 +14,7 @@
     "generate:index": "tsx src/generate-search-index.ts",
     "dev": "pnpm run generate && cf dev",
     "build": "pnpm run generate && cf build",
-    "deploy": "pnpm run generate && cf deploy --mode production",
+    "deploy": "pnpm run generate && cf build && cf deploy --prebuilt --mode production",
     "typecheck": "cf workers types && tsc --noEmit"
   },
   "dependencies": {

@@ -74,7 +74,9 @@ const notFoundPageStyles = sva({
 /**
  * 404 の中身。公開ページのレイアウト (`/_normal`) の内側で描画する。
  * 記事やカテゴリが見つからないときは各 loader が `notFound()` を投げ、
- * `/_normal` の notFoundComponent としてここが出る。
+ * そのルート自身の notFoundComponent としてここが出る。親 (`/_normal`) で
+ * 受けるとレイアウトごと置き換わってしまうため、notFound() を投げるルートには
+ * 必ず `notFoundComponent: NotFound` を付ける。
  */
 export function NotFound() {
   const classes = notFoundPageStyles();

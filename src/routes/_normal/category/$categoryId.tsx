@@ -1,3 +1,4 @@
+import { NotFound } from "@/components/NotFound";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { Tag, TentTree } from "lucide-react";
 import { css, sva } from "styled-system/css";
@@ -39,6 +40,8 @@ export const Route = createFileRoute("/_normal/category/$categoryId")({
     };
   },
   component: CategoryPostsPage,
+  // loader の notFound() をこのルートで受け、公開レイアウトの内側に出す
+  notFoundComponent: NotFound,
 });
 
 const categoryPostsPageStyles = sva({

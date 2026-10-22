@@ -16,7 +16,7 @@ import { WikiPostDetail } from "@/types/wiki";
 import { EditorNav } from "@/components/EditorNav";
 import { Button } from "@/components/Button";
 import { Spinner } from "@morinoparty/chlorophyll-react/components";
-import { ClientOnly } from "@tanstack/react-router";
+import { ClientOnly, useRouter } from "@tanstack/react-router";
 import type { MDXEditorMethods } from "@morinoparty/hagaki/editor";
 import { diffRemovedImagePaths } from "@morinoparty/hagaki/markdown";
 import {
@@ -44,6 +44,7 @@ interface PostEditorClientProps {
 const EditorComp = lazy(() => import("./Editor"));
 
 export function PostEditorClient({ post }: PostEditorClientProps) {
+  const router = useRouter();
   const [form, setForm] = useState(post);
   // 直近でコミット済みの本文。未コミット画像の抽出と削除差分の基準になる。
   const [committedBody, setCommittedBody] = useState(post.body);
@@ -180,6 +181,12 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
       setCommittedThumbnailId(thumbId);
       for (const { imageId } of images.images) removePending(imageId);
       setIsDirty(false); // 保存後にダーティフラグをリセット
+
+      // 一覧などキャッシュ済みの loader データを古いものとして扱わせる。
+      // 編集中のこのルートは state を持っているので読み直さない
+      void router.invalidate({
+        filter: (match) => match.routeId !== "/dashboard/posts/$postId",
+      });
     });
   };
 
