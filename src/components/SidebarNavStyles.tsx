@@ -73,10 +73,10 @@ export const SidebarNavListItem: React.FC<{
             pl: "20px",
             pr: "36px",
             gap: "16px",
-            textStyle: "body",
-            // textStyle body は文字色 (colorPalette.fg) も持ち、recipe の文字色を上書きしてしまう。
-            // 塗りの上で読めるよう、primary の文字色に戻す
-            color: "colorPalette.contrast",
+            // 以前と同じ高さ (上下 14px + 16px × 1.75 の行) にするため、文字の大きさと行の高さだけ揃える。
+            // 文字色やフォントは Button のレシピに任せる
+            fontSize: "16px",
+            lineHeight: "1.75",
           })}
         >
           <Link to={href}>
