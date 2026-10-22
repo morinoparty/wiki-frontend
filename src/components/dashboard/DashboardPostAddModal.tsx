@@ -108,7 +108,7 @@ export const DashboardPostAddModal: React.FC<{
   };
 
   // タイトル・URL・説明はカテゴリに関係なく引き継ぐ。
-  // option (座標や enum) はカテゴリごとに中身が違うので、同じカテゴリに戻ったときだけ引き継ぐ
+  // option (enum など) はカテゴリごとに中身が違うので、同じカテゴリに戻ったときだけ引き継ぐ
   const initialValues: Partial<PostFormValues> | undefined = draftValues
     ? draftValues.category === selectedCategory
       ? draftValues.values

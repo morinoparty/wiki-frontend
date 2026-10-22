@@ -7,14 +7,9 @@ import {
   createListCollection,
 } from "@morinoparty/chlorophyll-react/components";
 import { PostOptionValues, WikiCategory } from "@/types/wiki";
-import type { PositionKey } from "@/lib/categoryOptions";
 import {
-  POSITION_KEYS,
   defaultOptionValues,
   enumOptionFields,
-  hasPositionOption,
-  positionLabel,
-  positionPlaceholder,
   validateOptionValues,
 } from "@/lib/categoryOptions";
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -78,7 +73,7 @@ export interface PostFormValues {
   url: string;
   description: string;
   /**
-   * カテゴリが option で宣言したフィールドの値。座標もここに入り、enum は
+   * カテゴリが option で宣言したフィールドの値。enum は
    * 選択肢の id を入れる（記事の frontmatter `option.<key>` に保存される）。
    */
   option?: PostOptionValues;
@@ -130,9 +125,6 @@ export const DashboardPostFormModal: React.FC<{
     useState<SlugCheckStatus>("idle");
 
   const styles = postFormModalStyles();
-
-  // 座標入力を出すかどうかはカテゴリの option 宣言から決まる
-  const requiresPosition = hasPositionOption(currentCategory);
 
   // カテゴリが宣言した enum フィールド。選択肢は Select の collection に変換する
   const enumFields = useMemo(
@@ -202,7 +194,7 @@ export const DashboardPostFormModal: React.FC<{
     formData.title.trim() !== "" &&
     formData.url.trim() !== "" &&
     slugCheckStatus === "available" &&
-    // 座標・enum など、カテゴリの宣言を満たしているか
+    // enum など、カテゴリの option 宣言を満たしているか
     validateOptionValues(currentCategory, formData.option) === null;
 
   const handleInputChange = (
@@ -230,11 +222,6 @@ export const DashboardPostFormModal: React.FC<{
       }
       return { ...prev, option };
     });
-  };
-
-  const handleCoordinateChange = (key: PositionKey, value: string) => {
-    const parsed = Number.parseInt(value, 10);
-    handleOptionChange(key, Number.isNaN(parsed) ? undefined : parsed);
   };
 
   const handleSubmit = () => {
@@ -318,30 +305,6 @@ export const DashboardPostFormModal: React.FC<{
             maxLength={100}
           />
         </Field.Root>
-
-        {/* Coordinate Fields - Only show if the category declares x / y */}
-        {requiresPosition &&
-          POSITION_KEYS.map((key) => (
-            <Field.Root key={key} required>
-              {/* ラベルとプレースホルダーはカテゴリの option 宣言に従う */}
-              <Field.Label>
-                {positionLabel(currentCategory, key)}
-                <Field.RequiredIndicator />
-              </Field.Label>
-              <Field.Input
-                type="number"
-                value={
-                  typeof formData.option?.[key] === "number"
-                    ? formData.option[key]
-                    : ""
-                }
-                onChange={(e) => {
-                  handleCoordinateChange(key, e.target.value);
-                }}
-                placeholder={positionPlaceholder(currentCategory, key)}
-              />
-            </Field.Root>
-          ))}
 
         {/* Enum Fields - カテゴリが option で宣言した選択式のフィールド */}
         {enumFields.map(({ key, field }) => {

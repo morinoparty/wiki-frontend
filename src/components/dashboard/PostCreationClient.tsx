@@ -27,7 +27,7 @@ export function PostCreationClient({
         body: data.description || "",
         category: data.category,
         description: data.description || "",
-        // カテゴリが宣言した option の値 (座標・enum など)。空なら送らない
+        // カテゴリが宣言した option の値 (enum など)。空なら送らない
         ...(data.option &&
           Object.keys(data.option).length > 0 && { option: data.option }),
       };

@@ -85,7 +85,7 @@ export const createPost = createServerFn({ method: "POST" })
           return { success: false, error: "指定されたカテゴリが見つかりません" };
         }
 
-        // 必須・型・enum の選択肢を宣言と突き合わせる（座標もこの経路）
+        // 必須・型・enum の選択肢を宣言と突き合わせる
         const optionError = validateOptionValues(category, input.option);
         if (optionError) {
           return { success: false, error: optionError };
@@ -248,7 +248,7 @@ export const updatePost = createServerFn({ method: "POST" })
           draft:
             typeof input.draft === "boolean" ? input.draft : existingPost.draft,
           // option はキー単位でマージする。丸ごと差し替えると、送らなかった
-          // フィールド (エディタが編集しない座標など) が消える
+          // フィールド (エディタが編集しないものなど) が消える
           ...(input.option
             ? { option: { ...existingPost.option, ...input.option } }
             : {}),
