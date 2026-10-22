@@ -8,6 +8,8 @@ Cloudflare Workers で動かします。記事の読み書きは
 - デプロイ: Cloudflare CLI [`cf`](https://developers.cloudflare.com/cf/) (beta)。main への push で GitHub Actions が実行
 - コンテンツ: [morinoparty/wiki-content](https://github.com/morinoparty/wiki-content)
   (`https://wiki-content.<subdomain>.workers.dev` から配信)
+- Minecraft のアセット: [morinoparty/mc-assets](https://github.com/morinoparty/mc-assets)
+  (`https://mc-assets.morinoparty.workers.dev` から配信)
 
 ## 構成
 
@@ -32,6 +34,8 @@ Cloudflare Workers で動かします。記事の読み書きは
   wiki-content の Actions がデプロイすると公開ページに反映されます。
 - エディタに入れた画像はブラウザで AVIF にし、保存時に本文と同じコミットへ入れます
   (詳細は [`src/server/README.md`](src/server/README.md))。
+- Minecraft 系コンポーネント (chlorophyll の `MinecraftItem` など) は、`src/components/ui/provider.tsx` の
+  `MinecraftProvider` を通して mc-assets のモデル・テクスチャを読みます。配信元は `src/lib/minecraft-assets.ts` の `MINECRAFT_ASSETS_URL`。
 - 未ログインで `/dashboard` に来たら、`src/routes/dashboard/route.tsx` の
   `beforeLoad` がサインインへ送ります。
 
