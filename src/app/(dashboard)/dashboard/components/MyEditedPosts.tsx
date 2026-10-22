@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { Edit } from "lucide-react";
-import { sva } from "styled-system/css";
+import { css, cx, sva } from "styled-system/css";
 import { Button } from "@/components/Button";
 import { NotLoginNote } from "@/components/NotLoginNote";
 import { getSession } from "@/lib/auth";
 import { formatDateTime } from "@/lib/formatDateTime";
-import { getPostsEditedBy } from "@/lib/getEditedPosts";
 import { articleImageUrl } from "@/lib/content";
+import {
+  getDashboardPostsEditedBy,
+  type DashboardPost,
+} from "../posts/getDashboardPosts";
 
 const myEditedPosts = sva({
   slots: [
@@ -15,6 +18,7 @@ const myEditedPosts = sva({
     "image",
     "body",
     "title",
+    "badge",
     "meta",
     "actions",
     "empty",
@@ -57,9 +61,19 @@ const myEditedPosts = sva({
       textStyle: "body",
       color: "colorPalette.fg",
       fontWeight: "bold",
-      textOverflow: "ellipsis",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
       overflow: "hidden",
-      whiteSpace: "nowrap",
+    },
+    badge: {
+      fontSize: "xs",
+      fontWeight: "normal",
+      color: "colorPalette.fg",
+      borderRadius: "full",
+      px: "8px",
+      py: "2px",
+      flexShrink: 0,
     },
     meta: {
       textStyle: "body",
@@ -83,11 +97,22 @@ const myEditedPosts = sva({
   },
 });
 
+/** CDN に無い記事 (draft / デプロイ待ち) のサムネイルはリポジトリ経由で読む。 */
+function thumbnailSrc(post: DashboardPost): string {
+  if (!post.thumbnail) return "/assets/placeholder.svg";
+  if (post.draft || post.unpublished) {
+    return `/api/article-assets/${post.uuid}/${post.thumbnail.imageId}${
+      post.draft ? "?draft=1" : ""
+    }`;
+  }
+  return articleImageUrl(post.uuid, post.thumbnail.imageId);
+}
+
 /**
  * ログイン中のプレイヤーが編集に関わった記事の一覧。
  *
- * 編集履歴は生成物 `info.json` が正なので、投稿直後の記事は
- * wiki-content のデプロイが終わるまでここには出てこない。
+ * 公開記事は生成物 `article.json` の `editors`、draft / デプロイ待ちの
+ * 記事はリポジトリのコミット履歴から判定する。
  */
 export async function MyEditedPosts() {
   const session = await getSession();
@@ -98,7 +123,7 @@ export async function MyEditedPosts() {
   }
 
   const styles = myEditedPosts();
-  const editedPosts = await getPostsEditedBy(playerId);
+  const editedPosts = await getDashboardPostsEditedBy(playerId);
 
   if (editedPosts.length === 0) {
     return (
@@ -115,16 +140,31 @@ export async function MyEditedPosts() {
       {editedPosts.map(({ post, edits, lastEditedAt }) => (
         <div key={post.uuid} className={styles.row}>
           <img
-            src={
-              post.thumbnail
-                ? articleImageUrl(post.uuid, post.thumbnail.imageId)
-                : "/assets/placeholder.svg"
-            }
+            src={thumbnailSrc(post)}
             alt={post.title}
             className={styles.image}
           />
           <div className={styles.body}>
-            <h3 className={styles.title}>{post.title}</h3>
+            <h3 className={styles.title}>
+              <span
+                className={css({
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                })}
+              >
+                {post.title || "(無題)"}
+              </span>
+              {post.draft ? (
+                <span className={cx(styles.badge, css({ bg: "gray.200" }))}>
+                  下書き
+                </span>
+              ) : post.unpublished ? (
+                <span className={cx(styles.badge, css({ bg: "amber.200" }))}>
+                  配信待ち
+                </span>
+              ) : null}
+            </h3>
             <p className={styles.meta}>
               最終編集 {formatDateTime(lastEditedAt)} ・ {edits}回編集
             </p>

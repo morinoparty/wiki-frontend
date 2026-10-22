@@ -1,6 +1,6 @@
 import { PlayerMap } from "@morinoparty/chlorophyll-react/components";
 import { sva } from "styled-system/css";
-import { contributorsFromHistory } from "@/lib/contributors";
+import { summarizeEditors } from "@morinoparty/hagaki";
 import { formatDateTime } from "@/lib/formatDateTime";
 import { getArticleInfo } from "@/lib/getArticleInfo";
 import { getPlayerNames } from "@/lib/getPlayerName";
@@ -105,7 +105,7 @@ export async function PostContributors({ articleId }: PostContributorsProps) {
   const info = await getArticleInfo(articleId);
   if (!info) return null;
 
-  const contributors = contributorsFromHistory(info.history);
+  const contributors = summarizeEditors(info.history);
   const names = await getPlayerNames(contributors.map((c) => c.player));
   const created = formatDateTime(info.created);
   const updated = formatDateTime(info.updated);
