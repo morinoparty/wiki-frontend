@@ -96,9 +96,28 @@ export const DashboardPostAddModal: React.FC<{
     }
   };
 
-  const handleBack = () => {
+  // 戻ったときに、フォームに入力していた値を保持しておく
+  const [draftValues, setDraftValues] = useState<{
+    category: string;
+    values: PostFormValues;
+  } | null>(null);
+
+  const handleBack = (values: PostFormValues) => {
+    if (selectedCategory) setDraftValues({ category: selectedCategory, values });
     setCurrentStep("category");
   };
+
+  // タイトル・URL・説明はカテゴリに関係なく引き継ぐ。
+  // option (座標や enum) はカテゴリごとに中身が違うので、同じカテゴリに戻ったときだけ引き継ぐ
+  const initialValues: Partial<PostFormValues> | undefined = draftValues
+    ? draftValues.category === selectedCategory
+      ? draftValues.values
+      : {
+          title: draftValues.values.title,
+          url: draftValues.values.url,
+          description: draftValues.values.description,
+        }
+    : undefined;
 
   const handleSubmit = (formData: PostFormValues) => {
     if (selectedCategory && onCreatePost) {
@@ -117,6 +136,7 @@ export const DashboardPostAddModal: React.FC<{
         existingSlugs={existingSlugs}
         onBack={handleBack}
         onSubmit={handleSubmit}
+        initialValues={initialValues}
       />
     );
   }

@@ -20,6 +20,7 @@ import {
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { css, sva } from "styled-system/css";
 import { buttonSize } from "@/components/buttonSize";
+import { ChevronLeft } from "lucide-react";
 
 // フォームの部品 (ラベル・入力欄・必須の印・補足/エラー) は chlorophyll の Field に任せ、
 // ここではダイアログ内のレイアウトと見出しまわりだけを持つ
@@ -94,21 +95,35 @@ export const DashboardPostFormModal: React.FC<{
   selectedCategory: string;
   categories: WikiCategory[];
   existingSlugs: string[];
-  onBack: () => void;
+  /**
+   * 前の段階 (カテゴリ選択) に戻る。入力中の値を渡すので、呼び出し側で保持しておけば
+   * 次に進み直したときに `initialValues` で復元できる
+   */
+  onBack: (values: PostFormValues) => void;
   onSubmit: (data: PostFormValues) => void;
-}> = ({ selectedCategory, categories, existingSlugs, onSubmit }) => {
+  /** 戻る前に入力していた値。カテゴリを選び直した場合、option は呼び出し側で捨てる */
+  initialValues?: Partial<PostFormValues>;
+}> = ({
+  selectedCategory,
+  categories,
+  existingSlugs,
+  onBack,
+  onSubmit,
+  initialValues,
+}) => {
   // 選択されたカテゴリの情報を取得
   const currentCategory = categories.find(
     (cat) => cat.slug === selectedCategory
   );
 
   // 宣言に default があるフィールドは初期値を入れておく。カテゴリを選び直すと
-  // この画面はいったん閉じて (アンマウントされて) 開き直るので、初期化は 1 回でよい
+  // この画面はいったん閉じて (アンマウントされて) 開き直るので、初期化は 1 回でよい。
+  // 戻る前に入力していた値があればそちらを優先する
   const [formData, setFormData] = useState<PostFormValues>(() => ({
-    title: "",
-    url: "",
-    description: "",
-    option: defaultOptionValues(currentCategory),
+    title: initialValues?.title ?? "",
+    url: initialValues?.url ?? "",
+    description: initialValues?.description ?? "",
+    option: initialValues?.option ?? defaultOptionValues(currentCategory),
   }));
 
   const [slugCheckStatus, setSlugCheckStatus] =
@@ -383,6 +398,17 @@ export const DashboardPostFormModal: React.FC<{
 
       {/* Bottom navigation - 右寄せの並びは ModalDialog.Footer が持つ */}
       <ModalDialog.Footer>
+        {/* 補助の操作なので plain にし、左端に寄せて主操作と離す */}
+        <Button
+          type="button"
+          intent="plain"
+          size="lg"
+          className={css(buttonSize.raw({ size: "md" }), { mr: "auto" })}
+          onClick={() => onBack(formData)}
+        >
+          <ChevronLeft aria-hidden />
+          戻る
+        </Button>
         <p className={styles.successMessage}>
           新しいページがついに生まれます！
         </p>
