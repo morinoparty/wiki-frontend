@@ -5,17 +5,15 @@ import {
 } from "@morinoparty/chlorophyll-react/components";
 import { WikiCategory } from "@/types/wiki";
 import { useState } from "react";
-import { sva } from "styled-system/css";
+import { css, cx, sva } from "styled-system/css";
 import { DashboardPostFormModal } from "./DashboardPostFormModal";
+import { postDialogStyles } from "./postDialogStyles";
 import type { PostFormValues } from "./DashboardPostFormModal";
 import { buttonSize } from "@/components/buttonSize";
 
-// grid 上の配置 (title / main / footer) とフッターの右寄せは ModalDialog の各パーツが持つので、
-// ここでは見出しまわりとカテゴリ一覧の中身だけを持つ
+// 枠・見出し・区切り線は postDialogStyles で 2/2 と共通にし、ここではカテゴリ一覧の中身だけを持つ
 const postAddModalStyles = sva({
   slots: [
-    "heading",
-    "subtitle",
     "main",
     "radioGroup",
     "categoryItem",
@@ -24,49 +22,44 @@ const postAddModalStyles = sva({
     "categoryDescription",
   ],
   base: {
-    subtitle: {
-      textStyle: "body",
-      fontWeight: "bold",
-      color: "colorPalette.fg.subtle",
-      mb: "8px",
-    },
-    heading: {
-      textStyle: "heading2",
-      color: "colorPalette.fg",
-      fontSize: "26px",
-    },
-    // ModalDialog.Content に当てる。カテゴリが多いときはこの中だけをスクロールさせ、上下を区切り線で挟む
+    // カテゴリが多いときは一覧の中だけをスクロールさせる
     main: {
       maxHeight: "440px",
       overflowY: "auto",
-      py: "32px",
-      borderTop: "1px solid",
-      borderBottom: "1px solid",
-      borderColor: "border.subtle",
     },
-    // RadioGroup.Root に当てる。縦積みはレシピが持つため、項目間の余白だけを指定する
+    // 行そのものに面を持たせるので、行と行の間はわずかに空けるだけにする
     radioGroup: {
-      gap: "32px",
+      gap: "4px",
     },
-    // 丸・cursor・横並びは RadioGroup のレシピが持つため、ここでは項目間の余白と左右の内側余白だけを上書きする
-    // (Content は端まで伸びるので、title / footer と同じ 38px をここで取る)
+    // 1 行を押しやすい面にする。hover と選択中で地色を付け、
+    // 左右に 16px はみ出させて丸の位置を見出しの左端に揃える
     categoryItem: {
-      gap: "24px",
+      gap: "16px",
+      alignItems: "flex-start",
+      px: "16px",
+      py: "12px",
+      mx: "-16px",
       borderRadius: "12px",
-      px: "38px",
+      transition: "background-color 0.15s ease",
+      _hover: {
+        bg: "colorPalette.surface.subtle",
+      },
+      _checked: {
+        bg: "colorPalette.surface",
+      },
     },
     // Item は <label> なので、中身は span を block 化して縦に積む
     categoryContent: {
       display: "flex",
       flexDirection: "column",
-      gap: "8px",
+      gap: "2px",
       flex: 1,
     },
     // ItemText の文字色はレシピが持つため、見出しとしての大きさと太さだけを上書きする
     categoryTitle: {
-      fontSize: "18px",
+      fontSize: "16px",
       fontWeight: "bold",
-      lineHeight: "1em",
+      lineHeight: "1.5",
     },
     categoryDescription: {
       display: "block",
@@ -89,6 +82,7 @@ export const DashboardPostAddModal: React.FC<{
   );
 
   const styles = postAddModalStyles();
+  const dialog = postDialogStyles();
 
   const handleNext = () => {
     if (selectedCategory) {
@@ -142,13 +136,13 @@ export const DashboardPostAddModal: React.FC<{
   }
 
   return (
-    <ModalDialog.Container>
+    <ModalDialog.Container className={dialog.container}>
       <ModalDialog.Title>
-        <p className={styles.subtitle}>Wikiの新規作成 1/2</p>
-        <h2 className={styles.heading}>カテゴリを選びましょう</h2>
+        <p className={dialog.subtitle}>Wikiの新規作成 1/2</p>
+        <h2 className={dialog.heading}>カテゴリを選びましょう</h2>
       </ModalDialog.Title>
 
-      <ModalDialog.Content className={styles.main}>
+      <ModalDialog.Content className={cx(dialog.main, styles.main)}>
         {/* カテゴリの選択。RadioGroup にすることで矢印キーでの移動や role="radio" による読み上げに対応する */}
         <RadioGroup.Root
           className={styles.radioGroup}
@@ -162,7 +156,8 @@ export const DashboardPostAddModal: React.FC<{
               value={category.slug}
               className={styles.categoryItem}
             >
-              <RadioGroup.ItemControl />
+              {/* 1 行目 (カテゴリ名) の高さに丸を揃える */}
+              <RadioGroup.ItemControl className={css({ mt: "2px" })} />
               {/* タイトルと説明を縦に並べる。説明は選択肢の名前 (ItemText) には含めない */}
               <span className={styles.categoryContent}>
                 <RadioGroup.ItemText className={styles.categoryTitle}>

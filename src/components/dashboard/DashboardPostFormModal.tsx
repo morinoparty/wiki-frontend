@@ -13,35 +13,21 @@ import {
   validateOptionValues,
 } from "@/lib/categoryOptions";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { css, sva } from "styled-system/css";
+import { css, cx, sva } from "styled-system/css";
+import { postDialogStyles } from "./postDialogStyles";
 import { buttonSize } from "@/components/buttonSize";
 import { ChevronLeft } from "lucide-react";
 
 // フォームの部品 (ラベル・入力欄・必須の印・補足/エラー) は chlorophyll の Field に任せ、
-// ここではダイアログ内のレイアウトと見出しまわりだけを持つ
+// 枠・見出し・区切り線は postDialogStyles で 1/2 と共通にする。ここではフォームの並びだけを持つ
 const postFormModalStyles = sva({
-  slots: ["heading", "subtitle", "main", "urlRow", "urlPrefix", "successMessage"],
+  slots: ["main", "urlRow", "urlPrefix"],
   base: {
-    subtitle: {
-      textStyle: "body",
-      fontWeight: "bold",
-      color: "colorPalette.fg.subtle",
-      mb: "8px",
-    },
-    heading: {
-      textStyle: "heading2",
-      color: "colorPalette.fg",
-      fontSize: "26px",
-    },
+    // 入力欄を縦に積む。ラベルと入力欄のまとまりが分かる程度に間を空ける
     main: {
-      // grid の配置は ModalDialog.Content が持つので、中身の縦積みと区切り線だけを書く
       display: "flex",
       flexDirection: "column",
-      gap: "40px",
-      py: "32px",
-      borderTop: "1px solid",
-      borderBottom: "1px solid",
-      borderColor: "border.subtle",
+      gap: "24px",
     },
     urlRow: {
       // 「wiki.morino.party/」の固定部分と slug の入力欄を横に並べる
@@ -55,14 +41,6 @@ const postFormModalStyles = sva({
       color: "fg.subtle",
       whiteSpace: "nowrap",
       flexShrink: 0,
-    },
-    successMessage: {
-      fontSize: "16px",
-      fontWeight: "bold",
-      color: "colorPalette.fg.subtle",
-      lineHeight: "1.7",
-      textAlign: "right",
-      flex: 1,
     },
   },
 });
@@ -125,6 +103,7 @@ export const DashboardPostFormModal: React.FC<{
     useState<SlugCheckStatus>("idle");
 
   const styles = postFormModalStyles();
+  const dialog = postDialogStyles();
 
   // カテゴリが宣言した enum フィールド。選択肢は Select の collection に変換する
   const enumFields = useMemo(
@@ -231,13 +210,13 @@ export const DashboardPostFormModal: React.FC<{
   };
 
   return (
-    <ModalDialog.Container hasMainPadding>
+    <ModalDialog.Container className={dialog.container}>
       <ModalDialog.Title>
-        <p className={styles.subtitle}>Wikiの新規作成 2/2</p>
-        <h2 className={styles.heading}>必要な情報を教えてね</h2>
+        <p className={dialog.subtitle}>Wikiの新規作成 2/2</p>
+        <h2 className={dialog.heading}>必要な情報を教えてね</h2>
       </ModalDialog.Title>
 
-      <ModalDialog.Content className={styles.main}>
+      <ModalDialog.Content className={cx(dialog.main, styles.main)}>
         {/* Title Field */}
         <Field.Root required>
           <Field.Label>
@@ -359,22 +338,28 @@ export const DashboardPostFormModal: React.FC<{
         })}
       </ModalDialog.Content>
 
-      {/* Bottom navigation - 右寄せの並びは ModalDialog.Footer が持つ */}
+      {/* 戻るは左端、主操作は右端に置く */}
       <ModalDialog.Footer>
         {/* 補助の操作なので plain にし、左端に寄せて主操作と離す */}
         <Button
           type="button"
           intent="plain"
           size="lg"
-          className={css(buttonSize.raw({ size: "md" }), { mr: "auto" })}
+          // 高さは他のボタンとそろえ、左右の余白だけ詰めて文字の左端を見出しに合わせる
+          className={css(buttonSize.raw({ size: "md" }), {
+            mr: "auto",
+            ml: "-16px",
+            px: "16px",
+          })}
           onClick={() => onBack(formData)}
         >
           <ChevronLeft aria-hidden />
           戻る
         </Button>
-        <p className={styles.successMessage}>
-          新しいページがついに生まれます！
-        </p>
+        {/* 必要な情報がそろったときだけ、主操作の横に一言添える */}
+        {isFormValid && (
+          <p className={dialog.footerNote}>新しいページがついに生まれます！</p>
+        )}
         {/* ダイアログの主操作なので primary の lg */}
         <Button
           type="button"
