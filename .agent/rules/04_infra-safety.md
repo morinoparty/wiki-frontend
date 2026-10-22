@@ -23,6 +23,6 @@ Worker の env は `getEnv()` (`src/lib/env.ts`) を通して読みます。work
 
 - デプロイは通常、main への push で `.github/workflows/deploy.yml` から行われます
   (`pnpm run generate` → `pnpm run typecheck` → `cf build` → `cf deploy --prebuilt --mode production`。PR では dry-run まで)。
-- PR では `cf workers versions create --preview-alias` で本番に deploy しない Worker Version を upload し (alias は `pr-<番号>` と `sha-<commit 8 桁>` の 2 つ)、preview の URL を PR にコメントします。preview は本番の secret を引き継ぐので、preview からの保存も wiki-content にコミットされます。
+- PR では `cf workers versions create --preview-alias` で本番に deploy しない Worker Version を upload し (alias は `pr-<番号>`。commit に固定した URL には Version の URL を使う)、preview の URL を PR にコメントします。preview は本番の secret を引き継ぐので、preview からの保存も wiki-content にコミットされます。
 - 検索 index は配信中の wiki-content から作ります。取得に失敗したとき、push (本番 deploy) では build を止め、PR やローカルでは空の index で続けます。
 - 手元からデプロイ (`pnpm run deploy` / `cf deploy`) や Worker secret の変更など、リモートの状態を変える操作は、ユーザーに明示的に指示されない限り行わないでください。検証には `pnpm exec cf deploy --dry-run` を使ってください。

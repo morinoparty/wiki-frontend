@@ -83,11 +83,10 @@ pull request では dry-run まで行います。Worker secret は GitHub secret
 pull request では、本番に deploy しない Worker Version を
 `cf workers versions create --preview-alias` で upload し、
 preview の URL を PR にコメントします (push のたびに同じコメントを書き換えます)。
-alias は 1 回の upload に 1 つしか付けられないので、同じビルドを 2 回 upload します。
 
 - `https://pr-<番号>-wiki-frontend.<subdomain>.workers.dev` は、その PR の最新の commit を返します。
-- `https://sha-<commit の先頭 8 桁>-wiki-frontend.<subdomain>.workers.dev` は、その commit に固定されます。
-  alias は英小文字で始める必要があるため、`sha-` を付けています。
+- `https://<Version ID の先頭 8 桁>-wiki-frontend.<subdomain>.workers.dev` は、その commit の Version に固定されます。
+  commit SHA は数字で始まることがあり、英小文字で始める必要がある alias には使えないため、Version の URL を使います。
 - preview URL を返すには `cloudflare.config.ts` の `previewUrls: true` が本番に deploy されている必要があります。
 - secret は本番の Worker のものを引き継ぎます。そのため、preview から保存した記事も wiki-content にコミットされます。
 - MineAuth のコールバックは origin ごとに登録が要ります。preview の origin を登録していなければ、preview ではログインできません。

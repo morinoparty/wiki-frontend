@@ -1,7 +1,7 @@
 # TanStack Start アプリを cf でビルドし、Worker "wiki-frontend" として deploy する。
 #
 # PR と main への push で build + dry-run を行い、main への push のときだけ本番 deploy する。
-# PR では本番に deploy しない Worker Version を preview alias (pr-<番号> と sha-<commit 8 桁>) 付きで upload し、
+# PR では本番に deploy しない Worker Version を preview alias (pr-<番号>) 付きで upload し、
 # その URL を PR にコメントする。
 # 必要な secret:
 #   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID  … cf CLI 用 (Worker には渡さない)
@@ -74,24 +74,24 @@ jobs:
         run: |
           set -o pipefail
           short_sha="${HEAD_SHA::8}"
-          # alias は 1 回の upload に 1 つしか付けられないので、同じビルドを 2 回 upload する。
-          #   pr-<番号>   … その PR の最新 commit を指し続ける
-          #   sha-<8 桁> … その commit に固定 (alias は英小文字で始める必要があるため sha- を付ける)
-          upload() {
-            local alias="$1" name="$2"
-            # cf は upload 結果を ND-JSON で WRANGLER_OUTPUT_FILE_PATH に書き出す
-            local out="$RUNNER_TEMP/cf-output-${name}.ndjson"
-            WRANGLER_OUTPUT_FILE_PATH="$out" pnpm exec cf workers versions create --prebuilt --mode production \
-              --preview-alias "$alias" --tag "$alias" --message "PR #${PR_NUMBER} (${short_sha})"
-            local result
-            result="$(jq -c 'select(.type == "version-upload")' "$out" | tail -n 1)"
-            printf '%s\n' "$result"
-            echo "${name}_url=$(jq -r '.preview_alias_url // empty' <<<"$result")" >> "$GITHUB_OUTPUT"
-            echo "${name}_version_id=$(jq -r '.version_id // empty' <<<"$result")" >> "$GITHUB_OUTPUT"
-          }
-          upload "pr-${PR_NUMBER}" pr
-          upload "sha-${short_sha}" sha
-          echo "short_sha=${short_sha}" >> "$GITHUB_OUTPUT"
+          alias="pr-${PR_NUMBER}"
+          # URL は 2 つ得られる。
+          #   alias (pr-<番号>)          … その PR の最新 commit を指し続ける
+          #   Version (<Version ID 8 桁>) … この upload に固定される
+          # commit SHA は数字で始まることがあり、英小文字始まりが必要な alias には使えないため、
+          # commit に固定した URL には Version の URL を使う
+          # cf は upload 結果を ND-JSON で WRANGLER_OUTPUT_FILE_PATH に書き出す
+          export WRANGLER_OUTPUT_FILE_PATH="$RUNNER_TEMP/cf-output.ndjson"
+          pnpm exec cf workers versions create --prebuilt --mode production \
+            --preview-alias "$alias" --tag "$alias" --message "PR #${PR_NUMBER} (${short_sha})"
+          result="$(jq -c 'select(.type == "version-upload")' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n 1)"
+          printf '%s\n' "$result"
+          {
+            echo "short_sha=${short_sha}"
+            echo "version_id=$(jq -r '.version_id // empty' <<<"$result")"
+            echo "pr_url=$(jq -r '.preview_alias_url // empty' <<<"$result")"
+            echo "version_url=$(jq -r '.preview_url // empty' <<<"$result")"
+          } >> "$GITHUB_OUTPUT"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -108,9 +108,9 @@ jobs:
             echo "| Resource | Link |"
             echo "|----------|------|"
             [ -n "$PR_URL" ] && echo "| 🌐 PR #${PR_NUMBER} (latest) | ${PR_URL} |"
-            [ -n "$SHA_URL" ] && echo "| 📌 Commit \`${SHORT_SHA}\` | ${SHA_URL} |"
+            [ -n "$VERSION_URL" ] && echo "| 📌 Commit \`${SHORT_SHA}\` | ${VERSION_URL} |"
             echo
-            echo "Worker Version: \`${SHA_VERSION_ID:-unknown}\`"
+            echo "Worker Version: \`${VERSION_ID:-unknown}\`"
             echo
             echo "> 本番の Worker secret をそのまま使うため、preview からの保存も wiki-content にコミットされます。"
           } > comment.md
@@ -120,9 +120,9 @@ jobs:
           REPO_NAME: ${{ github.event.repository.name }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           SHORT_SHA: ${{ steps.preview.outputs.short_sha }}
-          SHA_VERSION_ID: ${{ steps.preview.outputs.sha_version_id }}
+          VERSION_ID: ${{ steps.preview.outputs.version_id }}
           PR_URL: ${{ steps.preview.outputs.pr_url }}
-          SHA_URL: ${{ steps.preview.outputs.sha_url }}
+          VERSION_URL: ${{ steps.preview.outputs.version_url }}
 
       # 本番 deploy は main への push のときだけ (push は branches: [main] に絞ってある)
       - if: github.event_name == 'push'
