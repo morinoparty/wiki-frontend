@@ -8,6 +8,7 @@ import { useState } from "react";
 import { sva } from "styled-system/css";
 import { DashboardPostFormModal } from "./DashboardPostFormModal";
 import type { PostFormValues } from "./DashboardPostFormModal";
+import { buttonSize } from "@/components/buttonSize";
 
 // grid 上の配置 (title / main / footer) とフッターの右寄せは ModalDialog の各パーツが持つので、
 // ここでは見出しまわりとカテゴリ一覧の中身だけを持つ
@@ -165,6 +166,7 @@ export const DashboardPostAddModal: React.FC<{
           type="button"
           intent="primary"
           size="lg"
+          className={buttonSize({ size: "md" })}
           disabled={!selectedCategory}
           onClick={handleNext}
         >

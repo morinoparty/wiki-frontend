@@ -2,6 +2,7 @@ import { css } from "styled-system/css";
 import { Button } from "@morinoparty/chlorophyll-react/components";
 import { startSignIn } from "@/server/auth";
 import { Link } from "@tanstack/react-router";
+import { buttonSize } from "@/components/buttonSize";
 
 export const NotLoginNote = () => {
   return (
@@ -61,7 +62,7 @@ export const NotLoginNote = () => {
           asChild
           intent="primary"
           size="md"
-          className={css({ width: "100%" })}
+          className={css(buttonSize.raw({ size: "md" }), { width: "100%" })}
         >
           <Link to="/auth/sign-in">ログイン</Link>
         </Button>

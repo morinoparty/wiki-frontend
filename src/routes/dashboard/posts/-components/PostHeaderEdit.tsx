@@ -41,6 +41,7 @@ import { blurhashToBase64 } from "@morinoparty/hagaki/markdown";
 import type { WikiThumbnail } from "@/types/wiki";
 import { handleInsertImage } from "./pending-images";
 import { toaster } from "@/components/ui/toaster";
+import { buttonSize } from "@/components/buttonSize";
 
 // 定数
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -261,7 +262,7 @@ export function PostHeaderEdit({
           type="button"
           intent="plain"
           size="sm"
-          className={css({ opacity: 0.5 })}
+          className={css(buttonSize.raw({ size: "sm" }), { opacity: 0.5 })}
         >
           <Tag size={16} />
           カテゴリ
@@ -270,7 +271,7 @@ export function PostHeaderEdit({
           type="button"
           intent="plain"
           size="sm"
-          className={css({ opacity: 0.5 })}
+          className={css(buttonSize.raw({ size: "sm" }), { opacity: 0.5 })}
           onClick={handleImageIconClick}
           disabled={disabled || isUploading}
         >

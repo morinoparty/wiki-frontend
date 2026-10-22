@@ -1,5 +1,6 @@
 import { css } from "styled-system/css";
 import { Button } from "@morinoparty/chlorophyll-react/components";
+import { buttonSize } from "@/components/buttonSize";
 
 export const Cta: React.FC = () => {
   return (
@@ -76,7 +77,7 @@ export const Cta: React.FC = () => {
         </p>
 
         {/* ページ内で一番目立たせたい参加導線なので、primary の lg (既定値) をそのまま使う */}
-        <Button asChild intent="primary" size="lg">
+        <Button asChild intent="primary" size="lg" className={buttonSize({ size: "md" })}>
           <a href="https://morino.party/">ちょっと入ってみる</a>
         </Button>
       </div>

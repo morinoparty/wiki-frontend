@@ -20,7 +20,11 @@ const PROFILE_ENDPOINTS = [
 /** 1 つのエンドポイントから名前を引く。引けなければ null。 */
 async function fetchName(url: string): Promise<string | null> {
   const res = await fetch(url);
-  if (!res.ok) return null;
+  if (!res.ok) {
+    // rate limit などで引けなかったときに原因を追えるよう、ステータスを残す
+    console.warn(`Player name lookup failed: ${res.status} ${url}`);
+    return null;
+  }
   const profile = (await res.json()) as { name?: unknown };
   return typeof profile.name === "string" && profile.name ? profile.name : null;
 }

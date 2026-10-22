@@ -33,6 +33,7 @@ import {
   SaveImagesError,
 } from "./pending-images";
 import { articleAssetsDir } from "@/lib/content";
+import { buttonSize } from "@/components/buttonSize";
 
 interface PostEditorClientProps {
   post: WikiPostDetail;
@@ -203,6 +204,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
           type="button"
           intent="primary"
           size="sm"
+          className={buttonSize({ size: "sm" })}
           onClick={handleSave}
           disabled={!isDirty || isPending || imageBusy || imageFailed}
         >

@@ -1,6 +1,7 @@
 import { css } from "styled-system/css";
 import { Button } from "@morinoparty/chlorophyll-react/components";
 import { startSignIn } from "@/server/auth";
+import { buttonSize } from "@/components/buttonSize";
 
 export const LoginModal: React.FC = () => {
   return (
@@ -51,7 +52,7 @@ export const LoginModal: React.FC = () => {
         </p>
 
         {/* フォームを送信する主操作。chlorophyll の Button は type を付けないため submit を明示する */}
-        <Button type="submit" intent="primary" size="lg">もりぱアカウントでログイン</Button>
+        <Button type="submit" intent="primary" size="lg" className={buttonSize({ size: "md" })}>もりぱアカウントでログイン</Button>
       </div>
     </form>
   );

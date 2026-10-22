@@ -10,6 +10,7 @@ import type {
   DashboardEditedPost,
   DashboardPost,
 } from "@/lib/getDashboardPosts";
+import { buttonSize } from "@/components/buttonSize";
 
 const myEditedPosts = sva({
   slots: [
@@ -146,7 +147,7 @@ export function MyEditedPosts({
           </div>
           <div className={styles.actions}>
             {/* 一覧の行ごとの操作なので plain の sm で控えめにする */}
-            <Button asChild intent="plain" size="sm">
+            <Button asChild intent="plain" size="sm" className={buttonSize({ size: "sm" })}>
               <Link to="/dashboard/posts/$postId" params={{ postId: post.uuid }}>
                 <Edit />
                 編集

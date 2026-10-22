@@ -2,6 +2,7 @@ import { Button } from "@morinoparty/chlorophyll-react/components";
 import { TentTree } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { sva } from "styled-system/css";
+import { buttonSize } from "@/components/buttonSize";
 
 const notFoundPageStyles = sva({
   slots: [
@@ -97,10 +98,10 @@ export function NotFound() {
       </div>
       <div className={classes.actions}>
         {/* 主導線はトップへの復帰。カテゴリ一覧は補助の導線なので plain で控えめにする */}
-        <Button asChild intent="primary" size="lg">
+        <Button asChild intent="primary" size="lg" className={buttonSize({ size: "md" })}>
           <Link to="/">トップページに戻る</Link>
         </Button>
-        <Button asChild intent="plain" size="lg">
+        <Button asChild intent="plain" size="lg" className={buttonSize({ size: "md" })}>
           <Link to="/category">カテゴリ一覧</Link>
         </Button>
       </div>

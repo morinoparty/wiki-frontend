@@ -10,6 +10,7 @@ import { PostCta } from "@/components/post/PostCta";
 import { articleImageUrl } from "@/lib/content";
 import { pageTitle } from "@/lib/pageTitle";
 import { fetchPostPage } from "@/server/post";
+import { buttonSize } from "@/components/buttonSize";
 
 export const Route = createFileRoute("/_normal/$postId")({
   loader: async ({ params }) => {
@@ -97,7 +98,7 @@ function Post() {
           asChild
           intent="primary"
           size="lg"
-          className={css({
+          className={css(buttonSize.raw({ size: "md" }), {
             width: {
               base: undefined,
               mdDown: "64px",

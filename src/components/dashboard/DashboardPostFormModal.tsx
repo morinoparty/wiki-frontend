@@ -19,6 +19,7 @@ import {
 } from "@/lib/categoryOptions";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { css, sva } from "styled-system/css";
+import { buttonSize } from "@/components/buttonSize";
 
 // フォームの部品 (ラベル・入力欄・必須の印・補足/エラー) は chlorophyll の Field に任せ、
 // ここではダイアログ内のレイアウトと見出しまわりだけを持つ
@@ -390,6 +391,7 @@ export const DashboardPostFormModal: React.FC<{
           type="button"
           intent="primary"
           size="lg"
+          className={buttonSize({ size: "md" })}
           disabled={!isFormValid}
           onClick={handleSubmit}
         >

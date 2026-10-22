@@ -56,12 +56,25 @@ export const SidebarNavListItem: React.FC<{
   if (asButton) {
     return (
       <li className={navClasses.item}>
-        {/* 塗り・hover・高さ・角丸は Button のレシピに任せ、幅だけサイドバーいっぱいに広げる */}
+        {/*
+          塗り・hover・角丸は Button のレシピに任せる。大きさは以前の見た目に揃え、
+          上下 14px の余白と本文サイズの文字にして、面を左右 8px ずつ外へ広げる
+          (左右の余白は 12px / 28px + はみ出した 8px)
+        */}
         <Button
           asChild
           intent="primary"
           size="lg"
-          className={css({ width: "100%" })}
+          className={css({
+            width: "calc(100% + 16px)",
+            mx: "-8px",
+            height: "auto",
+            py: "14px",
+            pl: "20px",
+            pr: "36px",
+            gap: "16px",
+            textStyle: "body",
+          })}
         >
           <Link to={href}>
             {icon}

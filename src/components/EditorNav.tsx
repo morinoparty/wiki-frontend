@@ -2,6 +2,7 @@ import { sva } from "styled-system/css";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@morinoparty/chlorophyll-react/components";
 import { ChevronLeft } from "lucide-react";
+import { buttonSize } from "@/components/buttonSize";
 
 const editorNavStyles = sva({
   slots: ["nav", "title"],
@@ -48,7 +49,7 @@ export function EditorNav({ title, children }: EditorNavProps) {
         }}
       >
         {/* ツールバーの補助操作なので plain の sm。並び・文字サイズ・アイコンの大きさはレシピに任せる */}
-        <Button asChild intent="plain" size="sm">
+        <Button asChild intent="plain" size="sm" className={buttonSize({ size: "sm" })}>
           <Link to="/dashboard">
             <ChevronLeft />
             戻る

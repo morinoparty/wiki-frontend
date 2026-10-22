@@ -6,6 +6,7 @@ import { PostStatusBadge } from "@/components/dashboard/PostStatusBadge";
 import { articleImageUrl } from "@/lib/content";
 import { pageTitle } from "@/lib/pageTitle";
 import { fetchDashboardPosts } from "@/server/dashboard";
+import { buttonSize } from "@/components/buttonSize";
 
 export const Route = createFileRoute("/dashboard/posts/")({
   loader: () => fetchDashboardPosts(),
@@ -49,7 +50,7 @@ function Home() {
         })}
       >
         {/* ページの主操作なので primary の lg */}
-        <Button asChild intent="primary" size="lg">
+        <Button asChild intent="primary" size="lg" className={buttonSize({ size: "md" })}>
           <Link to="/dashboard/posts/new">
             <Edit />
             新規作成
@@ -157,7 +158,13 @@ function Home() {
               })}
             >
               {/* 一覧の行ごとの操作なので plain の sm で控えめにする */}
-              <Button asChild intent="plain" size="sm">
+              <Button
+                asChild
+                intent="plain"
+                size="sm"
+                // 一覧の行に収まるよう、以前と同じく左右の余白だけ詰める
+                className={css(buttonSize.raw({ size: "sm" }), { px: "12px" })}
+              >
                 <Link
                   to="/dashboard/posts/$postId"
                   params={{ postId: post.uuid }}
