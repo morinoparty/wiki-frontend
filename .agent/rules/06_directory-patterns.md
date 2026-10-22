@@ -1,0 +1,20 @@
+## ディレクトリ配置規則
+
+- `src/routes/` にファイルベースのルート (ページと server route) を配置します。
+  - `__root.tsx` - html シェル。`beforeLoad` でセッションのユーザーをルーターのコンテキストに入れる
+  - `_normal.tsx` / `_normal/` - 公開ページ (pathless layout)
+  - `dashboard/` - エディタ。`route.tsx` の `beforeLoad` が未ログイン時にサインインへリダイレクトする
+  - `api/auth/$.ts` - better-auth
+  - `api/article-assets/$uuid/$imageId.ts` - コミット済み画像 (CDN またはリポジトリから返す)
+  - ルート専用のコンポーネントは `-components/` (先頭 `-` でルート対象外) に配置します (例: `dashboard/posts/-components/`)。
+- `src/routeTree.gen.ts` は Vite プラグイン (または `pnpm exec tsr generate`) の生成物です。設定は `tsr.config.json`。
+- `src/router.tsx` にルーター、`src/start.ts` に TanStack Start のインスタンス (リクエストミドルウェア: CSRF 対策と server function のボディ上限) を配置します。`start.ts` を置くと既定の CSRF 対策が外れるため、`createCsrfMiddleware` を外さないでください。
+- `src/server/` に server function (`createServerFn`) を配置します。ルートのデータローダー、`createPost`、`updatePost` (+ クライアント用ヘルパー `savePost`)、履歴、`getPostForEdit`、サインイン/アウトなど。詳細は `src/server/README.md`。
+  - `src/server/types.ts` - `ApiResult` などの型と Zod スキーマ (zod にしか依存せず、クライアントから import してよい)
+- `src/server/services/` にサーバー専用のサービスを配置します。`GitHubService` (hagaki ラッパー)、`AuthService`、`PermissionService`、`ValidationService` (Zod)、`post-images` (アップロード画像の検証)。
+- `src/lib/` に hagaki client (`hagaki.ts`)、認証 (`auth.ts`, better-auth)、env の読み出し (`env.ts`)、コンテンツ取得 (`content.ts`, `getAllPosts.ts`, `getPostBySlug.ts` など)、MineAuth サーバー解決 (`server-list.ts`) を配置します。
+- `src/components/` に共通コンポーネント (`dashboard/`, `post/`, `ui/` のサブディレクトリあり)、`src/hooks/` にフック、`src/types/` に型、`src/styles/globals.css` にグローバル CSS を配置します。
+- `src/generate-search-index.ts` は検索 index (`public/search-index.json`) を生成する Node スクリプトです。
+- `public/` に静的アセット (`_headers` など) を配置します。
+- `cloudflare.config.ts` (Worker 定義)、`vite.config.ts` (TanStack Start + Cloudflare Vite plugin)、`panda.config.ts` (Panda CSS / chlorophyll のプリセット) はリポジトリルートにあります。
+- `patches/` は pnpm の `patchedDependencies` 用のパッチです。
