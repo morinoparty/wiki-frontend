@@ -1,5 +1,6 @@
-import { Button } from "@/components/Button";
 import {
+  Button,
+  Field,
   ModalDialog,
   Portal,
   Select,
@@ -17,42 +18,13 @@ import {
   validateOptionValues,
 } from "@/lib/categoryOptions";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { sva } from "styled-system/css";
+import { css, sva } from "styled-system/css";
 
+// フォームの部品 (ラベル・入力欄・必須の印・補足/エラー) は chlorophyll の Field に任せ、
+// ここではダイアログ内のレイアウトと見出しまわりだけを持つ
 const postFormModalStyles = sva({
-  slots: [
-    "container",
-    "title",
-    "heading",
-    "subtitle",
-    "main",
-    "formGroup",
-    "labelRow",
-    "label",
-    "required",
-    "description",
-    "inputGroup",
-    "input",
-    "urlPrefix",
-    "textarea",
-    "footer",
-    "navigationArea",
-    "successMessage",
-    "slugStatus",
-    "slugError",
-    "slugSuccess",
-  ],
+  slots: ["heading", "subtitle", "main", "urlRow", "urlPrefix", "successMessage"],
   base: {
-    container: {
-      height: "100vh",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      bgColor: "colorPalette.surface",
-    },
-    title: {
-      gridArea: "title",
-    },
     subtitle: {
       textStyle: "body",
       fontWeight: "bold",
@@ -65,7 +37,7 @@ const postFormModalStyles = sva({
       fontSize: "26px",
     },
     main: {
-      gridArea: "main",
+      // grid の配置は ModalDialog.Content が持つので、中身の縦積みと区切り線だけを書く
       display: "flex",
       flexDirection: "column",
       gap: "40px",
@@ -74,104 +46,18 @@ const postFormModalStyles = sva({
       borderBottom: "1px solid",
       borderColor: "border.subtle",
     },
-    formGroup: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "6px",
-    },
-    labelRow: {
+    urlRow: {
+      // 「wiki.morino.party/」の固定部分と slug の入力欄を横に並べる
       display: "flex",
       alignItems: "center",
-      gap: "4px",
-    },
-    label: {
-      fontSize: "16px",
-      fontWeight: "bold",
-      color: "colorPalette.fg",
-      lineHeight: "1.7",
-    },
-    required: {
-      fontSize: "16px",
-      fontWeight: "bold",
-      color: "colorPalette.fg",
-      lineHeight: "1.7",
-    },
-    description: {
-      fontSize: "14px",
-      fontWeight: "500",
-      color: "colorPalette.fg.subtle",
-      lineHeight: "1.5",
-    },
-    inputGroup: {
-      display: "flex",
-      alignItems: "center",
-      bgColor: "white",
-      border: "0px 0px 2px solid",
-      borderColor: "border.muted",
-      borderRadius: "0px",
-      overflow: "hidden",
-    },
-    input: {
-      flex: 1,
-      padding: "15px 18px 15px 0px",
-      border: "none",
-      outline: "none",
-      fontSize: "18px",
-      fontWeight: "500",
-      color: "colorPalette.fg",
-      backgroundColor: "transparent",
-      lineHeight: "1.7",
-      borderBottom: "2px solid",
-      borderColor: "border.subtle",
-      "&::placeholder": {
-        color: "colorPalette.fg.subtle",
-        opacity: 1,
-      },
-      "&:focus": {
-        outline: "none",
-        "& + .border": {
-          borderColor: "colorPalette.border",
-        },
-      },
+      gap: "8px",
     },
     urlPrefix: {
-      fontSize: "16px",
+      fontSize: "sm",
       fontWeight: "500",
       color: "fg.subtle",
-      lineHeight: "1.7",
-      padding: "15px 8px 15px 0px",
+      whiteSpace: "nowrap",
       flexShrink: 0,
-    },
-    textarea: {
-      padding: "15px 18px 15px 0px",
-      border: "0px 0px 2px solid",
-      borderColor: "border.muted",
-      borderRadius: "0px",
-      outline: "none",
-      fontSize: "16px",
-      fontWeight: "500",
-      color: "colorPalette.fg.subtle",
-      backgroundColor: "white",
-      lineHeight: "1.7",
-      resize: "none",
-      minHeight: "50px",
-      "&::placeholder": {
-        color: "colorPalette.fg.subtle",
-        opacity: 1,
-      },
-      "&:focus": {
-        outline: "none",
-      },
-    },
-    footer: {
-      gridArea: "footer",
-      position: "relative",
-    },
-    navigationArea: {
-      display: "flex",
-      justifyContent: "flex-end",
-      alignItems: "center",
-      gap: "20px",
     },
     successMessage: {
       fontSize: "16px",
@@ -180,18 +66,6 @@ const postFormModalStyles = sva({
       lineHeight: "1.7",
       textAlign: "right",
       flex: 1,
-    },
-    slugStatus: {
-      fontSize: "14px",
-      fontWeight: "500",
-      lineHeight: "1.5",
-      mt: "4px",
-    },
-    slugError: {
-      color: "red.11",
-    },
-    slugSuccess: {
-      color: "colorPalette.fg",
     },
   },
 });
@@ -355,44 +229,45 @@ export const DashboardPostFormModal: React.FC<{
 
   return (
     <ModalDialog.Container hasMainPadding>
-      <div className={styles.title}>
+      <ModalDialog.Title>
         <p className={styles.subtitle}>Wikiの新規作成 2/2</p>
         <h2 className={styles.heading}>必要な情報を教えてね</h2>
-      </div>
+      </ModalDialog.Title>
 
-      <div className={styles.main}>
+      <ModalDialog.Content className={styles.main}>
         {/* Title Field */}
-        <div className={styles.formGroup}>
-          <div className={styles.labelRow}>
-            <label className={styles.label}>タイトル</label>
-            <span className={styles.required}>*</span>
-          </div>
-          <div className={styles.inputGroup}>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-              placeholder="僕が考えた最強の建築物"
-              className={styles.input}
-              maxLength={50}
-            />
-          </div>
-        </div>
+        <Field.Root required>
+          <Field.Label>
+            タイトル
+            <Field.RequiredIndicator />
+          </Field.Label>
+          <Field.Input
+            type="text"
+            value={formData.title}
+            onChange={(e) => handleInputChange("title", e.target.value)}
+            placeholder="僕が考えた最強の建築物"
+            maxLength={50}
+          />
+        </Field.Root>
 
         {/* URL Field */}
-        <div className={styles.formGroup}>
-          <div className={styles.labelRow}>
-            <label className={styles.label}>URL</label>
-            <span className={styles.required}>*</span>
-          </div>
-          <div className={styles.inputGroup}>
+        {/* 既存の slug と重複したときだけ invalid にして、ErrorText と赤い枠線で知らせる */}
+        <Field.Root
+          required
+          invalid={formData.url !== "" && slugCheckStatus === "duplicate"}
+        >
+          <Field.Label>
+            URL
+            <Field.RequiredIndicator />
+          </Field.Label>
+          <div className={styles.urlRow}>
             <span className={styles.urlPrefix}>wiki.morino.party/</span>
-            <input
+            <Field.Input
               type="text"
               value={formData.url}
-              onInput={(e) => {
-                const input = e.target as HTMLInputElement;
-                const filteredValue = input.value
+              // 制御コンポーネントなので onChange で受け、使えない文字を落としてから state に入れる
+              onChange={(e) => {
+                const filteredValue = e.target.value
                   .replace(/[^a-zA-Z0-9\-]/g, "")
                   .toLowerCase()
                   .slice(0, 50);
@@ -400,74 +275,56 @@ export const DashboardPostFormModal: React.FC<{
               }}
               pattern="[a-zA-Z0-9\-]*"
               placeholder="saikyo-architecture"
-              className={styles.input}
               minLength={5}
               maxLength={12}
+              className={css({ flex: 1 })}
             />
           </div>
           {/* Slug availability status */}
-          {formData.url && (
-            <div
-              className={`${styles.slugStatus} ${
-                slugCheckStatus === "checking"
-                  ? ""
-                  : slugCheckStatus === "available"
-                    ? styles.slugSuccess
-                    : slugCheckStatus === "duplicate"
-                      ? styles.slugError
-                      : ""
-              }`}
-            >
-              {slugCheckStatus === "checking" && "URLの確認中..."}
-              {slugCheckStatus === "available" && "✓ このURLは利用できます"}
-              {slugCheckStatus === "duplicate" &&
-                "✗ このURLは既に使用されています"}
-            </div>
+          {formData.url && slugCheckStatus === "checking" && (
+            <Field.HelperText>URLの確認中...</Field.HelperText>
           )}
-        </div>
+          {formData.url && slugCheckStatus === "available" && (
+            <Field.HelperText>✓ このURLは利用できます</Field.HelperText>
+          )}
+          {/* ErrorText は Field.Root が invalid のときだけ描画される */}
+          <Field.ErrorText>✗ このURLは既に使用されています</Field.ErrorText>
+        </Field.Root>
 
         {/* Description Field */}
-        <div className={styles.formGroup}>
-          <label className={styles.label}>説明文</label>
-          <div className={styles.inputGroup}>
-            <input
-              type="text"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              placeholder="もりぱ一最強な建築物を紹介します。"
-              className={styles.input}
-              maxLength={100}
-            />
-          </div>
-        </div>
+        <Field.Root>
+          <Field.Label>説明文</Field.Label>
+          <Field.Input
+            type="text"
+            value={formData.description}
+            onChange={(e) => handleInputChange("description", e.target.value)}
+            placeholder="もりぱ一最強な建築物を紹介します。"
+            maxLength={100}
+          />
+        </Field.Root>
 
         {/* Coordinate Fields - Only show if the category declares x / y */}
         {requiresPosition &&
           POSITION_KEYS.map((key) => (
-            <div key={key} className={styles.formGroup}>
-              <div className={styles.labelRow}>
-                {/* ラベルとプレースホルダーはカテゴリの option 宣言に従う */}
-                <label className={styles.label}>
-                  {positionLabel(currentCategory, key)}
-                </label>
-                <span className={styles.required}>*</span>
-              </div>
-              <div className={styles.inputGroup}>
-                <input
-                  type="number"
-                  value={
-                    typeof formData.option?.[key] === "number"
-                      ? formData.option[key]
-                      : ""
-                  }
-                  onChange={(e) => {
-                    handleCoordinateChange(key, e.target.value);
-                  }}
-                  placeholder={positionPlaceholder(currentCategory, key)}
-                  className={styles.input}
-                />
-              </div>
-            </div>
+            <Field.Root key={key} required>
+              {/* ラベルとプレースホルダーはカテゴリの option 宣言に従う */}
+              <Field.Label>
+                {positionLabel(currentCategory, key)}
+                <Field.RequiredIndicator />
+              </Field.Label>
+              <Field.Input
+                type="number"
+                value={
+                  typeof formData.option?.[key] === "number"
+                    ? formData.option[key]
+                    : ""
+                }
+                onChange={(e) => {
+                  handleCoordinateChange(key, e.target.value);
+                }}
+                placeholder={positionPlaceholder(currentCategory, key)}
+              />
+            </Field.Root>
           ))}
 
         {/* Enum Fields - カテゴリが option で宣言した選択式のフィールド */}
@@ -478,7 +335,9 @@ export const DashboardPostFormModal: React.FC<{
           const selected = formData.option?.[key];
           const value = typeof selected === "string" ? [selected] : [];
           return (
-            <div key={key} className={styles.formGroup}>
+            // Select は外側の Field.Root から required やラベルの id を受け取るので、
+            // RequiredIndicator と HelperText を他の入力欄と同じ形で使える
+            <Field.Root key={key} required={field.required}>
               <Select.Root
                 collection={collection}
                 value={value}
@@ -486,13 +345,12 @@ export const DashboardPostFormModal: React.FC<{
                   handleOptionChange(key, details.value[0])
                 }
               >
-                <div className={styles.labelRow}>
-                  {/* ラベル・説明・プレースホルダーはカテゴリの宣言に従う */}
-                  <Select.Label className={styles.label}>
-                    {field.label ?? key}
-                  </Select.Label>
-                  {field.required && <span className={styles.required}>*</span>}
-                </div>
+                {/* ラベル・説明・プレースホルダーはカテゴリの宣言に従う */}
+                {/* 行間は Field.Root の gap に任せるため、Select.Label 自身の下余白は消す */}
+                <Select.Label className={css({ mb: "0" })}>
+                  {field.label ?? key}
+                  <Field.RequiredIndicator />
+                </Select.Label>
                 <Select.Control>
                   <Select.Trigger>
                     <Select.ValueText
@@ -515,24 +373,29 @@ export const DashboardPostFormModal: React.FC<{
                 </Portal>
               </Select.Root>
               {field.description && (
-                <p className={styles.description}>{field.description}</p>
+                <Field.HelperText>{field.description}</Field.HelperText>
               )}
-            </div>
+            </Field.Root>
           );
         })}
-      </div>
+      </ModalDialog.Content>
 
-      {/* Bottom navigation */}
-      <div className={styles.footer}>
-        <div className={styles.navigationArea}>
-          <p className={styles.successMessage}>
-            新しいページがついに生まれます！
-          </p>
-          <Button size={"md"} disabled={!isFormValid} onClick={handleSubmit}>
-            ページを作る
-          </Button>
-        </div>
-      </div>
+      {/* Bottom navigation - 右寄せの並びは ModalDialog.Footer が持つ */}
+      <ModalDialog.Footer>
+        <p className={styles.successMessage}>
+          新しいページがついに生まれます！
+        </p>
+        {/* ダイアログの主操作なので primary の lg */}
+        <Button
+          type="button"
+          intent="primary"
+          size="lg"
+          disabled={!isFormValid}
+          onClick={handleSubmit}
+        >
+          ページを作る
+        </Button>
+      </ModalDialog.Footer>
     </ModalDialog.Container>
   );
 };

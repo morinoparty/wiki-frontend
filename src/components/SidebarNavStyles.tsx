@@ -1,12 +1,11 @@
+import { Button } from "@morinoparty/chlorophyll-react/components";
 import { Link } from "@tanstack/react-router";
-import { sva } from "styled-system/css";
+import { css, sva } from "styled-system/css";
 
 export const sidebarNavStyles = sva({
   slots: ["item", "link", "categoryList", "categoryItem", "categoryLink"],
   base: {
-    item: {
-      position: "relative",
-    },
+    item: {},
     link: {
       display: "flex",
       alignItems: "center",
@@ -40,47 +39,38 @@ export const sidebarNavStyles = sva({
       opacity: 0.7,
     },
   },
-  variants: {
-    asButton: {
-      true: {
-        item: {
-          _before: {
-            content: '""',
-            position: "absolute",
-            left: "-8px",
-            top: "0",
-            width: "calc(100% + 16px)",
-            height: "100%",
-            bgColor: "colorPalette.solid",
-            zIndex: "-1",
-            borderRadius: "16px",
-            transition: "background-color 0.2s ease",
-          },
-          _hover: {
-            _before: {
-              bgColor: "colorPalette.solid.emphasized",
-            },
-          },
-        },
-        link: {
-          color: "white",
-          padding: "14px 28px 14px 12px",
-          justifyContent: "center",
-        },
-      },
-    },
-  },
 });
 
+/**
+ * サイドバーのナビ項目。`asButton` を付けると、chlorophyll の Button (primary / lg) で
+ * リンクをボタンの見た目にする (「新規作成」などの主導線向け)。
+ */
 export const SidebarNavListItem: React.FC<{
   href: string;
   icon: React.ReactNode;
   children: React.ReactNode;
   asButton?: boolean;
 }> = ({ href, icon, children, asButton }) => {
-  const navClasses = sidebarNavStyles({
-    asButton: asButton,
-  });
+  const navClasses = sidebarNavStyles();
+
+  if (asButton) {
+    return (
+      <li className={navClasses.item}>
+        {/* 塗り・hover・高さ・角丸は Button のレシピに任せ、幅だけサイドバーいっぱいに広げる */}
+        <Button
+          asChild
+          intent="primary"
+          size="lg"
+          className={css({ width: "100%" })}
+        >
+          <Link to={href}>
+            {icon}
+            {children}
+          </Link>
+        </Button>
+      </li>
+    );
+  }
 
   return (
     <li className={navClasses.item}>

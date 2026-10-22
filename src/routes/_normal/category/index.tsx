@@ -1,3 +1,4 @@
+import { Card } from "@morinoparty/chlorophyll-react/components";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Tag } from "lucide-react";
 import { css, sva } from "styled-system/css";
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/_normal/category/")({
  * 各カテゴリの説明と記事数を並べる。
  */
 const categoryIndexStyles = sva({
-  slots: ["container", "header", "title", "grid", "card", "cardTitle", "cardBody", "count"],
+  slots: ["container", "header", "title", "grid", "count"],
   base: {
     container: {
       width: "100%",
@@ -58,31 +59,6 @@ const categoryIndexStyles = sva({
       },
       gap: "24px",
     },
-    card: {
-      display: "grid",
-      gap: "8px",
-      alignContent: "start",
-      p: "24px",
-      borderRadius: "24px",
-      bg: "bg.panel",
-      borderWidth: "1px",
-      borderColor: "border.subtle",
-      transition: "background 0.2s",
-      _hover: {
-        bg: "colorPalette.surface",
-      },
-    },
-    cardTitle: {
-      textStyle: "heading4",
-      fontSize: "20px",
-      fontWeight: "bold",
-      color: "colorPalette.fg",
-    },
-    cardBody: {
-      textStyle: "body",
-      fontSize: "14px",
-      color: "colorPalette.fg.subtle",
-    },
     count: {
       textStyle: "body",
       fontSize: "12px",
@@ -104,16 +80,28 @@ function CategoryIndex() {
 
       <div className={classes.grid}>
         {categories.map(({ category, count }) => (
-          <Link
+          // 枠線・hover・フォーカスリングは Card の interactive が持つ。
+          // asChild で TanStack Router の Link をそのまま描画し、preload とクライアント遷移を保つ
+          <Card.Root
             key={category.slug}
-            to="/category/$categoryId"
-            params={{ categoryId: category.slug }}
-            className={classes.card}
+            asChild
+            interactive
+            variant="outline"
+            size="lg"
           >
-            <span className={classes.cardTitle}>{category.title}</span>
-            <span className={classes.cardBody}>{category.body}</span>
-            <span className={classes.count}>{count} 件</span>
-          </Link>
+            <Link to="/category/$categoryId" params={{ categoryId: category.slug }}>
+              <Card.Body>
+                {/* リンク内の見出し的なテキストは従来どおり span のまま */}
+                <Card.Title asChild>
+                  <span>{category.title}</span>
+                </Card.Title>
+                <Card.Description asChild>
+                  <span>{category.body}</span>
+                </Card.Description>
+                <span className={classes.count}>{count} 件</span>
+              </Card.Body>
+            </Link>
+          </Card.Root>
         ))}
       </div>
     </div>

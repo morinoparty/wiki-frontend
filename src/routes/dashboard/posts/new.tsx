@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { css } from "styled-system/css";
 import { PostCreationClient } from "@/components/dashboard/PostCreationClient";
-import { ModalDialogRoot } from "@/components/ModalDialogRoot";
+import { ModalDialog } from "@morinoparty/chlorophyll-react/components";
 import { pageTitle } from "@/lib/pageTitle";
 import { fetchAllPosts, fetchCategories } from "@/server/content";
 
@@ -34,11 +34,11 @@ export const Route = createFileRoute("/dashboard/posts/new")({
 function NewPost() {
   const { categories, existingSlugs } = Route.useLoaderData();
   return (
-    <ModalDialogRoot isPage className={css({ bg: "colorPalette.surface" })}>
+    <ModalDialog.Root isPage className={css({ bg: "colorPalette.surface" })}>
       <PostCreationClient
         categories={categories}
         existingSlugs={existingSlugs}
       />
-    </ModalDialogRoot>
+    </ModalDialog.Root>
   );
 }

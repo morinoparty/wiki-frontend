@@ -1,5 +1,5 @@
 import { css } from "styled-system/css";
-import { Button } from "./Button";
+import { Button } from "@morinoparty/chlorophyll-react/components";
 
 export const Cta: React.FC = () => {
   return (
@@ -75,7 +75,8 @@ export const Cta: React.FC = () => {
           {`のんびり、ゆったり、気ままに、あそべる\nMinecraftサーバー「もりのパーティ」に参加してみませんか?`}
         </p>
 
-        <Button asChild>
+        {/* ページ内で一番目立たせたい参加導線なので、primary の lg (既定値) をそのまま使う */}
+        <Button asChild intent="primary" size="lg">
           <a href="https://morino.party/">ちょっと入ってみる</a>
         </Button>
       </div>

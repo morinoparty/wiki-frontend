@@ -1,5 +1,5 @@
 import { css } from "styled-system/css";
-import { Button } from "./Button";
+import { Button } from "@morinoparty/chlorophyll-react/components";
 import { startSignIn } from "@/server/auth";
 
 export const LoginModal: React.FC = () => {
@@ -7,7 +7,8 @@ export const LoginModal: React.FC = () => {
     <form
       action={startSignIn}
       className={css({
-        background: "#fff",
+        // ModalDialog.Container と同じパネルの面を使う
+        bg: "bg.panel",
         display: "grid",
         gridTemplateRows: "362px auto",
         maxWidth: "520px",
@@ -49,7 +50,8 @@ export const LoginModal: React.FC = () => {
           もりのパーティへ参加している方は、もりぱアカウントのセットアップをすることで、すぐにWikiを編集することができます。
         </p>
 
-        <Button type="submit">もりぱアカウントでログイン</Button>
+        {/* フォームを送信する主操作。chlorophyll の Button は type を付けないため submit を明示する */}
+        <Button type="submit" intent="primary" size="lg">もりぱアカウントでログイン</Button>
       </div>
     </form>
   );

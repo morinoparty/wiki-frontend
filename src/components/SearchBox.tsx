@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Document as FlexSearchDocument } from "flexsearch";
-import { Search } from "lucide-react";
-import { sva } from "styled-system/css";
+import { Search, X } from "lucide-react";
+import { Badge, IconButton, Spinner } from "@morinoparty/chlorophyll-react/components";
+import { css, sva } from "styled-system/css";
 
 export type PostDocument = {
   slug: string;
@@ -12,24 +13,27 @@ export type PostDocument = {
 };
 
 // SVAでスタイルを定義
+// 読み込み中スピナーの左余白（見た目そのものは chlorophyll の Spinner が持つ）
+const spinnerLayout = css({ ml: "8px" });
+
+// タグ Badge の色味。colorPalette の既定に依存せず無彩色のアウトラインにする
+const tagBadgeColor = css({ colorPalette: "gray" });
+
 const searchBoxStyles = sva({
   slots: [
     "container",
     "searchLabel",
     "searchInput",
-    "spinner",
     "popover",
     "popoverContent",
     "popoverHeader",
     "popoverHeaderTitle",
-    "popoverCloseButton",
     "popoverBody",
     "resultsList",
     "resultItem",
     "resultLink",
     "resultTitle",
     "resultMeta",
-    "resultTag",
     "resultExcerpt",
     "emptyResult",
   ],
@@ -76,17 +80,6 @@ const searchBoxStyles = sva({
         opacity: 0.5,
       },
     },
-    spinner: {
-      width: "16px",
-      height: "16px",
-      borderRadius: "full",
-      borderWidth: "2px",
-      borderStyle: "solid",
-      borderColor: "border.subtle",
-      borderTopColor: "colorPalette.border",
-      animation: "spin 1s linear infinite",
-      ml: "8px",
-    },
     popover: {
       position: "absolute",
       top: "100%",
@@ -122,19 +115,6 @@ const searchBoxStyles = sva({
       fontSize: "sm",
       fontWeight: "semibold",
       color: "colorPalette.fg",
-    },
-    popoverCloseButton: {
-      color: "colorPalette.fg.subtle",
-      cursor: "pointer",
-      border: "none",
-      background: "none",
-      fontSize: "20px",
-      borderRadius: "full",
-      _hover: {
-        color: "colorPalette.fg",
-        bg: "colorPalette.surface",
-      },
-      transition: "background 0.2s, color 0.2s",
     },
     popoverBody: {
       p: 0,
@@ -178,19 +158,6 @@ const searchBoxStyles = sva({
       mb: "8px",
       fontSize: "sm",
       color: "colorPalette.fg.subtle",
-    },
-    resultTag: {
-      display: "inline-flex",
-      alignItems: "center",
-      px: "8px",
-      py: "2px",
-      borderRadius: "2rem",
-      fontSize: "xs",
-      fontWeight: "medium",
-      bg: "white",
-      color: "colorPalette.fg",
-      border: "1px solid",
-      borderColor: "border.subtle",
     },
     resultExcerpt: {
       fontSize: "sm",
@@ -383,9 +350,10 @@ export const SearchBox = () => {
           placeholder="Search..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          aria-label="記事を検索"
           className={styles.searchInput}
         />
-        {isLoading && <div className={styles.spinner} />}
+        {isLoading && <Spinner size="sm" className={spinnerLayout} />}
       </label>
 
       {isOpen && searchResults.length > 0 && (
@@ -395,13 +363,14 @@ export const SearchBox = () => {
               <h3 className={styles.popoverHeaderTitle}>
                 「{searchTerm}」の検索結果 ({searchResults.length}件)
               </h3>
-              <button
+              <IconButton
+                size="sm"
+                shape="circle"
                 onClick={() => setIsOpen(false)}
-                className={styles.popoverCloseButton}
                 aria-label="閉じる"
               >
-                ✕
-              </button>
+                <X size={16} />
+              </IconButton>
             </div>
             <div className={styles.popoverBody}>
               {searchResults.length > 0 ? (
@@ -424,9 +393,14 @@ export const SearchBox = () => {
                           >
                             {typeof result.tags === "string"
                               ? result.tags.split(",").map((tag) => (
-                                  <span key={tag} className={styles.resultTag}>
+                                  <Badge
+                                    key={tag}
+                                    variant="outline"
+                                    size="sm"
+                                    className={tagBadgeColor}
+                                  >
                                     {highlightText(tag.trim(), searchTerm)}
-                                  </span>
+                                  </Badge>
                                 ))
                               : null}
                           </div>

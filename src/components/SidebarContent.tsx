@@ -1,3 +1,4 @@
+import { IconButton } from "@morinoparty/chlorophyll-react/components";
 import type { WikiCategory } from "@/types/wiki";
 import {
   ChevronLeft,
@@ -13,7 +14,6 @@ import {
   SidebarNavListCategory,
   SidebarNavListCategoryItem,
 } from "./SidebarNavStyles";
-import { IconButton } from "@/components/IconButton";
 import { Link } from "@tanstack/react-router";
 
 const sidebarContentStyles = sva({
@@ -27,10 +27,9 @@ const sidebarContentStyles = sva({
       minHeight: "0",
       overflowY: "auto",
       overscrollBehavior: "contain",
-      // 「新規作成」ボタン (asButton) は _before で左右に 8px はみ出すが、
-      // overflowY: auto を指定すると overflow-x も auto 扱いになるため
-      // そのままだと横スクロールバーが出て、左側のはみ出しは切れてしまう。
-      // 同じ幅の内側パディングではみ出しを受け止め、負のマージンで見た目の位置を戻す。
+      // overflowY: auto を指定すると overflow-x も auto 扱いになり、はみ出した部分は切れる。
+      // 「新規作成」の Button (primary) は影 (boxShadow md / hover で lg) とフォーカスリングを
+      // 要素の外側に描くため、内側パディングでそれを受け止め、負のマージンで見た目の位置を戻す。
       px: "8px",
       mx: "-8px",
     },
@@ -99,7 +98,7 @@ export const SidebarContentDashboard: React.FC = () => {
               ml: "-12px",
             })}
           >
-            <IconButton asChild>
+            <IconButton asChild aria-label="トップページへ戻る">
               <Link to="/">
                 <ChevronLeft />
               </Link>

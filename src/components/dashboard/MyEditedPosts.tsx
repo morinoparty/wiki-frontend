@@ -1,7 +1,8 @@
+import { Button, Card } from "@morinoparty/chlorophyll-react/components";
 import { Link } from "@tanstack/react-router";
 import { Edit } from "lucide-react";
-import { css, cx, sva } from "styled-system/css";
-import { Button } from "@/components/Button";
+import { css, sva } from "styled-system/css";
+import { PostStatusBadge } from "@/components/dashboard/PostStatusBadge";
 import { NotLoginNote } from "@/components/NotLoginNote";
 import { formatDateTime } from "@/lib/formatDateTime";
 import { articleImageUrl } from "@/lib/content";
@@ -17,11 +18,8 @@ const myEditedPosts = sva({
     "image",
     "body",
     "title",
-    "badge",
     "meta",
     "actions",
-    "empty",
-    "emptyText",
   ],
   base: {
     list: {
@@ -65,15 +63,6 @@ const myEditedPosts = sva({
       gap: "8px",
       overflow: "hidden",
     },
-    badge: {
-      fontSize: "xs",
-      fontWeight: "normal",
-      color: "colorPalette.fg",
-      borderRadius: "full",
-      px: "8px",
-      py: "2px",
-      flexShrink: 0,
-    },
     meta: {
       textStyle: "body",
       fontSize: "14px",
@@ -83,15 +72,6 @@ const myEditedPosts = sva({
       display: "flex",
       alignItems: "center",
       justifyContent: "end",
-    },
-    empty: {
-      bg: "bg.panel",
-      padding: "24px",
-      borderRadius: "24px",
-    },
-    emptyText: {
-      textStyle: "body",
-      color: "colorPalette.fg.subtle",
     },
   },
 });
@@ -123,17 +103,17 @@ export function MyEditedPosts({
     return <NotLoginNote />;
   }
 
-  const styles = myEditedPosts();
-
   if (editedPosts.length === 0) {
     return (
-      <div className={styles.empty}>
-        <p className={styles.emptyText}>
-          まだ編集した記事がありません。気になるページを編集してみましょう。
-        </p>
-      </div>
+      <Card.Root variant="elevated">
+        <Card.Body>
+          <p>まだ編集した記事がありません。気になるページを編集してみましょう。</p>
+        </Card.Body>
+      </Card.Root>
     );
   }
+
+  const styles = myEditedPosts();
 
   return (
     <div className={styles.list}>
@@ -155,22 +135,18 @@ export function MyEditedPosts({
               >
                 {post.title || "(無題)"}
               </span>
-              {post.draft ? (
-                <span className={cx(styles.badge, css({ bg: "gray.200" }))}>
-                  下書き
-                </span>
-              ) : post.unpublished ? (
-                <span className={cx(styles.badge, css({ bg: "amber.200" }))}>
-                  配信待ち
-                </span>
-              ) : null}
+              <PostStatusBadge
+                draft={post.draft}
+                unpublished={post.unpublished}
+              />
             </h3>
             <p className={styles.meta}>
               最終編集 {formatDateTime(lastEditedAt)} ・ {edits}回編集
             </p>
           </div>
           <div className={styles.actions}>
-            <Button size="sm" variant="ghost" asChild>
+            {/* 一覧の行ごとの操作なので plain の sm で控えめにする */}
+            <Button asChild intent="plain" size="sm">
               <Link to="/dashboard/posts/$postId" params={{ postId: post.uuid }}>
                 <Edit />
                 編集

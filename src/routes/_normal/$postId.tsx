@@ -2,7 +2,7 @@ import { NotFound } from "@/components/NotFound";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Edit } from "lucide-react";
 import { css } from "styled-system/css";
-import { Button } from "@/components/Button";
+import { Button } from "@morinoparty/chlorophyll-react/components";
 import { PostHeader } from "@/components/PostHeader";
 import { PostBody } from "@/components/post/PostBody";
 import { PostContributors } from "@/components/post/PostContributors";
@@ -89,8 +89,14 @@ function Post() {
           },
         })}
       >
+        {/*
+          記事を編集する主導線なので primary の lg。
+          スマホでは丸いフローティングボタンにするため、寸法と角丸だけを上書きする
+        */}
         <Button
           asChild
+          intent="primary"
+          size="lg"
           className={css({
             width: {
               base: undefined,

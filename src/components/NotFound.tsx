@@ -1,4 +1,4 @@
-import { Button } from "@/components/Button";
+import { Button } from "@morinoparty/chlorophyll-react/components";
 import { TentTree } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { sva } from "styled-system/css";
@@ -96,10 +96,11 @@ export function NotFound() {
         </p>
       </div>
       <div className={classes.actions}>
-        <Button asChild>
+        {/* 主導線はトップへの復帰。カテゴリ一覧は補助の導線なので plain で控えめにする */}
+        <Button asChild intent="primary" size="lg">
           <Link to="/">トップページに戻る</Link>
         </Button>
-        <Button variant="ghost" asChild>
+        <Button asChild intent="plain" size="lg">
           <Link to="/category">カテゴリ一覧</Link>
         </Button>
       </div>

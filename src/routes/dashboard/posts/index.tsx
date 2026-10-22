@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Edit } from "lucide-react";
 import { css } from "styled-system/css";
-import { Button } from "@/components/Button";
+import { Button } from "@morinoparty/chlorophyll-react/components";
+import { PostStatusBadge } from "@/components/dashboard/PostStatusBadge";
 import { articleImageUrl } from "@/lib/content";
 import { pageTitle } from "@/lib/pageTitle";
 import { fetchDashboardPosts } from "@/server/dashboard";
@@ -47,7 +48,8 @@ function Home() {
           justifyContent: "end",
         })}
       >
-        <Button asChild>
+        {/* ページの主操作なので primary の lg */}
+        <Button asChild intent="primary" size="lg">
           <Link to="/dashboard/posts/new">
             <Edit />
             新規作成
@@ -62,7 +64,7 @@ function Home() {
           gridTemplateAreas: `
             "img title actions"
             `,
-          bg: "white",
+          bg: "bg.panel",
           padding: "16px",
           borderRadius: "24px",
           gap: "0px",
@@ -126,37 +128,10 @@ function Home() {
                 })}
               >
                 {post.title || "(無題)"}
-                {post.draft ? (
-                  <span
-                    className={css({
-                      fontSize: "xs",
-                      fontWeight: "normal",
-                      color: "colorPalette.fg",
-                      bg: "gray.200",
-                      borderRadius: "full",
-                      px: "8px",
-                      py: "2px",
-                      flexShrink: 0,
-                    })}
-                  >
-                    下書き
-                  </span>
-                ) : post.unpublished ? (
-                  <span
-                    className={css({
-                      fontSize: "xs",
-                      fontWeight: "normal",
-                      color: "colorPalette.fg",
-                      bg: "amber.200",
-                      borderRadius: "full",
-                      px: "8px",
-                      py: "2px",
-                      flexShrink: 0,
-                    })}
-                  >
-                    配信待ち
-                  </span>
-                ) : null}
+                <PostStatusBadge
+                  draft={post.draft}
+                  unpublished={post.unpublished}
+                />
               </h2>
               <p
                 className={css({
@@ -181,14 +156,8 @@ function Home() {
                 alignItems: "center",
               })}
             >
-              <Button
-                size="sm"
-                variant="ghost"
-                className={css({
-                  px: "12px",
-                })}
-                asChild
-              >
+              {/* 一覧の行ごとの操作なので plain の sm で控えめにする */}
+              <Button asChild intent="plain" size="sm">
                 <Link
                   to="/dashboard/posts/$postId"
                   params={{ postId: post.uuid }}

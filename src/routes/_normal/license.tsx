@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { sva } from "styled-system/css";
+import { Badge, Card } from "@morinoparty/chlorophyll-react/components";
+import { css, sva } from "styled-system/css";
 import { ScrollText, ExternalLink } from "lucide-react";
 import { pageTitle } from "@/lib/pageTitle";
 import { fetchLicenses, type LicensePackage } from "@/server/license";
@@ -155,12 +156,11 @@ const licenseCardStyles = sva({
   slots: [
     "section",
     "header",
-    "badge",
     "title",
     "description",
     "summary",
     "packageGrid",
-    "packageItem",
+    "packageRow",
     "packageInfo",
     "packageName",
     "publisher",
@@ -181,15 +181,6 @@ const licenseCardStyles = sva({
       textStyle: "heading3",
       wordBreak: "break-all",
       flex: "1",
-    },
-    badge: {
-      background: "colorPalette.surface",
-      color: "colorPalette.fg",
-      padding: "4px 12px",
-      borderRadius: "16px",
-      fontSize: "14px",
-      fontWeight: "medium",
-      flexShrink: "0",
     },
     description: {
       textStyle: "body",
@@ -212,25 +203,11 @@ const licenseCardStyles = sva({
         mdDown: "1fr",
       },
     },
-    packageItem: {
-      display: "flex",
+    // 枠線・hover・フォーカスは Card (outline / interactive) が持つので、行の並びだけ指定する
+    packageRow: {
+      flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      padding: "12px 16px",
-      borderRadius: "12px",
-      border: "2px solid",
-      borderColor: "colorPalette.fg.subtle",
-      transition: "all 0.2s ease",
-      textDecoration: "none",
-      color: "inherit",
-      cursor: "pointer",
-      _hover: {
-        borderColor: "border.subtle",
-        borderWidth: "1px",
-      },
-      _active: {
-        transform: "translateY(0px)",
-      },
     },
     packageInfo: {
       flex: "1",
@@ -303,7 +280,13 @@ function LicenseCard({
     <section className={classes.section}>
       <div className={classes.header}>
         <h3 className={classes.title}>{licenseInfo?.name || licenseName}</h3>
-        <span className={classes.badge}>{packages.length}個</span>
+        <Badge
+          variant="subtle"
+          size="md"
+          className={css({ flexShrink: 0 })}
+        >
+          {packages.length}個
+        </Badge>
       </div>
 
       {licenseInfo && (
@@ -314,36 +297,38 @@ function LicenseCard({
 
       <div className={classes.packageGrid}>
         {packages.map(({ packageName, repository, publisher }) => {
+          const info = (
+            <div className={classes.packageInfo}>
+              <h4 className={classes.packageName}>{packageName}</h4>
+              {publisher && <p className={classes.publisher}>by {publisher}</p>}
+            </div>
+          );
+
+          // リポジトリがあればカード全体を外部リンクにする (asChild で <a> に差し替え)
           if (repository)
             return (
-              <a
-                href={repository}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={classes.packageItem}
+              <Card.Root
+                asChild
+                interactive
+                variant="outline"
+                size="sm"
                 key={packageName}
               >
-                <div className={classes.packageInfo}>
-                  <h4 className={classes.packageName}>{packageName}</h4>
-                  {publisher && (
-                    <p className={classes.publisher}>by {publisher}</p>
-                  )}
-                </div>
-                <div className={classes.link}>
-                  <ExternalLink size={16} />
-                </div>
-              </a>
+                <a href={repository} target="_blank" rel="noopener noreferrer">
+                  <Card.Body className={classes.packageRow}>
+                    {info}
+                    <div className={classes.link}>
+                      <ExternalLink size={16} />
+                    </div>
+                  </Card.Body>
+                </a>
+              </Card.Root>
             );
 
           return (
-            <div className={classes.packageItem} key={packageName}>
-              <div className={classes.packageInfo}>
-                <h4 className={classes.packageName}>{packageName}</h4>
-                {publisher && (
-                  <p className={classes.publisher}>by {publisher}</p>
-                )}
-              </div>
-            </div>
+            <Card.Root variant="outline" size="sm" key={packageName}>
+              <Card.Body className={classes.packageRow}>{info}</Card.Body>
+            </Card.Root>
           );
         })}
       </div>

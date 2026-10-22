@@ -1,3 +1,4 @@
+import { Card } from "@morinoparty/chlorophyll-react/components";
 import { EditorNav } from "@/components/EditorNav";
 import { GitCommitHorizontal } from "lucide-react";
 import { css } from "styled-system/css";
@@ -13,44 +14,30 @@ import { fetchCommitWithChecks } from "@/server/dashboard";
 /** wiki-content の deploy workflow (.github/workflows/deploy.yml) のジョブ名。 */
 const DEPLOY_CHECK_NAME = "deploy";
 
+// 白い面・角丸・余白は chlorophyll の Card (elevated / lg) が持つ。
+// ここではアイコンと見出しを横に並べるレイアウトと、説明文のインデントだけを持つ
 const commitCardStyles = sva({
-  slots: ["card", "iconBox", "title", "desc", "inner", "icon"],
+  slots: ["header", "iconBox", "desc"],
   base: {
-    card: {
-      width: "100%",
-      px: "24px",
-      pt: "20px",
-      pb: "24px",
-      borderRadius: "32px",
-      bgColor: "white",
-    },
-    inner: {
-      display: "grid",
-      gridTemplateColumns: "40px 1fr",
-      gap: "12px",
+    header: {
+      // Card.Header は縦積みなので、アイコンと見出しを横並びにする
+      flexDirection: "row",
       alignItems: "center",
+      gap: "12px",
     },
     iconBox: {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
+      flexShrink: 0,
       width: "40px",
       height: "40px",
       borderRadius: "100%",
       color: "colorPalette.fg",
     },
-    icon: {},
-    title: {
-      textStyle: "heading2",
-      fontSize: "18px",
-      color: "colorPalette.fg",
-    },
     desc: {
+      // 見出しの書き出し (アイコン 40px + gap 12px) に揃える
       pl: "52px",
-      pt: "4px",
-      textStyle: "body",
-      fontSize: "16px",
-      color: "colorPalette.fg",
     },
   },
 });
@@ -64,15 +51,19 @@ interface CommitCardProps {
 function CommitCard({ icon, title, description }: CommitCardProps) {
   const styles = commitCardStyles();
   return (
-    <div className={styles.card}>
-      <div className={styles.inner}>
-        <div className={styles.iconBox}>
-          <span className={styles.icon}>{icon}</span>
-        </div>
-        <h2 className={styles.title}>{title}</h2>
-      </div>
-      <div className={styles.desc}>{description}</div>
-    </div>
+    <Card.Root variant="elevated" size="lg">
+      <Card.Header className={styles.header}>
+        <div className={styles.iconBox}>{icon}</div>
+        {/* 文書構造は従来どおり h2 のまま (Card.Title の既定は h3) */}
+        <Card.Title asChild>
+          <h2>{title}</h2>
+        </Card.Title>
+      </Card.Header>
+      <Card.Body>
+        {/* description は複数行の断片なので、Body の flex gap が行ごとに入らないよう 1 つの要素で包む */}
+        <div className={styles.desc}>{description}</div>
+      </Card.Body>
+    </Card.Root>
   );
 }
 
