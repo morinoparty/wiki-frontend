@@ -63,6 +63,10 @@ const sidebarStyles = sva({
         lgDown: "auto",
         mdDown: "1fr auto",
       },
+      // モバイルでは画面下に固定されて本文の上に重なるので、透けないよう背景を敷く
+      bg: {
+        mdDown: "bg.panel",
+      },
       borderTopColor: "border.subtle",
       borderTopWidth: {
         base: "none",
