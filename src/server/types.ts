@@ -101,3 +101,21 @@ export type ValidationError = {
   field: string;
   message: string;
 };
+
+/**
+ * ログイン後の戻り先。オープンリダイレクトを防ぐため、同じオリジン内の
+ * パス (`/` で始まり、`//` や `/\` で始まらない) だけを受け付ける。
+ */
+export const RedirectPathSchema = z
+  .string()
+  .max(2048)
+  .refine(
+    (path) => path.startsWith("/") && !/^\/[/\\]/.test(path),
+    "戻り先はサイト内のパスである必要があります",
+  );
+
+/** 戻り先として安全なパスならそれを、そうでなければ `/` を返す。 */
+export function toSafeRedirectPath(value: unknown): string {
+  const result = RedirectPathSchema.safeParse(value);
+  return result.success ? result.data : "/";
+}

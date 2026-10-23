@@ -3,10 +3,13 @@ import { Button } from "@morinoparty/chlorophyll-react/components";
 import { startSignIn } from "@/server/auth";
 import { buttonSize } from "@/components/buttonSize";
 
-export const LoginModal: React.FC = () => {
+export const LoginModal: React.FC<{
+  /** ログイン後に戻るサイト内のパス */
+  redirectTo: string;
+}> = ({ redirectTo }) => {
   return (
     <form
-      action={startSignIn}
+      action={() => startSignIn(redirectTo)}
       className={css({
         // ModalDialog.Container と同じパネルの面を使う
         bg: "bg.panel",

@@ -37,7 +37,9 @@ Cloudflare Workers で動かします。記事の読み書きは
 - Minecraft 系コンポーネント (chlorophyll の `MinecraftItem` など) は、`src/components/ui/provider.tsx` の
   `MinecraftProvider` を通して mc-assets のモデル・テクスチャを読みます。配信元は `src/lib/minecraft-assets.ts` の `MINECRAFT_ASSETS_URL`。
 - 未ログインで `/dashboard` に来たら、`src/routes/dashboard/route.tsx` の
-  `beforeLoad` がサインインへ送ります。
+  `beforeLoad` がサインイン (`/auth/sign-in?redirect=<元のパス>`) へ送ります。
+- ログインボタン (サイドバー、記事の「このページを編集」) はサインインページを経由せず、直接 MineAuth へ遷移します。
+  ログイン後は押したページ (編集ボタンなら編集ページ) に戻ります。戻り先は `RedirectPathSchema` (`src/server/types.ts`) でサイト内のパスに限ります。
 
 ### Worker の env
 
