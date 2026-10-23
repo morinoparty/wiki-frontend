@@ -36,6 +36,8 @@ Cloudflare Workers で動かします。記事の読み書きは
   (詳細は [`src/server/README.md`](src/server/README.md))。
 - Minecraft 系コンポーネント (chlorophyll の `MinecraftItem` など) は、`src/components/ui/provider.tsx` の
   `MinecraftProvider` を通して mc-assets のモデル・テクスチャを読みます。配信元は `src/lib/minecraft-assets.ts` の `MINECRAFT_ASSETS_URL`。
+- プレイヤーの顔 (`PlayerAvatar`) とスキン (`SkinViewer`) は、同じ `MinecraftProvider` の `config` で
+  mc-api (`src/lib/mc-api.ts` の `MC_API_URL`) から読みます。mc-api は morinoparty に参加したことのあるプレイヤーだけを返します。
 - 未ログインで `/dashboard` に来たら、`src/routes/dashboard/route.tsx` の
   `beforeLoad` がサインイン (`/auth/sign-in?redirect=<元のパス>`) へ送ります。
 - ログインボタン (サイドバー、記事の「このページを編集」) はサインインページを経由せず、直接 MineAuth へ遷移します。
