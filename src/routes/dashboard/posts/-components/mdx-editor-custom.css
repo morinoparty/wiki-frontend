@@ -527,6 +527,423 @@
   font-size: 16px !important; /* textStyle: body */
 }
 
+/* =========================================================
+   テーブルエディタ (MDXEditor tablePlugin)
+   MDXEditor のクラス名は CSS Modules でハッシュ化されている
+   (_tableEditor_xxxx_123 など) ため、属性セレクタで部分一致させる。
+   DOM 構造:
+     thead      … 列メニュー ("…") だけのツール行 (data-tool-cell)
+     tbody      … 1 行目が見出し行 (th)、2 行目以降が本文 (td)。
+                  各行の先頭は行メニューのツールセル、
+                  1 行目の末尾は「列を追加」ボタン (rowSpan で全行に跨る)
+     tfoot      … 「行を追加」ボタン
+   上の .prose table / th / td のルールはツールセルにも当たってしまうため、
+   ここで詳細度を上げて上書きする。
+   ========================================================= */
+.mdx-editor [class*="_tableEditor_"] {
+  /* 角丸の枠線を出すため collapse ではなく separate にする */
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  margin: 24px 0 !important;
+  font-size: 15px !important;
+  background: transparent !important;
+}
+
+/* ツール行・ツールセルは .prose の背景や罫線・余白を打ち消す */
+.mdx-editor [class*="_tableEditor_"] thead,
+.mdx-editor [class*="_tableEditor_"] tfoot {
+  background: transparent !important;
+}
+
+.mdx-editor [class*="_tableEditor_"] tr {
+  border-bottom: none !important;
+}
+
+.mdx-editor [class*="_tableEditor_"] [data-tool-cell],
+.mdx-editor [class*="_tableEditor_"] [class*="_tableToolsColumn_"],
+.mdx-editor [class*="_tableEditor_"] thead th,
+.mdx-editor [class*="_tableEditor_"] tfoot th {
+  background: transparent !important;
+  border: none !important;
+  padding: 2px !important;
+  font-weight: normal !important;
+  vertical-align: middle !important;
+}
+
+/* データセル: 右と下に罫線を引き、先頭列・先頭行だけ左・上を足して二重線を防ぐ */
+.mdx-editor [class*="_tableEditor_"] > tbody > tr > :is(td, th):not([data-tool-cell]) {
+  border: none !important;
+  border-right: 1px solid #cdebdf !important; /* leaf.100 */
+  border-bottom: 1px solid #cdebdf !important; /* leaf.100 */
+  padding: 10px 14px !important;
+  background: white !important;
+  color: #2d634b !important; /* leaf.700 */
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  vertical-align: top !important;
+  transition: background 0.15s ease !important;
+}
+
+.mdx-editor [class*="_tableEditor_"] > tbody > tr > :nth-child(2):not([data-tool-cell]) {
+  border-left: 1px solid #cdebdf !important; /* leaf.100 */
+}
+
+.mdx-editor [class*="_tableEditor_"] > tbody > tr:first-child > :not([data-tool-cell]) {
+  border-top: 1px solid #cdebdf !important; /* leaf.100 */
+}
+
+/* 見出し行 (1 行目) は薄い緑で塗り、太字・左寄せにする */
+.mdx-editor [class*="_tableEditor_"] > tbody > tr:first-child > th:not([data-tool-cell]) {
+  background: #eaf2ef !important; /* leaf.50 */
+  font-weight: 600 !important;
+  text-align: left !important;
+  border-bottom-color: #b5deca !important; /* leaf.200 */
+}
+
+/* 本文行のホバー */
+.mdx-editor [class*="_tableEditor_"] > tbody > tr:not(:first-child):hover > td:not([data-tool-cell]) {
+  background: rgba(234, 242, 239, 0.5) !important; /* leaf.50/50 */
+}
+
+/* 外周の角を丸める (ツールセルを除いたデータセルの四隅) */
+.mdx-editor [class*="_tableEditor_"] > tbody > tr:first-child > :nth-child(2):not([data-tool-cell]) {
+  border-top-left-radius: 8px !important;
+}
+
+.mdx-editor [class*="_tableEditor_"] > tbody > tr:first-child > :not([data-tool-cell]):is(:last-child, :has(+ [data-tool-cell])) {
+  border-top-right-radius: 8px !important;
+}
+
+.mdx-editor [class*="_tableEditor_"] > tbody > tr:last-child > :nth-child(2):not([data-tool-cell]) {
+  border-bottom-left-radius: 8px !important;
+}
+
+.mdx-editor [class*="_tableEditor_"] > tbody > tr:last-child > :not([data-tool-cell]):is(:last-child, :has(+ [data-tool-cell])) {
+  border-bottom-right-radius: 8px !important;
+}
+
+/* セル内の段落は .prose p の大きな余白を打ち消す */
+.mdx-editor [class*="_tableEditor_"] :is(td, th) p {
+  margin: 0 !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+}
+
+/* 編集中のセルはブランドの緑で囲む */
+.mdx-editor [class*="_tableEditor_"] > tbody > tr > [data-active="true"]:not([data-tool-cell]) {
+  outline: 2px solid #347e5e !important; /* leaf.600 */
+  outline-offset: -2px !important;
+  background: white !important;
+}
+
+/* 行・列メニューの "…" トリガーとテーブル削除ボタン
+   普段は隠し、テーブルにホバーしたときだけ控えめに出す */
+.mdx-editor [class*="_tableEditor_"] [class*="_tableColumnEditorTrigger_"],
+.mdx-editor [class*="_tableEditor_"] [class*="_tableRowEditorTrigger_"],
+.mdx-editor [class*="_tableEditor_"] [class*="_iconButton_"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 22px !important;
+  height: 22px !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+  border-radius: 6px !important;
+  color: #347e5e !important; /* leaf.600 */
+  cursor: pointer !important;
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease !important;
+}
+
+.mdx-editor [class*="_tableEditor_"] [class*="_tableColumnEditorTrigger_"] svg,
+.mdx-editor [class*="_tableEditor_"] [class*="_tableRowEditorTrigger_"] svg,
+.mdx-editor [class*="_tableEditor_"] [class*="_iconButton_"] svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+@media (hover: hover) {
+  .mdx-editor [class*="_tableEditor_"] [class*="_tableColumnEditorTrigger_"],
+  .mdx-editor [class*="_tableEditor_"] [class*="_tableRowEditorTrigger_"],
+  .mdx-editor [class*="_tableEditor_"] [class*="_iconButton_"] {
+    opacity: 0 !important;
+  }
+
+  .mdx-editor [class*="_tableEditor_"]:hover [class*="_tableColumnEditorTrigger_"],
+  .mdx-editor [class*="_tableEditor_"]:hover [class*="_tableRowEditorTrigger_"],
+  .mdx-editor [class*="_tableEditor_"]:hover [class*="_iconButton_"] {
+    opacity: 0.45 !important;
+  }
+}
+
+.mdx-editor [class*="_tableEditor_"] [class*="_tableColumnEditorTrigger_"]:hover,
+.mdx-editor [class*="_tableEditor_"] [class*="_tableRowEditorTrigger_"]:hover,
+.mdx-editor [class*="_tableEditor_"] [class*="_tableColumnEditorTrigger_"][data-active="true"],
+.mdx-editor [class*="_tableEditor_"] [class*="_tableColumnEditorTrigger_"][data-state="open"] {
+  opacity: 1 !important;
+  background: #eaf2ef !important; /* leaf.50 */
+}
+
+/* テーブル削除ボタンは危険な操作なので赤で示す */
+.mdx-editor [class*="_tableEditor_"] [class*="_iconButton_"]:hover {
+  opacity: 1 !important;
+  color: #dc2626 !important; /* red.600 */
+  background: #fef2f2 !important; /* red.50 */
+}
+
+/* 「列を追加」「行を追加」: 細い帯に + を載せ、ホバーで緑を濃くする */
+.mdx-editor [class*="_tableEditor_"] [class*="_addColumnButton_"],
+.mdx-editor [class*="_tableEditor_"] [class*="_addRowButton_"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  background: rgba(234, 242, 239, 0.5) !important; /* leaf.50/50 */
+  border: 1px dashed #cdebdf !important; /* leaf.100 */
+  color: #b5deca !important; /* leaf.200 */
+  cursor: pointer !important;
+  opacity: 1 !important;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease !important;
+}
+
+.mdx-editor [class*="_tableEditor_"] [class*="_addColumnButton_"] svg,
+.mdx-editor [class*="_tableEditor_"] [class*="_addRowButton_"] svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* 列追加の帯はセルの高さいっぱいに伸ばす (rowSpan のセルに絶対配置) */
+.mdx-editor [class*="_tableEditor_"] th:has(> [class*="_addColumnButton_"]) {
+  position: relative !important;
+  width: 24px !important;
+  min-width: 24px !important;
+  padding: 0 !important;
+}
+
+.mdx-editor [class*="_tableEditor_"] [class*="_addColumnButton_"] {
+  position: absolute !important;
+  inset: 0 0 0 6px !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* 行追加の帯は表の幅いっぱいに伸ばす */
+.mdx-editor [class*="_tableEditor_"] [class*="_addRowButton_"] {
+  width: 100% !important;
+  height: 22px !important;
+  margin-top: 4px !important;
+}
+
+.mdx-editor [class*="_tableEditor_"] [class*="_addColumnButton_"]:hover,
+.mdx-editor [class*="_tableEditor_"] [class*="_addRowButton_"]:hover {
+  background: #eaf2ef !important; /* leaf.50 */
+  border-color: #347e5e !important; /* leaf.600 */
+  border-style: solid !important;
+  color: #347e5e !important; /* leaf.600 */
+}
+
+/* 行・列メニューのポップオーバー (ポータルで本文の外に出るので .mdx-editor で絞らない) */
+[class*="_tableColumnEditorPopoverContent_"] {
+  background: white !important;
+  border: 1px solid #cdebdf !important; /* leaf.100 */
+  border-radius: 8px !important;
+  padding: 4px !important;
+  filter: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  z-index: 9999 !important;
+}
+
+[class*="_tableColumnEditorToolbar_"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+}
+
+[class*="_tableColumnEditorToolbar_"] button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  color: #2d634b !important; /* leaf.700 */
+  cursor: pointer !important;
+  transition: background 0.15s ease !important;
+}
+
+[class*="_tableColumnEditorToolbar_"] button:hover {
+  background: #eaf2ef !important; /* leaf.50 */
+  color: #347e5e !important; /* leaf.600 */
+}
+
+/* 列の揃え (左・中央・右) の選択中 */
+[class*="_tableColumnEditorToolbar_"] button[data-state="on"] {
+  background: #347e5e !important; /* leaf.600 */
+  color: white !important;
+}
+
+[class*="_tableColumnEditorToolbar_"] [role="separator"] {
+  width: 1px !important;
+  align-self: stretch !important;
+  margin: 4px 4px !important;
+  background: #cdebdf !important; /* leaf.100 */
+}
+
+[class*="_tableColumnEditorPopoverContent_"] [class*="_popoverArrow_"] {
+  fill: white !important;
+}
+
+/* =========================================================
+   コードブロック (MDXEditor codeMirrorPlugin)
+   _codeMirrorWrapper_ の中に、言語選択と削除ボタンのツールバー
+   (_codeMirrorToolbar_) と CodeMirror 本体 (.cm-editor) が入る。
+   ========================================================= */
+.mdx-editor [class*="_codeMirrorWrapper_"] {
+  margin: 24px 0 !important;
+  padding: 0 !important;
+  border: 1px solid #cdebdf !important; /* leaf.100 */
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  background: white !important;
+}
+
+/* ツールバーはコードに重ならないよう、絶対配置をやめて上部の帯にし、右寄せにする */
+.mdx-editor [class*="_codeMirrorToolbar_"] {
+  position: static !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 6px !important;
+  padding: 6px 8px !important;
+  background: rgba(234, 242, 239, 0.5) !important; /* leaf.50/50 */
+  border-bottom: 1px solid #cdebdf !important; /* leaf.100 */
+  border-radius: 0 !important;
+}
+
+/* 言語の選択 */
+.mdx-editor [class*="_codeMirrorToolbar_"] [class*="_selectTrigger_"] {
+  height: 28px !important;
+  margin: 0 !important;
+  padding: 0 8px 0 10px !important;
+  gap: 4px !important;
+  justify-content: space-between !important;
+  background: white !important;
+  border: 1px solid #cdebdf !important; /* leaf.100 */
+  border-radius: 6px !important;
+  color: #2d634b !important; /* leaf.700 */
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: border-color 0.15s ease !important;
+}
+
+.mdx-editor [class*="_codeMirrorToolbar_"] [class*="_selectTrigger_"]:hover {
+  border-color: #b5deca !important; /* leaf.200 */
+}
+
+.mdx-editor [class*="_codeMirrorToolbar_"] [class*="_selectTrigger_"]:focus-visible,
+.mdx-editor [class*="_codeMirrorToolbar_"] [class*="_selectTrigger_"][data-state="open"] {
+  outline: none !important;
+  border-color: #347e5e !important; /* leaf.600 */
+  filter: none !important;
+  border-radius: 6px !important;
+}
+
+/* コードブロックの削除ボタン */
+.mdx-editor [class*="_codeMirrorToolbar_"] [class*="_iconButton_"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 6px !important;
+  color: #347e5e !important; /* leaf.600 */
+  cursor: pointer !important;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease !important;
+}
+
+.mdx-editor [class*="_codeMirrorToolbar_"] [class*="_iconButton_"] svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.mdx-editor [class*="_codeMirrorToolbar_"] [class*="_iconButton_"]:hover {
+  color: #dc2626 !important; /* red.600 */
+  background: #fef2f2 !important; /* red.50 */
+}
+
+/* CodeMirror 本体
+   冒頭の `.mdxeditor *` がすべての要素に本文用のフォントを !important で当てているため、
+   詳細度を上げて等幅フォントで上書きする */
+.mdx-editor .cm-editor {
+  padding: 8px 0 !important;
+  background: white !important;
+  font-size: 14px !important;
+}
+
+.mdx-editor .cm-editor,
+.mdx-editor .cm-editor .cm-scroller,
+.mdx-editor .cm-editor .cm-content,
+.mdx-editor .cm-editor .cm-line,
+.mdx-editor .cm-editor .cm-line *,
+.mdx-editor .cm-editor .cm-gutters,
+.mdx-editor .cm-editor .cm-gutterElement {
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    "SF Mono",
+    Menlo,
+    Consolas,
+    "Liberation Mono",
+    monospace !important;
+}
+
+.mdx-editor .cm-editor .cm-content {
+  padding: 0 !important;
+  line-height: 1.7 !important;
+  color: #1f2937 !important; /* gray.800 */
+  caret-color: #347e5e !important; /* leaf.600 */
+}
+
+.mdx-editor .cm-editor .cm-line {
+  padding: 0 16px 0 12px !important;
+}
+
+.mdx-editor .cm-editor .cm-cursor {
+  border-left-color: #347e5e !important; /* leaf.600 */
+}
+
+/* 行番号: 本文より小さく薄い色で、本文との間に罫線を引く */
+.mdx-editor .cm-editor .cm-gutters {
+  background: white !important;
+  border-right: 1px solid #eaf2ef !important; /* leaf.50 */
+  color: #9ca3af !important; /* gray.400 */
+  font-size: 12px !important;
+}
+
+.mdx-editor .cm-editor .cm-gutterElement {
+  padding: 0 10px 0 14px !important;
+}
+
+.mdx-editor .cm-editor .cm-activeLineGutter {
+  background: transparent !important;
+  color: #347e5e !important; /* leaf.600 */
+}
+
+.mdx-editor .cm-editor .cm-selectionBackground,
+.mdx-editor .cm-editor.cm-focused .cm-selectionBackground {
+  background: #cdebdf !important; /* leaf.100 */
+}
+
 /* HR styles */
 .mdx-editor .mdx-content-editable hr {
   border: none !important;

@@ -5,6 +5,7 @@ import {
   ContentImage,
   type HagakiImageProps,
 } from "./ContentImage";
+import { ImageLightbox } from "./ImageLightbox";
 import { CONTENT_BASE_URL } from "@/lib/content";
 
 /**
@@ -164,6 +165,20 @@ export const mdxStyles = sva({
   },
 });
 
+/**
+ * MarkdownParser がリンク (`<a>`) の中の画像に付ける属性。
+ * リンク付き画像はリンクとして動かすため、拡大表示 (ボタン) で包まない。
+ */
+export const IN_LINK_ATTRIBUTE = "data-in-link";
+
+/** 画像の props から `data-in-link` の印を取り出し、残りの props と分ける */
+function takeInLink<P extends object>(props: P): { inLink: boolean; rest: P } {
+  const { [IN_LINK_ATTRIBUTE]: inLink, ...rest } = props as P & {
+    [IN_LINK_ATTRIBUTE]?: unknown;
+  };
+  return { inLink: inLink != null && inLink !== false, rest: rest as P };
+}
+
 export const components = {
   p: (props: React.ComponentProps<"p">) => (
     <p className={mdxStyles().p} {...props} />
@@ -213,7 +228,8 @@ export const components = {
   pre: (props: React.ComponentProps<"pre">) => (
     <pre className={mdxStyles().pre} {...props} />
   ),
-  img: (props: React.ComponentProps<"img">) => {
+  img: (allProps: React.ComponentProps<"img">) => {
+    const { inLink, rest: props } = takeInLink(allProps);
     const { src = "", alt = "", width, height, ...rest } = props;
     if (typeof src !== "string") return null;
     const isExternal =
@@ -235,10 +251,12 @@ export const components = {
           ? height
           : 600;
 
-    return (
+    const resolvedSrc = isExternal ? src : CONTENT_BASE_URL + src;
+
+    const image = (
       <img
         className={mdxStyles().img}
-        src={isExternal ? src : CONTENT_BASE_URL + src}
+        src={resolvedSrc}
         alt={alt}
         width={imageWidth}
         height={imageHeight}
@@ -246,12 +264,40 @@ export const components = {
         {...rest}
       />
     );
+
+    // リンクの中の画像はリンクとして動かす (ボタンで包むとクリックがリンクに届かない)
+    if (inLink) return image;
+
+    // クリックで拡大表示する。拡大側は width / height 属性を付けず、
+    // 画像本来の比率のまま画面に収める
+    return (
+      <ImageLightbox
+        alt={alt}
+        renderEnlarged={(imageClassName) => (
+          <img
+            className={imageClassName}
+            src={resolvedSrc}
+            alt={alt}
+            decoding="async"
+          />
+        )}
+      >
+        {image}
+      </ImageLightbox>
+    );
   },
   // hagaki の `<Image imageId="…" />` (MarkdownParser が変換したカスタム要素)。
   // articleId と URL 解決は <HagakiImageConfig> が供給する。
-  [HAGAKI_IMAGE_TAG]: (props: HagakiImageProps) => (
-    <ContentImage {...props} className={mdxStyles().img} />
-  ),
+  [HAGAKI_IMAGE_TAG]: (allProps: HagakiImageProps) => {
+    const { inLink, rest: props } = takeInLink(allProps);
+    return (
+      <ContentImage
+        {...props}
+        className={mdxStyles().img}
+        enlargeable={!inLink}
+      />
+    );
+  },
   hr: (props: React.ComponentProps<"hr">) => (
     <hr className={mdxStyles().hr} {...props} />
   ),

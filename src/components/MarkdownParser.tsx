@@ -66,6 +66,46 @@ const schema = {
   },
 };
 
+/**
+ * リンクの中にある画像に付ける印 (hast のプロパティ名)。
+ * React には `IN_LINK_ATTRIBUTE` (`data-in-link`) として渡る。
+ */
+const IN_LINK_PROPERTY = "dataInLink";
+
+interface HastElementLike extends Node {
+  type: "element";
+  tagName: string;
+  properties?: Record<string, unknown>;
+  children?: Node[];
+}
+
+/**
+ * `<a>` の中にある画像 (`<img>` と `<hagaki-image>`) に印を付ける。
+ *
+ * 画像はクリックで拡大する `<button>` に包まれるが、リンクの中でそうすると
+ * interactive content の入れ子になり、クリックがリンクではなくボタンに取られる。
+ * リンク付き画像 (バッジなど) はリンクとして動かしたいので、印の付いた画像は拡大対象から外す。
+ * sanitize の後に走らせるので、この属性は本文から書き込めない。
+ */
+function rehypeMarkImagesInLink() {
+  const walk = (node: Node, inLink: boolean) => {
+    const element = node as HastElementLike;
+    const isElement = element.type === "element";
+    if (
+      isElement &&
+      inLink &&
+      (element.tagName === "img" || element.tagName === HAGAKI_IMAGE_TAG)
+    ) {
+      element.properties = { ...element.properties, [IN_LINK_PROPERTY]: true };
+    }
+    const nextInLink = inLink || (isElement && element.tagName === "a");
+    for (const child of (node as Parent).children ?? []) {
+      walk(child, nextInLink);
+    }
+  };
+  return (tree: Node) => walk(tree, false);
+}
+
 // SSR とクライアント遷移の両方で同じ処理系を使う。jsx-runtime の jsx / jsxs は
 // 開発ビルドでもそのまま動くので、jsxDEV への切り替えはしない
 const processor = unified()
@@ -75,6 +115,7 @@ const processor = unified()
   .use(remarkRehype, { allowDangerousHtml: false, skipHtml: true })
   .use(rehypeRaw)
   .use(rehypeSanitize, schema)
+  .use(rehypeMarkImagesInLink)
   .use(rehypeReact, { Fragment, jsx, jsxs, components });
 
 /**
