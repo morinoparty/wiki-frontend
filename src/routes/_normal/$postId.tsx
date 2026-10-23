@@ -11,6 +11,7 @@ import { articleImageUrl } from "@/lib/content";
 import { pageTitle } from "@/lib/pageTitle";
 import { fetchPostPage } from "@/server/post";
 import { buttonSize } from "@/components/buttonSize";
+import { startSignIn } from "@/server/auth";
 
 export const Route = createFileRoute("/_normal/$postId")({
   loader: async ({ params }) => {
@@ -53,6 +54,7 @@ export const Route = createFileRoute("/_normal/$postId")({
 
 function Post() {
   const { post, contributors } = Route.useLoaderData();
+  const { user } = Route.useRouteContext();
 
   return (
     <div
@@ -125,7 +127,17 @@ function Post() {
             },
           })}
         >
-          <Link to="/dashboard/posts/$postId" params={{ postId: post.uuid }}>
+          <Link
+            to="/dashboard/posts/$postId"
+            params={{ postId: post.uuid }}
+            onClick={(event) => {
+              // 未ログインならサインインページを経由せず MineAuth へ直接送り、
+              // ログイン後はこの記事の編集ページに戻す
+              if (user) return;
+              event.preventDefault();
+              void startSignIn(`/dashboard/posts/${post.uuid}`);
+            }}
+          >
             <Edit />
             <span
               className={css({

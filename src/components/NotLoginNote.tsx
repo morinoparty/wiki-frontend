@@ -1,13 +1,13 @@
 import { css } from "styled-system/css";
 import { Button } from "@morinoparty/chlorophyll-react/components";
 import { startSignIn } from "@/server/auth";
-import { Link } from "@tanstack/react-router";
 import { buttonSize } from "@/components/buttonSize";
 
 export const NotLoginNote = () => {
   return (
     <form
-      action={startSignIn}
+      // ログイン後はこのページに戻る
+      action={() => startSignIn()}
       className={css({
         background: "bg.panel",
         borderRadius: "18px",
@@ -56,15 +56,16 @@ export const NotLoginNote = () => {
       >
         {/*
           ログインへの主導線なので primary にする (secondary は bg.panel でカードの地と同化するため使わない)。
-          リンクで遷移するだけなのでフォームの送信ボタンにはならない (asChild で <a> を描く)。幅だけカードに合わせて広げる
+          サインインページを経由せず、フォームの送信で直接 MineAuth へ遷移する。
+          chlorophyll の Button は type を付けないため submit を明示する。幅だけカードに合わせて広げる
         */}
         <Button
-          asChild
+          type="submit"
           intent="primary"
           size="md"
           className={css(buttonSize.raw({ size: "md" }), { width: "100%" })}
         >
-          <Link to="/auth/sign-in">ログイン</Link>
+          ログイン
         </Button>
       </div>
     </form>
