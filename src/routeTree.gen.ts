@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as NormalRouteImport } from './routes/_normal'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as NormalIndexRouteImport } from './routes/_normal/index'
 import { Route as NormalPostIdRouteImport } from './routes/_normal/$postId'
 import { Route as NormalLicenseRouteImport } from './routes/_normal/license'
@@ -32,6 +34,16 @@ const NormalRoute = NormalRouteImport.update({
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NormalIndexRoute = NormalIndexRouteImport.update({
@@ -105,6 +117,8 @@ const ApiArticleAssetsUuidImageIdRoute =
 export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/': typeof NormalIndexRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/$postId': typeof NormalPostIdRoute
   '/license': typeof NormalLicenseRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -119,6 +133,8 @@ export interface FileRoutesByFullPath {
   '/api/article-assets/$uuid/$imageId': typeof ApiArticleAssetsUuidImageIdRoute
 }
 export interface FileRoutesByTo {
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/$postId': typeof NormalPostIdRoute
   '/license': typeof NormalLicenseRoute
   '/': typeof NormalIndexRoute
@@ -137,6 +153,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/_normal': typeof NormalRouteWithChildren
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_normal/$postId': typeof NormalPostIdRoute
   '/_normal/license': typeof NormalLicenseRoute
   '/_normal/': typeof NormalIndexRoute
@@ -156,6 +174,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/dashboard'
     | '/'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/$postId'
     | '/license'
     | '/dashboard/'
@@ -170,6 +190,8 @@ export interface FileRouteTypes {
     | '/api/article-assets/$uuid/$imageId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/$postId'
     | '/license'
     | '/'
@@ -187,6 +209,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/dashboard'
     | '/_normal'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/_normal/$postId'
     | '/_normal/license'
     | '/_normal/'
@@ -205,6 +229,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   NormalRoute: typeof NormalRouteWithChildren
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiArticleAssetsUuidImageIdRoute: typeof ApiArticleAssetsUuidImageIdRoute
 }
@@ -223,6 +249,20 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_normal/': {
@@ -363,6 +403,8 @@ const NormalRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   NormalRoute: NormalRouteWithChildren,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiArticleAssetsUuidImageIdRoute: ApiArticleAssetsUuidImageIdRoute,
 }
