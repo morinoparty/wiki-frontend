@@ -6,6 +6,7 @@ import {
   type GenericOAuthUserInfo,
 } from "better-auth/plugins/generic-oauth";
 import { getEnv } from "./env";
+import { getRequestOrigin } from "./request-origin";
 import { getAuthServerUrl } from "./server-list";
 
 // buildAuth の戻り値から型を推論する。better-auth 1.6 以降は betterAuth() が
@@ -138,15 +139,7 @@ async function buildAuth(baseURL: string, authServerUrl: string) {
  * 呼び出せる。
  */
 export async function getAuth(): Promise<Auth> {
-  const headerList = getRequest().headers;
-  const host =
-    headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:5173";
-  const proto =
-    headerList.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") || host.startsWith("127.0.0.1")
-      ? "http"
-      : "https");
-  const origin = `${proto}://${host}`;
+  const origin = getRequestOrigin();
   const authServerUrl = await getAuthServerUrl();
   const cacheKey = `${origin}|${authServerUrl}`;
 

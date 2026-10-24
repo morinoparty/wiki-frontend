@@ -219,6 +219,7 @@ emoji コミットの概要
   - `dashboard/` - エディタ。`route.tsx` の `beforeLoad` が未ログイン時にサインインへリダイレクトする
   - `api/auth/$.ts` - better-auth
   - `api/article-assets/$uuid/$imageId.ts` - コミット済み画像 (CDN またはリポジトリから返す)
+  - `sitemap[.]xml.ts` / `robots[.]txt.ts` - `/sitemap.xml` と `/robots.txt` (ファイル名の `[.]` はドットのエスケープ)
   - ルート専用のコンポーネントは `-components/` (先頭 `-` でルート対象外) に配置します (例: `dashboard/posts/-components/`)。
 - `src/routeTree.gen.ts` は Vite プラグイン (または `pnpm exec tsr generate`) の生成物です。設定は `tsr.config.json`。
 - `src/router.tsx` にルーター、`src/start.ts` に TanStack Start のインスタンス (リクエストミドルウェア: CSRF 対策と server function のボディ上限) を配置します。`start.ts` を置くと既定の CSRF 対策が外れるため、`createCsrfMiddleware` を外さないでください。
