@@ -144,6 +144,8 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
             description: form.description,
             thumbnail: form.thumbnail,
             draft: form.draft === true,
+            // 空 ([]) は「編集者の指定を外す」。undefined だと既存の値が残る
+            editor: form.editor ?? [],
           },
           { deletePaths },
           images.images.length > 0 ? images.form : undefined
@@ -220,6 +222,7 @@ export function PostEditorClient({ post }: PostEditorClientProps) {
         title={form.title}
         description={form.description}
         draft={isDraft}
+        editor={form.editor}
         onChange={handleHeaderChange}
       />
 

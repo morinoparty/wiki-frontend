@@ -4,11 +4,19 @@
  */
 import { z } from "zod";
 
+/**
+ * 失敗の種類。画面の出し分けに使う (例: 編集ページで権限が無いときは
+ * エディタの代わりに案内を出す)。
+ */
+export type ApiErrorCode = "unauthenticated" | "not_found" | "forbidden";
+
 // API操作の結果型
 export type ApiResult<T = void> = {
   success: boolean;
   data?: T;
   error?: string;
+  /** 失敗の種類。必要な箇所でだけ付ける */
+  code?: ApiErrorCode;
   commitId?: string;
 };
 
@@ -25,6 +33,17 @@ export type OperationContext = {
 };
 
 // Zodスキーマ定義
+/**
+ * 編集者リストの 1 要素 (Minecraft UUID)。クライアントの入力欄も
+ * `isEditorId` で同じ規則を使い、入力欄では通るのに保存で断られる、を防ぐ。
+ */
+export const EditorIdSchema = z.uuid("編集者は Minecraft UUID で指定してください");
+
+/** 編集者リストの 1 要素として受け付けられる値か (`EditorIdSchema` と同じ規則)。 */
+export function isEditorId(id: string): boolean {
+  return EditorIdSchema.safeParse(id).success;
+}
+
 export const CreatePostInputSchema = z.object({
   // 記事の同一性は uuid で持つ (slug は変わりうる)
   uuid: z.uuid("記事 ID が uuid ではありません").optional(),
@@ -63,6 +82,10 @@ export const CreatePostInputSchema = z.object({
     .optional(),
   // 下書きフラグ。frontmatter に永続化され、true の間は配信されない
   draft: z.boolean().optional(),
+  // 編集できるプレイヤー (Minecraft UUID) の一覧。frontmatter の `editor` に保存される。
+  // 空 (未指定) ならログイン済みの全員が編集できる。正規化 (小文字化・重複除去) は
+  // normalizeEditorList が行う
+  editor: z.array(EditorIdSchema).optional(),
 });
 
 export const UpdatePostInputSchema = CreatePostInputSchema.partial().extend({
@@ -101,6 +124,36 @@ export type ValidationError = {
   field: string;
   message: string;
 };
+
+/**
+ * 編集者リストを正規化する。前後の空白を落とし、空要素を除き、小文字にそろえて
+ * 重複を取り除く。frontmatter の `editor` は YAML 配列だけを受け付け、
+ * それ以外の形 (カンマ区切りの文字列など) は空として扱う。
+ *
+ * @param value frontmatter / 入力の値 (配列・未設定)
+ * @returns 正規化した UUID の配列。空なら空配列
+ */
+export function normalizeEditorList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const result: string[] = [];
+  for (const item of value) {
+    if (typeof item !== "string") continue;
+    const id = item.trim().toLowerCase();
+    if (id.length > 0 && !result.includes(id)) result.push(id);
+  }
+  return result;
+}
+
+/**
+ * エディタの入力欄 (カンマ・改行区切りのテキスト) を編集者リストにする。
+ * 区切り文字を解釈するのは入力欄だけで、frontmatter の形式は YAML 配列に限る。
+ *
+ * @param text 入力欄の値
+ * @returns 正規化した UUID の配列。空なら空配列
+ */
+export function parseEditorInput(text: string): string[] {
+  return normalizeEditorList(text.split(/[,\n]/));
+}
 
 /**
  * ログイン後の戻り先。オープンリダイレクトを防ぐため、同じオリジン内の

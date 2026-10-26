@@ -57,15 +57,6 @@ export class GitHubService {
     return getHagakiClient().posts.existsInRepo(uuid);
   }
 
-  /**
-   * 記事の存在をチェック
-   */
-  static async checkPostExists(slug: string): Promise<boolean> {
-    const uuid = await this.resolveUuid(slug);
-    if (!uuid) return false;
-    return this.checkPostExistsByUuid(uuid);
-  }
-
   /** uuid 指定で GitHub 上の記事 (未配信の変更を含む) を取得する。 */
   static async getPostByUuid(uuid: string): Promise<WikiPostDetail | null> {
     return getHagakiClient().posts.getFromRepo(uuid);

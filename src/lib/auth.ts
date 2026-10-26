@@ -28,6 +28,16 @@ function claim(value: unknown): string | undefined {
 }
 
 /**
+ * MineAuth の `roles` クレーム (LuckPerms のグループ名の配列) を取り出す。
+ * roles スコープが通らなかった・LuckPerms が無いなどでクレームが無いときは空配列。
+ */
+function rolesOf(profile: GenericOAuthUserInfo): string[] {
+  const roles: unknown = profile.roles;
+  if (!Array.isArray(roles)) return [];
+  return roles.filter((role): role is string => typeof role === "string");
+}
+
+/**
  * MineAuth の `/oauth2/userinfo` から Minecraft UUID を取り出す。OIDC 標準の
  * `sub` と、旧実装の独自クレーム `id` の両方を受け付ける。
  */
@@ -81,8 +91,21 @@ async function buildAuth(baseURL: string, authServerUrl: string) {
           required: false,
           input: true,
         },
+        // MineAuth の roles スコープで受け取る LuckPerms のグループ名。
+        // 権限判定 (PermissionService の "staff") に使う、ログイン時点のスナップショット。
+        // OAuth プロフィールから user に写すには input: true が必要なので、
+        // クライアントから書き換えられないよう下の disabledPaths で
+        // /update-user を塞いでいる
+        roles: {
+          type: "string[]",
+          required: false,
+          input: true,
+        },
       },
     },
+    // additionalFields (roles など) をクライアントが書き換えられる経路を塞ぐ。
+    // このアプリはユーザー情報を MineAuth からしか受け取らないので使っていない
+    disabledPaths: ["/update-user", "/sign-up/email"],
     databaseHooks: {
       user: {
         create: {
@@ -110,7 +133,12 @@ async function buildAuth(baseURL: string, authServerUrl: string) {
             pkce: true,
             // サーバーリストの上から順に解決した認証サーバーの discovery を使う
             discoveryUrl: `${authServerUrl}/.well-known/openid-configuration`,
-            scopes: ["openid", "profile", "email"],
+            // roles は MineAuth が常に許可するスコープで、LuckPerms のグループを返す
+            scopes: ["openid", "profile", "email", "roles"],
+            // 既存ユーザーの再ログインでも name / image / roles をプロバイダーの値で
+            // 上書きする。DB-less でも同じ isolate のメモリアダプタに user が残って
+            // いると、これが無い限り roles が初回ログイン時のまま更新されない
+            overrideUserInfo: true,
             // アカウントの同一性も Minecraft UUID で持つ
             accountSubject: ({ profile }) => minecraftIdOf(profile),
             // `preferred_username` (OIDC) と `username` (旧実装) の両方を受け付ける
@@ -121,6 +149,7 @@ async function buildAuth(baseURL: string, authServerUrl: string) {
                   claim(profile.username) ?? claim(profile.preferred_username),
                 image: `https://crafthead.net/avatar/${minecraftId}`,
                 minecraftId,
+                roles: rolesOf(profile),
               };
             },
           },
