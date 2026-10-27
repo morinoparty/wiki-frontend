@@ -64,12 +64,13 @@ server function のハンドラ本体はクライアントのバンドルから�
 
 - roles に `staff` (完全一致) を持つプレイヤーは、上の制限をすべて無視できる。
   roles はログイン時点のスナップショットなので、グループを変えたら再ログインが要る
-- 作成者は記事本体 (`index.mdx`) の最古のコミットのプレイヤー (`posts.history` の最後の要素)。
+- 作成者は記事本体 (`index.mdx`) の最古のコミットのユーザー (`posts.history` の最後の要素)。
   `createPost` でコミットした人がそのまま作成者になる。次の場合は作成者を特定できないものとして扱い、
   その下書きには `editor` のプレイヤーとスタッフだけが触れる。
-  - コミッター名からプレイヤーを特定できない (古い移行データなど)
+  - コミッター名からユーザーを特定できない (古い移行データなど)
   - 履歴が 1 ページ (100 件) を超える。hagaki 0.3.0 の `posts.history` は新しい順の 1 ページしか
     返さず、最古のコミットまで届かないため。途中のコミットの人を作成者にはしない
+    (hagaki の `posts.firstCommit` へ移ると解消する。後述の「編集者の ID」を参照)
   - 履歴が 1 件も取れない (作成直後に GitHub の commits API が追いついていないときなど)
 - wiki-content は公開リポジトリで、下書きの uuid も誰でも見られる。そのため、作成者が分からない
   下書きは通さない (fail closed)。作成直後に本人が締め出されないよう、`createPost` が作成者を
@@ -94,6 +95,40 @@ server function のハンドラ本体はクライアントのバンドルから�
   そのため `EDITOR_LIST_PERSISTED` (`src/types/wiki.ts`) が false の間は、エディタに入力欄を出さず、
   `createPost` / `updatePost` は空でない `editor` の保存を断る。現状では frontmatter に
   `editor` を手で書いても効かない。hagaki を上げたら、型の拡張と一緒にこの定数を消す
+
+## 編集者の ID (`player` から `userId` への移行)
+
+記事の編集者・作成者の ID は、better-auth の `session.user.id` と同じ値である
+(このデプロイでは MineAuth の Minecraft UUID だが、hagaki 側はそれを前提にしない)。
+hagaki は次の版でこの ID のフィールド名を `player` から `userId` へ改名し
+(`PathCommit`、`WikiHistoryEntry`、`EditorSummary`、frontmatter の `modified[]`)、
+wiki-content の生成物 (`article.json` の `editors[]`、`info.json` の `history[]`) も同じ名前になる。
+
+移行のあいだは、インストール済みの hagaki 0.3.0 (`player`) と配信中の生成物
+(移行前は `player`、移行後は `userId`) が混ざる。そのため、ID を読む処理は
+`src/lib/content-user.ts` のアダプタだけを通す。
+
+- `contentUserId(record)` は `userId ?? player` を返す。`getPostsEditedBy`、
+  `getDashboardPostsEditedBy`、`creatorFromHistory` がこれで読む
+- `summarizeContentEditors(history)` は `info.json` の履歴を `userId` に統一して集計する
+  (記事ページの編集者一覧 `fetchPostPage` が使う)
+- アプリ内の型 (`PostContributor` など) は `userId` に統一している
+
+このアダプタが面倒を見るのは**読み取りだけ**である。保存は安全ではない。
+hagaki 0.3.0 の `posts.getFromRepo` は frontmatter の `modified[].player` しか読まないため、
+wiki-content の書き換え (`modified[].userId`) が入った記事を `updatePost` で保存すると、
+`modified` を持たない投稿として保存され、git 以前の編集履歴が消える
+(次の `hagaki generate` で `info.json` と `editors[]` からも消える)。
+そのため、wiki-content の移行 PR のマージと、この app の hagaki 更新・デプロイは同時に行う。
+同時にできない場合は、この app を更新するまでダッシュボードからの編集を止める。
+
+hagaki を改名版へ上げたら、次の 2 点を行う。
+
+1. `src/lib/content-user.ts` の `player` へのフォールバックと詰め替えを消し、hagaki の `userId` をそのまま使う
+2. 作成者の判定 (`PermissionService.getPostCreator` と `getDashboardPostsEditedBy`) を
+   `posts.history` + `creatorFromHistory` から hagaki の `posts.firstCommit(uuid)` に置き換える。
+   `firstCommit` は履歴の長さによらず最古のコミットを返すので、「履歴が 1 ページ (100 件) を超えると
+   作成者を特定できない」制限がなくなる。hagaki 0.3.0 には `firstCommit` が無いため、今は置き換えていない
 
 ## slug の重複チェック
 

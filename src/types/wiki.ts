@@ -1,7 +1,6 @@
 import type {
   CategoryOptionEnumValue,
   CategoryOptionField,
-  EditorSummary,
   PostOptionValues,
   GetAllPostsOptions as HagakiGetAllPostsOptions,
   WikiCategory as HagakiCategory,
@@ -9,6 +8,7 @@ import type {
   WikiPostDetail as HagakiPostDetail,
   WikiThumbnail,
 } from "@morinoparty/hagaki";
+import type { ContentEditorSummary } from "@/lib/content-user";
 
 export type {
   CategoryOptionEnumValue,
@@ -19,10 +19,12 @@ export type {
 
 /**
  * 記事一件の編集者一人分の集計。wiki-content の生成物
- * (`article.json` の `editors`) が正で、履歴をプレイヤーごとに畳んだもの。
- * `player` は Minecraft UUID で、better-auth の user.id と同じ値。
+ * (`article.json` の `editors`) が正で、履歴をユーザーごとに畳んだもの。
+ * ユーザーの ID は better-auth の `session.user.id` と同じ値。
+ * 生成物の移行前は `player`、移行後は `userId` に入るので、
+ * 読むときは必ず `contentUserId` (`@/lib/content-user`) を通す。
  */
-export type ArticleEditor = EditorSummary;
+export type ArticleEditor = ContentEditorSummary;
 
 // 生成物 (article.json) 由来のフィールド。hagaki の WikiPost には無い。
 type GeneratedMetadata = {
@@ -34,7 +36,7 @@ type GeneratedMetadata = {
 export type WikiPost = HagakiPost & GeneratedMetadata;
 
 // 詳細取得時（bodyあり）。
-// `editor` は frontmatter の編集者リスト (Minecraft UUID の配列)。空・未設定なら
+// `editor` は frontmatter の編集者リスト (better-auth の user.id の配列)。空・未設定なら
 // ログイン済みの全員が編集できる。インストール済みの hagaki 0.3.0 の
 // WikiPostDetail にはまだ無いので、ここで足している。hagaki 側で読み書き
 // (parsePostMarkdown / posts.save) に対応した版へ上げたら、この拡張は消してよい。

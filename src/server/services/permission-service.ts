@@ -1,4 +1,5 @@
 import type { AppSession } from "@/lib/auth";
+import { contentUserId, type ContentUserFields } from "@/lib/content-user";
 import { getHagakiClient } from "@/lib/hagaki";
 import { createTtlCache } from "@/lib/ttlCache";
 import { normalizeEditorList, type Permission } from "@/server/types";
@@ -6,7 +7,7 @@ import type { WikiPostDetail } from "@/types/wiki";
 
 /** 権限判定に使うログインユーザー。セッションから `toPostActor` で作る。 */
 export type PostActor = {
-  /** Minecraft UUID (better-auth の user.id) */
+  /** better-auth の user.id (このデプロイでは MineAuth の Minecraft UUID) */
   userId: string;
   /** MineAuth の roles (LuckPerms のグループ名)。ログイン時点のスナップショット */
   roles: string[];
@@ -19,8 +20,8 @@ export type PostAccessInfo = {
   /** 下書きか */
   draft?: boolean;
   /**
-   * 記事の作成者 (最古のコミットのプレイヤー)。下書きの判定にだけ使う。
-   * null はコミッター名からプレイヤーを特定できなかった場合
+   * 記事の作成者 (最古のコミットのユーザー)。下書きの判定にだけ使う。
+   * null はコミッター名からユーザーを特定できなかった場合
    */
   creator?: string | null;
 };
@@ -36,7 +37,7 @@ export const STAFF_ROLE = "staff";
 export const HISTORY_PER_PAGE = 100;
 
 // 記事の作成者 (最古のコミット) は後から変わらないので isolate 内でキャッシュする。
-// 特定できなかったとき (null: プレイヤー不明・履歴が 1 ページを超える、
+// 特定できなかったとき (null: ユーザー不明・履歴が 1 ページを超える、
 // undefined: 履歴が取れない) はキャッシュしない — 作成直後に GitHub の
 // commits API が追いついていないだけのことがある
 const creatorCache = createTtlCache<string>(60 * 60 * 1000);
@@ -113,14 +114,20 @@ export class PermissionService {
   }
 
   /**
-   * 記事の作成者 = 記事本体 (`index.mdx`) の最古のコミットのプレイヤーを返す。
+   * 記事の作成者 = 記事本体 (`index.mdx`) の最古のコミットのユーザーを返す。
    *
-   * - string: 作成者の Minecraft UUID
-   * - null: 作成者を特定できない。最古のコミットにプレイヤーが無い (古い移行データ
+   * - string: 作成者のユーザー ID (better-auth の `user.id`)
+   * - null: 作成者を特定できない。最古のコミットにユーザーが無い (古い移行データ
    *   など) か、履歴が 1 ページ (`HISTORY_PER_PAGE` 件) を超えていて最古の
    *   コミットまで取れない場合
    * - undefined: 履歴が 1 件も取れない。作成直後に GitHub の commits API が
    *   追いついていないだけのことが多いが、判定には使えない
+   *
+   * TODO(hagaki の改名版へ上げたら): 最古のコミットは `posts.firstCommit(uuid)` で
+   * 取れるようになる (履歴の長さによらず API 2 回)。そのときは `posts.history` +
+   * `creatorFromHistory` をやめて `firstCommit` の `userId` を使い、
+   * 「履歴が 1 ページを超えると作成者不明」の制限をなくす。
+   * hagaki 0.3.0 には `firstCommit` が無いので、今は 1 ページ分の履歴で判定している
    */
   static async getPostCreator(uuid: string): Promise<string | null | undefined> {
     const cached = creatorCache.get(uuid);
@@ -183,17 +190,18 @@ export class PermissionService {
 
 /**
  * 新しい順のコミット一覧 (`perPage` 件を上限に 1 ページだけ取ったもの) から
- * 作成者 (最古のコミットのプレイヤー) を取り出す純粋関数。
+ * 作成者 (最古のコミットのユーザー) を取り出す純粋関数。
  *
- * 最古のコミットがプレイヤーを特定できない場合は null。一覧が 1 ページ分
+ * 最古のコミットのユーザーを特定できない場合は null。一覧が 1 ページ分
  * ちょうどある場合も、最古のコミットまで届いていない可能性があるので null
  * (途中のコミットの人を作成者にすると、本来の作成者が締め出されるため)。
  */
 export function creatorFromHistory(
-  commits: ReadonlyArray<{ player: string | null }>,
+  commits: ReadonlyArray<ContentUserFields>,
   perPage: number = HISTORY_PER_PAGE
 ): string | null {
   if (commits.length >= perPage) return null;
   const oldest = commits.at(-1);
-  return oldest?.player?.toLowerCase() ?? null;
+  if (!oldest) return null;
+  return contentUserId(oldest)?.toLowerCase() ?? null;
 }
