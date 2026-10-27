@@ -8,6 +8,10 @@ import { Link } from "@tanstack/react-router";
  * ページ状態はクライアントに持たず、常に呼び出し側から `currentPage` を受け取る
  * 制御コンポーネントとして動かす。zag には `type="link"` を伝えておき、
  * 実際の遷移は asChild で差し込んだ Link に任せる(preload とクライアント遷移が効く)。
+ *
+ * `getPageUrl` は渡さない。渡すと zag が `href="?page=N"` を付け、asChild のマージで
+ * Link の props に入る。Link はその href を遷移先として使い、router は pathname が空の
+ * href を `/` と解釈するため、`/?page=N` に飛んでしまう。
  */
 export const PaginationWrapper = ({
   currentPage,
@@ -23,7 +27,6 @@ export const PaginationWrapper = ({
       page={currentPage}
       siblingCount={0}
       type="link"
-      getPageUrl={({ page }) => `?page=${page}`}
     >
       <Pagination.Context>
         {(pagination) => (
