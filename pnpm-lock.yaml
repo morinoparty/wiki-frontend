@@ -182,8 +182,8 @@ importers:
         specifier: 0.5.0
         version: 0.5.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@morinoparty/hagaki':
-        specifier: ^0.3.0
-        version: 0.3.0(@mdxeditor/editor@4.3.3(@codemirror/language@6.13.1)(@lezer/highlight@1.2.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(yjs@13.6.33))(@mdxeditor/gurx@1.2.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(lexical@0.48.0(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)
+        specifier: ^0.4.0
+        version: 0.4.0(@mdxeditor/editor@4.3.3(@codemirror/language@6.13.1)(@lezer/highlight@1.2.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(yjs@13.6.33))(@mdxeditor/gurx@1.2.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(lexical@0.48.0(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)
       '@tanstack/react-router':
         specifier: ^1.170.45
         version: 1.170.45(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -1426,8 +1426,8 @@ packages:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
-  '@morinoparty/hagaki@0.3.0':
-    resolution: {integrity: sha512-hI79PNyGsHvvXuVWnN0pcPaZrroCljsETeWXkjToIskpMEMQPL96fBD2Sv7DTgyYKKqx7M1zGkC5UBRjQHBk6Q==, tarball: https://npm.pkg.github.com/download/@morinoparty/hagaki/0.3.0/85f97f0f0cdb3ead7b185e1e44f5f11cc1689920}
+  '@morinoparty/hagaki@0.4.0':
+    resolution: {integrity: sha512-3Z0autGBsuroUbKugX+hc0tiF6i03NvgxK34gPzz5rv6ii8rTL9YXzhfmKOqljpZ4fYQiCQ5PK9mrlvFio2lSA==, tarball: https://npm.pkg.github.com/download/@morinoparty/hagaki/0.4.0/12f18703373f78df3041a506a1d8c07b418c476f}
     engines: {node: '>=26.12.0'}
     hasBin: true
     peerDependencies:
@@ -6304,7 +6304,7 @@ snapshots:
       - immer
       - react-native
 
-  '@morinoparty/hagaki@0.3.0(@mdxeditor/editor@4.3.3(@codemirror/language@6.13.1)(@lezer/highlight@1.2.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(yjs@13.6.33))(@mdxeditor/gurx@1.2.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(lexical@0.48.0(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)':
+  '@morinoparty/hagaki@0.4.0(@mdxeditor/editor@4.3.3(@codemirror/language@6.13.1)(@lezer/highlight@1.2.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(yjs@13.6.33))(@mdxeditor/gurx@1.2.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(lexical@0.48.0(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)':
     dependencies:
       '@jsquash/avif': 2.1.1
       '@mdxeditor/editor': 4.3.3(@codemirror/language@6.13.1)(@lezer/highlight@1.2.5)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(typescript@7.0.2)(yjs@13.6.33)

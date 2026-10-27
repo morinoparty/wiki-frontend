@@ -43,7 +43,7 @@ import {
   parseEditorInput,
 } from "@/server/types";
 import { blurhashToBase64 } from "@morinoparty/hagaki/markdown";
-import { EDITOR_LIST_PERSISTED, type WikiThumbnail } from "@/types/wiki";
+import type { WikiThumbnail } from "@/types/wiki";
 import { handleInsertImage } from "./pending-images";
 import { toaster } from "@/components/ui/toaster";
 import { buttonSize } from "@/components/buttonSize";
@@ -492,8 +492,7 @@ export function PostHeaderEdit({
         {renderDescriptionEdit()}
 
         {/* 編集者リスト */}
-        {/* hagaki が editor を保存できるようになるまでは出さない (EDITOR_LIST_PERSISTED) */}
-        {EDITOR_LIST_PERSISTED && renderEditorList()}
+        {renderEditorList()}
       </div>
     </header>
   );

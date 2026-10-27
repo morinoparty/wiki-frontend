@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { summarizeContentEditors } from "@/lib/content-user";
+import { summarizeEditors } from "@morinoparty/hagaki";
 import { getArticleInfo } from "@/lib/getArticleInfo";
 import { getPlayerNames } from "@/lib/getPlayerName";
 import { getPostBySlug } from "@/lib/getPostBySlug";
@@ -26,9 +26,7 @@ export interface PostContributorsData {
  *
  * 編集者は生成物 `info.json` の履歴 (移行前の `modified` + git のコミット) から
  * 集計する。コミッター名が `"<name> (<id>)"` 形式でないものは
- * ユーザーを特定できないため一覧には出ない。履歴のユーザー ID は
- * 生成物の移行前後で `player` / `userId` のどちらにも入りうるので、
- * 集計は `summarizeContentEditors` に任せる。
+ * ユーザーを特定できないため一覧には出ない。
  */
 export const fetchPostPage = createServerFn({ method: "GET" })
   .validator((slug: string) => slug)
@@ -39,7 +37,7 @@ export const fetchPostPage = createServerFn({ method: "GET" })
     const info = await getArticleInfo(post.uuid);
     let contributors: PostContributorsData | null = null;
     if (info) {
-      const summaries = summarizeContentEditors(info.history);
+      const summaries = summarizeEditors(info.history);
       const names = await getPlayerNames(summaries.map((s) => s.userId));
       contributors = {
         contributors: summaries.map((s) => ({

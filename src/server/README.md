@@ -64,18 +64,15 @@ server function のハンドラ本体はクライアントのバンドルから�
 
 - roles に `staff` (完全一致) を持つプレイヤーは、上の制限をすべて無視できる。
   roles はログイン時点のスナップショットなので、グループを変えたら再ログインが要る
-- 作成者は記事本体 (`index.mdx`) の最古のコミットのユーザー (`posts.history` の最後の要素)。
-  `createPost` でコミットした人がそのまま作成者になる。次の場合は作成者を特定できないものとして扱い、
-  その下書きには `editor` のプレイヤーとスタッフだけが触れる。
+- 作成者は記事本体 (`index.mdx`) の最古のコミットのユーザー (hagaki の `posts.firstCommit`。
+  履歴の長さによらず API 2 回まで)。`createPost` でコミットした人がそのまま作成者になる。
+  次の場合は作成者を特定できないものとして扱い、その下書きには `editor` のユーザーとスタッフだけが触れる。
   - コミッター名からユーザーを特定できない (古い移行データなど)
-  - 履歴が 1 ページ (100 件) を超える。hagaki 0.3.0 の `posts.history` は新しい順の 1 ページしか
-    返さず、最古のコミットまで届かないため。途中のコミットの人を作成者にはしない
-    (hagaki の `posts.firstCommit` へ移ると解消する。後述の「編集者の ID」を参照)
-  - 履歴が 1 件も取れない (作成直後に GitHub の commits API が追いついていないときなど)
+  - コミットが 1 件も取れない (作成直後に GitHub の commits API が追いついていないときなど)
 - wiki-content は公開リポジトリで、下書きの uuid も誰でも見られる。そのため、作成者が分からない
   下書きは通さない (fail closed)。作成直後に本人が締め出されないよう、`createPost` が作成者を
   isolate 内のキャッシュに入れておく。別の isolate では履歴が出るまで数秒かかることがある
-- `editor` は Minecraft UUID の YAML 配列 (`editor: [uuid, uuid]`)。配列以外 (カンマ区切りの文字列など) は無視する。
+- `editor` はユーザー ID (better-auth の `user.id`。このデプロイでは Minecraft UUID) の YAML 配列 (`editor: [uuid, uuid]`)。配列以外 (カンマ区切りの文字列など) は無視する。
   前後の空白と空要素を落とし、小文字にそろえて重複を除く (`normalizeEditorList`)。
   空なら frontmatter に書かない (draft と同じく、無いことが既定値)。
   エディタのヘッダーでは、入力欄にカンマか改行区切りで書く (`parseEditorInput` で配列にする)。入力欄の検証はサーバーと同じ
@@ -90,45 +87,14 @@ server function のハンドラ本体はクライアントのバンドルから�
 - `updatePost` と `getPostForEdit` が判定する。権限が無いとき、`getPostForEdit` は記事の中身を
   返さずに `code: "forbidden"` を返し、編集ページはエディタの代わりに案内を出す
 - ダッシュボードの一覧 (`getDashboardPosts` / `getDashboardPostsEditedBy`) は、触れない下書きを出さない
-- `editor` の読み書きは hagaki の対応待ち。インストール済みの hagaki 0.3.0 は frontmatter の
-  `editor` を読まず、保存時にも書き出さない (`src/types/wiki.ts` の `WikiPostDetail` で型だけ先に足している)。
-  そのため `EDITOR_LIST_PERSISTED` (`src/types/wiki.ts`) が false の間は、エディタに入力欄を出さず、
-  `createPost` / `updatePost` は空でない `editor` の保存を断る。現状では frontmatter に
-  `editor` を手で書いても効かない。hagaki を上げたら、型の拡張と一緒にこの定数を消す
 
-## 編集者の ID (`player` から `userId` への移行)
+## 編集者の ID
 
-記事の編集者・作成者の ID は、better-auth の `session.user.id` と同じ値である
+記事の編集者・作成者の ID (`userId`) は、better-auth の `session.user.id` と同じ値である
 (このデプロイでは MineAuth の Minecraft UUID だが、hagaki 側はそれを前提にしない)。
-hagaki は次の版でこの ID のフィールド名を `player` から `userId` へ改名し
-(`PathCommit`、`WikiHistoryEntry`、`EditorSummary`、frontmatter の `modified[]`)、
-wiki-content の生成物 (`article.json` の `editors[]`、`info.json` の `history[]`) も同じ名前になる。
-
-移行のあいだは、インストール済みの hagaki 0.3.0 (`player`) と配信中の生成物
-(移行前は `player`、移行後は `userId`) が混ざる。そのため、ID を読む処理は
-`src/lib/content-user.ts` のアダプタだけを通す。
-
-- `contentUserId(record)` は `userId ?? player` を返す。`getPostsEditedBy`、
-  `getDashboardPostsEditedBy`、`creatorFromHistory` がこれで読む
-- `summarizeContentEditors(history)` は `info.json` の履歴を `userId` に統一して集計する
-  (記事ページの編集者一覧 `fetchPostPage` が使う)
-- アプリ内の型 (`PostContributor` など) は `userId` に統一している
-
-このアダプタが面倒を見るのは**読み取りだけ**である。保存は安全ではない。
-hagaki 0.3.0 の `posts.getFromRepo` は frontmatter の `modified[].player` しか読まないため、
-wiki-content の書き換え (`modified[].userId`) が入った記事を `updatePost` で保存すると、
-`modified` を持たない投稿として保存され、git 以前の編集履歴が消える
-(次の `hagaki generate` で `info.json` と `editors[]` からも消える)。
-そのため、wiki-content の移行 PR のマージと、この app の hagaki 更新・デプロイは同時に行う。
-同時にできない場合は、この app を更新するまでダッシュボードからの編集を止める。
-
-hagaki を改名版へ上げたら、次の 2 点を行う。
-
-1. `src/lib/content-user.ts` の `player` へのフォールバックと詰め替えを消し、hagaki の `userId` をそのまま使う
-2. 作成者の判定 (`PermissionService.getPostCreator` と `getDashboardPostsEditedBy`) を
-   `posts.history` + `creatorFromHistory` から hagaki の `posts.firstCommit(uuid)` に置き換える。
-   `firstCommit` は履歴の長さによらず最古のコミットを返すので、「履歴が 1 ページ (100 件) を超えると
-   作成者を特定できない」制限がなくなる。hagaki 0.3.0 には `firstCommit` が無いため、今は置き換えていない
+hagaki の `PathCommit`、`WikiHistoryEntry`、`EditorSummary`、frontmatter の `modified[]`、
+wiki-content の生成物 (`article.json` の `editors[]`、`info.json` の `history[]`) はすべて `userId` で持つ。
+hagaki 0.4.0 で `player` から改名された。
 
 ## slug の重複チェック
 
@@ -142,7 +108,7 @@ hagaki を改名版へ上げたら、次の 2 点を行う。
 - `createPost` は常に、`updatePost` は下書きかどうかに関係なく毎回、自分自身 (uuid) を除いて突き合わせる。
   被ったまま公開すると `hagaki generate` が fail してコンテンツのデプロイ全体が止まるため
 - 重複を確認できないときは作成・保存を断る (fail closed)。公開記事の一覧が取れない (CDN 障害) とき、
-  またはリポジトリにしか無い記事を 1 件でも読めなかったとき (hagaki 0.3.0 の `getFromRepo` は
+  またはリポジトリにしか無い記事を 1 件でも読めなかったとき (hagaki の `getFromRepo` は
   レート制限などのエラーも `null` にするので、git tree の uuid の数と読めた数を比べて検知する)
 - uuid の一覧 (git tree) は毎回取るが、リポジトリにしか無い記事の中身は uuid ごとに isolate 内で
   60 秒キャッシュする (保存のたびに下書きの数だけ GitHub API を叩かないため)。
