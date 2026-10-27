@@ -46,6 +46,12 @@ Cloudflare Workers で動かします。記事の読み書きは
   `beforeLoad` がサインイン (`/auth/sign-in?redirect=<元のパス>`) へ送ります。
 - ログインボタン (サイドバー、記事の「このページを編集」) はサインインページを経由せず、直接 MineAuth へ遷移します。
   ログイン後は押したページ (編集ボタンなら編集ページ) に戻ります。戻り先は `RedirectPathSchema` (`src/server/types.ts`) でサイト内のパスに限ります。
+- MineAuth には `openid profile email roles` のスコープを要求します。`roles` は LuckPerms のグループ名の配列で、
+  better-auth の user の `roles` に入ります (`src/lib/auth.ts`)。`staff` グループのプレイヤーは記事の編集制限
+  (下書きの持ち主、frontmatter の `editor`) をすべて無視できます。詳細は [`src/server/README.md`](src/server/README.md#編集の権限)。
+- roles はログインした時点のスナップショットで、セッションの間は更新されません。LuckPerms のグループを
+  変えたあとは、ログアウトしてログインし直す必要があります。記事の `editor` や下書きの作成者は
+  リクエストのたびに判定するため、こちらは再ログインしなくても反映されます。
 
 ### Worker の env
 

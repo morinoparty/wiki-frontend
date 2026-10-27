@@ -109,9 +109,9 @@ export function PostContributors({ data }: PostContributorsProps) {
           {contributors.length > 0 ? (
             <ul className={styles.list}>
               {contributors.map((contributor) => (
-                <li key={contributor.player} className={styles.item}>
+                <li key={contributor.userId} className={styles.item}>
                   <PlayerMap
-                    playerId={contributor.player}
+                    playerId={contributor.userId}
                     playerName={contributor.playerName}
                   />
                   <span className={styles.itemDate}>

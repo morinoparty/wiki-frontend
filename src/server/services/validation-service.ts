@@ -7,6 +7,11 @@ import {
 } from "@/server/types";
 import { ZodError } from "zod";
 
+/** 検証結果。成功時は Zod で parse した値を `data` に持つ。 */
+export type ValidationResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: string; errors?: ValidationError[] };
+
 export class ValidationService {
   /**
    * ZodエラーをValidationErrorの配列に変換
@@ -23,14 +28,12 @@ export class ValidationService {
   /**
    * 記事作成時の入力データを検証
    */
-  static validateCreateInput(input: CreatePostInput): {
-    success: boolean;
-    error?: string;
-    errors?: ValidationError[];
-  } {
+  static validateCreateInput(input: unknown): ValidationResult<CreatePostInput> {
     try {
-      CreatePostInputSchema.parse(input);
-      return { success: true };
+      // parse 後の値 (trim 済み・スキーマに無いキーは除去済み) を返す。
+      // 呼び出し側は生の入力ではなくこちらを使うこと
+      const data = CreatePostInputSchema.parse(input);
+      return { success: true, data };
     } catch (error) {
       if (error instanceof ZodError) {
         const errors = this.zodErrorToValidationErrors(error);
@@ -50,14 +53,12 @@ export class ValidationService {
   /**
    * 記事更新時の入力データを検証
    */
-  static validateUpdateInput(input: UpdatePostInput): {
-    success: boolean;
-    error?: string;
-    errors?: ValidationError[];
-  } {
+  static validateUpdateInput(input: unknown): ValidationResult<UpdatePostInput> {
     try {
-      UpdatePostInputSchema.parse(input);
-      return { success: true };
+      // parse 後の値 (trim 済み・スキーマに無いキーは除去済み) を返す。
+      // 呼び出し側は生の入力ではなくこちらを使うこと
+      const data = UpdatePostInputSchema.parse(input);
+      return { success: true, data };
     } catch (error) {
       if (error instanceof ZodError) {
         const errors = this.zodErrorToValidationErrors(error);

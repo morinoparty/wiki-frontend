@@ -1,6 +1,6 @@
 import { Editable } from "@ark-ui/react/editable";
-import { Button, Spinner, Switch } from "@morinoparty/chlorophyll-react/components";
-import { Tag, Image, EyeOff } from "lucide-react";
+import { Button, Field, Spinner, Switch } from "@morinoparty/chlorophyll-react/components";
+import { Tag, Image, EyeOff, Users } from "lucide-react";
 import { postHeaderStyles } from "@/components/PostHeader";
 import { css, cx, sva } from "styled-system/css";
 
@@ -37,8 +37,13 @@ const editableStyles = sva({
   },
 });
 import { useRef, useState, useEffect } from "react";
+import {
+  isEditorId,
+  normalizeEditorList,
+  parseEditorInput,
+} from "@/server/types";
 import { blurhashToBase64 } from "@morinoparty/hagaki/markdown";
-import type { WikiThumbnail } from "@/types/wiki";
+import { EDITOR_LIST_PERSISTED, type WikiThumbnail } from "@/types/wiki";
 import { handleInsertImage } from "./pending-images";
 import { toaster } from "@/components/ui/toaster";
 import { buttonSize } from "@/components/buttonSize";
@@ -60,12 +65,15 @@ interface PostHeaderEditProps {
   description: string;
   /** 下書きか。true の間は配信されない (frontmatter に永続化)。 */
   draft?: boolean;
+  /** 編集できるプレイヤー (Minecraft UUID)。空・未設定ならログイン済みの全員。 */
+  editor?: string[];
   onChange?: (fields: {
     title?: string;
     description?: string;
     category?: string;
     thumbnail?: WikiThumbnail | null;
     draft?: boolean;
+    editor?: string[];
   }) => void;
   disabled?: boolean;
   onSaveComplete?: boolean;
@@ -78,6 +86,7 @@ export function PostHeaderEdit({
   title,
   description,
   draft,
+  editor,
   onChange,
   disabled,
   onSaveComplete,
@@ -91,6 +100,23 @@ export function PostHeaderEdit({
   const previewImage = thumb
     ? `/api/article-assets/${articleId}/${thumb.imageId}${draft ? "?draft=1" : ""}`
     : undefined;
+  // 編集者リストの入力欄の生の文字列。正規化した配列だけを親へ渡し、
+  // 入力途中のカンマや改行はこちらで保持する
+  const [editorText, setEditorText] = useState(() => (editor ?? []).join("\n"));
+  // 入力欄の検証はサーバーの Zod スキーマ (EditorIdSchema) と同じ規則で行う
+  const invalidEditors = parseEditorInput(editorText).filter(
+    (id) => !isEditorId(id)
+  );
+  // 保存後の再読み込みなどで props の編集者リストが変わったら、入力欄を合わせる。
+  // 入力中 (正規化すると同じ値) は打ちかけのカンマや改行を消さないよう触らない
+  const editorKey = normalizeEditorList(editor).join(",");
+  useEffect(() => {
+    setEditorText((current) =>
+      parseEditorInput(current).join(",") === editorKey
+        ? current
+        : editorKey.split(",").filter(Boolean).join("\n")
+    );
+  }, [editorKey]);
   // アップロード直後のbase64キャッシュ
   const [base64Cache, setBase64Cache] = useState<string | null>(null);
 
@@ -317,6 +343,45 @@ export function PostHeaderEdit({
   };
 
   /**
+   * 編集者リストの入力欄のレンダリング。カンマか改行で区切った UUID を受け付ける。
+   * 空ならログイン済みの全員が編集でき、指定するとそのプレイヤー (とスタッフ) だけになる
+   */
+  const renderEditorList = () => {
+    return (
+      <Field.Root
+        size="sm"
+        disabled={disabled}
+        invalid={invalidEditors.length > 0}
+        className={css({ mt: "24px", opacity: 0.8 })}
+      >
+        <Field.Label
+          className={css({ display: "flex", alignItems: "center", gap: "6px" })}
+        >
+          <Users size={14} aria-hidden />
+          編集者 (Minecraft UUID)
+        </Field.Label>
+        <Field.Textarea
+          value={editorText}
+          rows={2}
+          placeholder="空欄ならログインしている全員が編集できます"
+          onChange={(e) => {
+            setEditorText(e.target.value);
+            const list = parseEditorInput(e.target.value);
+            // 空のリストは「指定なし」として送らない (frontmatter から消える)
+            onChange?.({ editor: list.length > 0 ? list : undefined });
+          }}
+        />
+        <Field.HelperText>
+          カンマか改行で区切ります。指定すると、そのプレイヤーとスタッフだけが編集できます (自分も含めてください)
+        </Field.HelperText>
+        <Field.ErrorText>
+          UUID ではない値があります: {invalidEditors.join(", ")}
+        </Field.ErrorText>
+      </Field.Root>
+    );
+  };
+
+  /**
    * タイトル編集フィールドのレンダリング
    */
   const renderTitleEdit = () => {
@@ -425,6 +490,10 @@ export function PostHeaderEdit({
 
         {/* 説明編集 */}
         {renderDescriptionEdit()}
+
+        {/* 編集者リスト */}
+        {/* hagaki が editor を保存できるようになるまでは出さない (EDITOR_LIST_PERSISTED) */}
+        {EDITOR_LIST_PERSISTED && renderEditorList()}
       </div>
     </header>
   );

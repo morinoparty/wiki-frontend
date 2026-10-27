@@ -57,6 +57,23 @@ export interface PostFormValues {
   option?: PostOptionValues;
 }
 
+/**
+ * 入力欄の slug を、サーバーが返す使用中の slug (hagaki の `toUrlSlug` 済み) と
+ * 比較できる形にそろえる。
+ *
+ * 入力欄は英数字とハイフンしか受け付けないので、その範囲で `toUrlSlug` と同じ
+ * 変換 (小文字化・連続ハイフンの圧縮・前後のハイフン除去) だけを行う。
+ * hagaki の本体を import すると gray-matter などサーバー用の依存がこのページの
+ * バンドルに入るため、ここでは使わない。最終的な重複チェックは createPost が行う。
+ */
+function toComparableSlug(slug: string): string {
+  return slug
+    .trim()
+    .toLowerCase()
+    .replace(/--+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 type SlugCheckStatus =
   | "idle"
   | "checking"
@@ -99,6 +116,9 @@ export const DashboardPostFormModal: React.FC<{
     option: initialValues?.option ?? defaultOptionValues(currentCategory),
   }));
 
+  // 使用中の slug (toUrlSlug 済み) を引きやすい形にしておく
+  const existingSlugSet = useMemo(() => new Set(existingSlugs), [existingSlugs]);
+
   const [slugCheckStatus, setSlugCheckStatus] =
     useState<SlugCheckStatus>("idle");
 
@@ -135,23 +155,14 @@ export const DashboardPostFormModal: React.FC<{
         return;
       }
 
-      console.log("チェック対象slug:", slug);
-      console.log("既存slugs:", existingSlugs);
-
       setSlugCheckStatus("checking");
 
       // 少し遅延を入れてリアルタイム入力に対応
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // 正規化して比較（大文字小文字を無視し、空白やスペシャル文字も考慮）
-      const normalizedInputSlug = slug.toLowerCase().trim();
-      const isDuplicate = existingSlugs.some((existingSlug) => {
-        const normalizedExistingSlug = existingSlug.toLowerCase().trim();
-        return normalizedExistingSlug === normalizedInputSlug;
-      });
-
-      console.log("重複チェック結果:", isDuplicate);
-      console.log("正規化された入力slug:", normalizedInputSlug);
+      // existingSlugs はサーバー側で toUrlSlug 済み (公開記事と下書きの和集合)。
+      // 入力も同じ形にそろえて比較する
+      const isDuplicate = existingSlugSet.has(toComparableSlug(slug));
 
       if (isDuplicate) {
         setSlugCheckStatus("duplicate");
@@ -159,7 +170,7 @@ export const DashboardPostFormModal: React.FC<{
         setSlugCheckStatus("available");
       }
     },
-    [existingSlugs]
+    [existingSlugSet]
   );
 
   // URLが変更されたときにチェックを実行
