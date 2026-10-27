@@ -6,7 +6,7 @@ import {
   type OperationContext,
   type UpdatePostInput,
 } from "./types";
-import { EDITOR_LIST_PERSISTED, type WikiPostDetail } from "@/types/wiki";
+import type { WikiPostDetail } from "@/types/wiki";
 import { GitHubService } from "./services/github-service";
 import { ValidationService } from "./services/validation-service";
 import { AuthService } from "./services/auth-service";
@@ -56,10 +56,6 @@ const SELF_LOCKOUT_MESSAGE =
 const DRAFT_LOCKOUT_MESSAGE =
   "下書きにすると、この記事を編集できなくなります。下書きは作成者・編集者リストのプレイヤー・スタッフだけが編集できます";
 
-/** 編集者リストを保存できない (hagaki が未対応の) 間に、リストが送られてきたときのメッセージ。 */
-const EDITOR_LIST_UNSUPPORTED_MESSAGE =
-  "編集者リストはまだ保存できません (hagaki の更新待ち)";
-
 /** slug が他の記事 (下書きを含む) と被っているときのメッセージ。 */
 const SLUG_TAKEN_MESSAGE =
   "このスラッグは既に別の記事 (下書きを含む) で使用されています";
@@ -99,11 +95,8 @@ export const createPost = createServerFn({ method: "POST" })
           return { success: false, error: "記事作成の権限がありません" };
         }
 
-        // 4. 編集者リスト。保存できない間は断り、自分を締め出すリストでは作らせない
+        // 4. 編集者リスト。自分を締め出すリストでは作らせない
         const editor = normalizeEditorList(input.editor);
-        if (!EDITOR_LIST_PERSISTED && editor.length > 0) {
-          return { success: false, error: EDITOR_LIST_UNSUPPORTED_MESSAGE };
-        }
         if (locksOutSelf(actor, editor)) {
           return { success: false, error: SELF_LOCKOUT_MESSAGE };
         }
@@ -260,13 +253,6 @@ export const updatePost = createServerFn({ method: "POST" })
         const editor = normalizeEditorList(
           input.editor !== undefined ? input.editor : existingPost.editor
         );
-        if (
-          !EDITOR_LIST_PERSISTED &&
-          input.editor !== undefined &&
-          editor.length > 0
-        ) {
-          return { success: false, error: EDITOR_LIST_UNSUPPORTED_MESSAGE };
-        }
         const draft =
           typeof input.draft === "boolean" ? input.draft : existingPost.draft;
 

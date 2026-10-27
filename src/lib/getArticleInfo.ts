@@ -1,5 +1,4 @@
-import type { WikiThumbnail } from "@morinoparty/hagaki";
-import type { ContentHistoryEntry } from "@/lib/content-user";
+import type { WikiHistoryEntry, WikiThumbnail } from "@morinoparty/hagaki";
 import { CONTENT_BASE_URL } from "./content";
 import { createTtlCache } from "./ttlCache";
 
@@ -13,9 +12,6 @@ const infoCache = createTtlCache<ArticleInfo>(60 * 60 * 1000);
  * frontmatter の `modified`(移行前の履歴) と git のコミット履歴をマージして
  * 書き出している。hagaki の `posts.getByUuid` は created / updated しか
  * 取り出さないため、編集履歴が欲しい場合はこちらを直接読む。
- *
- * 履歴のユーザー ID は生成物の移行前後で `player` / `userId` のどちらにも
- * 入りうる (`ContentHistoryEntry`)。読むときは `@/lib/content-user` を通す。
  */
 export interface ArticleInfo {
   title: string;
@@ -26,7 +22,7 @@ export interface ArticleInfo {
   thumbnail: WikiThumbnail | null;
   created: string | null;
   updated: string | null;
-  history: ContentHistoryEntry[];
+  history: WikiHistoryEntry[];
 }
 
 /** 記事一件の `info.json` を取得する。未生成・取得失敗時は null。 */

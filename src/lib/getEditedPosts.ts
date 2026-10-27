@@ -1,4 +1,3 @@
-import { contentUserId } from "@/lib/content-user";
 import type { ArticleEditor, WikiPost } from "@/types/wiki";
 import { getAllPosts } from "./getAllPosts";
 
@@ -17,8 +16,6 @@ export interface EditedPost {
  * 判定は生成物 `article.json` の `editors` (履歴のコミッター名から復元した
  * ユーザー ID を畳んだもの) で行う。コミッター名には better-auth の
  * `user.id` が入っているので、セッションの ID をそのまま渡せる。
- * `editors` の ID は移行前後で `player` / `userId` のどちらにも入りうるため
- * `contentUserId` で読む。
  *
  * 記事一覧 1 リクエストで完結する。`editors` を持たない古い生成物が
  * 配信されている場合は誰の編集も引けないため、警告だけ出して空を返す。
@@ -38,7 +35,7 @@ export async function getPostsEditedBy(
   const edited: EditedPost[] = [];
   for (const post of posts) {
     const editor = post.editors?.find(
-      (candidate: ArticleEditor) => contentUserId(candidate) === userId
+      (candidate: ArticleEditor) => candidate.userId === userId
     );
     if (!editor) continue;
     edited.push({

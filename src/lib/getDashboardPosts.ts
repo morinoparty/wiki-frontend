@@ -1,4 +1,3 @@
-import { contentUserId } from "@/lib/content-user";
 import { getAllPosts } from "@/lib/getAllPosts";
 import { getPostsEditedBy, type EditedPost } from "@/lib/getEditedPosts";
 import { getHagakiClient } from "@/lib/hagaki";
@@ -110,7 +109,7 @@ export async function getRepoOnlyPosts(
   );
   const loaded = extras.filter((post) => post !== null);
   if (options.strict && loaded.length !== missing.length) {
-    // hagaki 0.3.0 の getFromRepo は取得エラーも null にするので、件数で検知する
+    // hagaki の getFromRepo は取得エラーも null にするので、件数で検知する
     throw new Error(
       "リポジトリの記事を一部読み込めなかったため、スラッグの重複を確認できません。時間をおいて再度お試しください"
     );
@@ -183,7 +182,7 @@ export async function getDashboardPosts(): Promise<DashboardPost[]> {
  *
  * 公開記事は article.json の `editors` で判定する (getPostsEditedBy)。
  * draft / デプロイ待ちの記事は manifest に無いため、リポジトリの
- * コミット履歴 (コミットのユーザー ID。`contentUserId` で読む) から判定する。
+ * コミット履歴 (`PathCommit.userId`) から判定する。
  * 触れなくなった下書き (編集者リストから外された・自分が作成者でない) は出さない。
  */
 export async function getDashboardPostsEditedBy(
@@ -206,17 +205,23 @@ export async function getDashboardPostsEditedBy(
           perPage: HISTORY_PER_PAGE,
         });
         const mine = commits.filter(
-          (commit) => contentUserId(commit)?.toLowerCase() === userId
+          (commit) => commit.userId?.toLowerCase() === userId
         );
         if (mine.length === 0) return null;
-        // 作成者は取得済みの履歴から決める (history を二度引かない)。
-        // 1 ページに収まらない履歴では作成者は不明 (null) になる。
-        // TODO(hagaki の改名版へ上げたら): 作成者は posts.firstCommit(uuid) で取る
-        // (src/server/README.md の「編集者の ID」を参照)
+        // 作成者は下書きの判定にだけ要る。取得済みの履歴が 1 ページに収まって
+        // いればそこから決め (history を二度引かない)、収まらなければ
+        // posts.firstCommit で最古のコミットを引く
+        let creator: string | null | undefined = null;
+        if (post.draft === true) {
+          creator =
+            commits.length < HISTORY_PER_PAGE
+              ? creatorFromHistory(commits)
+              : await PermissionService.getPostCreator(post.uuid);
+        }
         const allowed = canEditPost(actor, {
           editor: post.editor,
           draft: post.draft,
-          creator: creatorFromHistory(commits),
+          creator: creator ?? null,
         });
         if (post.draft === true && !allowed) return null;
         return {

@@ -1,5 +1,4 @@
 import type { AppSession } from "@/lib/auth";
-import { contentUserId, type ContentUserFields } from "@/lib/content-user";
 import { getHagakiClient } from "@/lib/hagaki";
 import { createTtlCache } from "@/lib/ttlCache";
 import { normalizeEditorList, type Permission } from "@/server/types";
@@ -31,13 +30,13 @@ export const STAFF_ROLE = "staff";
 
 /**
  * 作成者の履歴を引くときの 1 ページの件数 (GitHub API の上限)。
- * hagaki 0.3.0 の `posts.history` は 1 ページ目 (新しい順) しか返さないので、
- * この件数ちょうど返ってきたら最古のコミットまで届いていないとみなす。
+ * 1 ページ (新しい順) だけを取った履歴がこの件数ちょうどなら、最古のコミットまで
+ * 届いていないとみなす (そのときは `posts.firstCommit` で引き直す)。
  */
 export const HISTORY_PER_PAGE = 100;
 
 // 記事の作成者 (最古のコミット) は後から変わらないので isolate 内でキャッシュする。
-// 特定できなかったとき (null: ユーザー不明・履歴が 1 ページを超える、
+// 特定できなかったとき (null: ユーザー不明、
 // undefined: 履歴が取れない) はキャッシュしない — 作成直後に GitHub の
 // commits API が追いついていないだけのことがある
 const creatorCache = createTtlCache<string>(60 * 60 * 1000);
@@ -117,26 +116,20 @@ export class PermissionService {
    * 記事の作成者 = 記事本体 (`index.mdx`) の最古のコミットのユーザーを返す。
    *
    * - string: 作成者のユーザー ID (better-auth の `user.id`)
-   * - null: 作成者を特定できない。最古のコミットにユーザーが無い (古い移行データ
-   *   など) か、履歴が 1 ページ (`HISTORY_PER_PAGE` 件) を超えていて最古の
-   *   コミットまで取れない場合
-   * - undefined: 履歴が 1 件も取れない。作成直後に GitHub の commits API が
+   * - null: 作成者を特定できない。最古のコミットのコミッター名から
+   *   ユーザーを読み戻せない (古い移行データなど) 場合
+   * - undefined: コミットが 1 件も取れない。作成直後に GitHub の commits API が
    *   追いついていないだけのことが多いが、判定には使えない
    *
-   * TODO(hagaki の改名版へ上げたら): 最古のコミットは `posts.firstCommit(uuid)` で
-   * 取れるようになる (履歴の長さによらず API 2 回)。そのときは `posts.history` +
-   * `creatorFromHistory` をやめて `firstCommit` の `userId` を使い、
-   * 「履歴が 1 ページを超えると作成者不明」の制限をなくす。
-   * hagaki 0.3.0 には `firstCommit` が無いので、今は 1 ページ分の履歴で判定している
+   * 最古のコミットは hagaki の `posts.firstCommit` で引く。履歴の長さによらず
+   * API は 2 回まで。
    */
   static async getPostCreator(uuid: string): Promise<string | null | undefined> {
     const cached = creatorCache.get(uuid);
     if (cached) return cached;
-    const commits = await getHagakiClient().posts.history(uuid, {
-      perPage: HISTORY_PER_PAGE,
-    });
-    if (commits.length === 0) return undefined;
-    const creator = creatorFromHistory(commits);
+    const first = await getHagakiClient().posts.firstCommit(uuid);
+    if (!first) return undefined;
+    const creator = first.userId?.toLowerCase() ?? null;
     if (creator) creatorCache.set(uuid, creator);
     return creator;
   }
@@ -197,11 +190,11 @@ export class PermissionService {
  * (途中のコミットの人を作成者にすると、本来の作成者が締め出されるため)。
  */
 export function creatorFromHistory(
-  commits: ReadonlyArray<ContentUserFields>,
+  commits: ReadonlyArray<{ userId: string | null }>,
   perPage: number = HISTORY_PER_PAGE
 ): string | null {
   if (commits.length >= perPage) return null;
   const oldest = commits.at(-1);
   if (!oldest) return null;
-  return contentUserId(oldest)?.toLowerCase() ?? null;
+  return oldest.userId?.toLowerCase() ?? null;
 }
