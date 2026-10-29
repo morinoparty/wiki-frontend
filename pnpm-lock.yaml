@@ -1421,13 +1421,13 @@ packages:
       react-dom: '>= 18 || >= 19'
 
   '@morinoparty/chlorophyll-react@0.5.0':
-    resolution: {integrity: sha512-Uk6NFTdvLPjqTUDF4iBjv1+7tKTRj4eL9i7qW1hu2+6rBHVW0KjODILpvLelKQfyohP0AHYk9RM/ly3VfpVxRA==, tarball: https://npm.pkg.github.com/download/@morinoparty/chlorophyll-react/0.5.0/720edf90df3177c79d6ba28f44c1605ae7a82ec0}
+    resolution: {integrity: sha512-mrD45OhDairAEe7hp0ACbmIbI16hbFRv1mi/56mnDzkq7aFaWtWDy2gPSu0OTnHE7QH297Ux/1vSNvtUDo+x1A==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
 
   '@morinoparty/hagaki@0.4.0':
-    resolution: {integrity: sha512-3Z0autGBsuroUbKugX+hc0tiF6i03NvgxK34gPzz5rv6ii8rTL9YXzhfmKOqljpZ4fYQiCQ5PK9mrlvFio2lSA==, tarball: https://npm.pkg.github.com/download/@morinoparty/hagaki/0.4.0/12f18703373f78df3041a506a1d8c07b418c476f}
+    resolution: {integrity: sha512-XMTG052hODokoqMIX8PutRkHvG+GFm7si2DyHpTk1rIV2ez2mXpi4UG6WfzSWob72T1JOYlNKE3a+ntPua4ghQ==}
     engines: {node: '>=26.12.0'}
     hasBin: true
     peerDependencies:

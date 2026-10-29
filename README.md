@@ -76,8 +76,8 @@ MineAuth には `https://wiki-frontend.<subdomain>.workers.dev/api/auth/callback
    gh secret set -f .env
    ```
 
-`@morinoparty/chlorophyll-react` は GitHub Packages から入れるため、
-`~/.npmrc` に `//npm.pkg.github.com/:_authToken=<read:packages の PAT>` が必要です。
+`@morinoparty/chlorophyll-react` と `@morinoparty/hagaki` は npm から入れるため、`.npmrc` の設定やトークンは不要です。
+`~/.npmrc` に `@morinoparty:registry=https://npm.pkg.github.com` が残っている場合は、GitHub Packages を読みにいくので削除してください。
 
 ## ローカル開発
 

@@ -42,8 +42,8 @@ Minecraft のモデル・テクスチャ・アイテム定義は、別リポジ�
 - Zod (入力バリデーション)
 - GitHub Actions (`.github/workflows/deploy.yml`)
 
-`@morinoparty/chlorophyll-react` は GitHub Packages から入れるため (`.npmrc` のレジストリ指定)、
-`~/.npmrc` に `//npm.pkg.github.com/:_authToken=<read:packages の PAT>` が必要です。
+`@morinoparty/chlorophyll-react` と `@morinoparty/hagaki` は npm から入れます。`.npmrc` の設定やトークンは不要です。
+`~/.npmrc` に `@morinoparty:registry=https://npm.pkg.github.com` があると GitHub Packages を読みにいくので、置かないでください。
 
 ## 経緯
 もともとは vinext (Vite 上の Next.js API) で書かれていましたが、TanStack Start へ移行しました。
