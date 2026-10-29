@@ -22,8 +22,6 @@ concurrency:
 
 permissions:
   contents: read
-  # @morinoparty/chlorophyll-react を GitHub Packages から取得する
-  packages: read
   # PR に preview の URL をコメントする
   pull-requests: write
 
@@ -40,13 +38,7 @@ jobs:
       - uses: pnpm/setup@v3
         with:
           cache: true      # pnpm store を lockfile ごとにキャッシュ
-          install: false   # GitHub Packages の認証を install の前に挟むため
-
-      # GitHub Packages の npm レジストリは公開パッケージでも認証が要る
-      - name: Authenticate to GitHub Packages
-        run: echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          install: false   # install は下で --frozen-lockfile 付きで明示的に行う
 
       # prepare で panda codegen も走る
       - run: pnpm install --frozen-lockfile
