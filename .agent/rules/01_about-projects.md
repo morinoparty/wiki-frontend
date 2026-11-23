@@ -31,7 +31,7 @@ Minecraft のモデル・テクスチャ・アイテム定義は、別リポジ�
 `src/components/ui/provider.tsx` の `MinecraftProvider` に渡しているので、chlorophyll の `MinecraftItem` などは個別に URL を渡さずに使えます。
 
 ## 主な技術スタック
-- **TanStack Start / Router** + Vite 8 + `@cloudflare/vite-plugin` (v2 beta) + `cf` (Cloudflare CLI, beta)
+- **TanStack Start / Router** + Vite+ (`vite-plus`。`vite` は catalog で Vite+ のコアに差し替える) + `@cloudflare/vite-plugin` (v2 beta) + `cf` (Cloudflare CLI, beta)
 - React 19 / TypeScript
 - **chlorophyll (`@morinoparty/chlorophyll-react`) + Panda CSS** (スタイリング。`colorPalette: mori`)
 - Ark UI (`@ark-ui/react`)、アイコンは `lucide-react`

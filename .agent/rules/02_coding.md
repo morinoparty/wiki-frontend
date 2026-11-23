@@ -25,14 +25,14 @@
 ## コマンド
 
 - `pnpm install` - 依存関係のインストール (`prepare` で `panda codegen` も走る)
-- `pnpm run dev` - ライセンス一覧と検索 index を生成してから `cf dev`
-- `pnpm run build` - 生成してから `cf build` (Vite + TanStack Start。出力は `.cloudflare/output`。`cf build` は `--mode` を渡せない)
+- `pnpm run dev` - ライセンス一覧と検索 index を生成してから `vp dev` (Worker secret は `.env` から Cloudflare Vite plugin が読む)
+- `pnpm run build` - 生成してから `vp build` (Vite+ + TanStack Start。出力は `.cloudflare/output`。`--mode` は付けない)
 - `pnpm run typecheck` - `cf workers types && tsc --noEmit`
-- `pnpm run generate` - `generate:license` + `generate:index` (`cf build` の前に必要。`cf` は package.json の scripts を通らない)
+- `pnpm run generate` - `generate:license` + `generate:index` (`vp build` の前に必要。`vp` は package.json の scripts を通らない)
 - `pnpm exec cf deploy --dry-run` - 認証情報なしでデプロイを検証する
 - `pnpm exec tsr generate` - `src/routeTree.gen.ts` の再生成 (通常は Vite プラグインが生成する)
 
-`cloudflare.config.ts` のないディレクトリで `cf dev` / `cf build` / `cf deploy` を実行しないでください。
+`cloudflare.config.ts` のないディレクトリで `vp dev` / `vp build` / `cf deploy` を実行しないでください。
 
 ## コードスタイル
 

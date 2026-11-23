@@ -17,5 +17,5 @@
 - `src/components/` に共通コンポーネント (`dashboard/`, `post/`, `ui/` のサブディレクトリあり)、`src/hooks/` にフック、`src/types/` に型、`src/styles/globals.css` にグローバル CSS を配置します。
 - `src/generate-search-index.ts` は検索 index (`public/search-index.json`) を生成する Node スクリプトです。
 - `public/` に静的アセット (`_headers` など) を配置します。
-- `cloudflare.config.ts` (Worker 定義)、`vite.config.ts` (TanStack Start + Cloudflare Vite plugin)、`panda.config.ts` (Panda CSS / chlorophyll のプリセット) はリポジトリルートにあります。
+- `cloudflare.config.ts` (Worker 定義)、`vite.config.ts` (Vite+ / TanStack Start + Cloudflare Vite plugin)、`panda.config.ts` (Panda CSS / chlorophyll のプリセット) はリポジトリルートにあります。
 - `patches/` は pnpm の `patchedDependencies` 用のパッチです。

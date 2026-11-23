@@ -2,8 +2,7 @@ import path from "node:path";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
+import { defineConfig, lazyPlugins } from "vite-plus";
 
 // chlorophyll は生の TypeScript ソースで配布され、その中から `styled-system/*` を
 // 参照している。tsconfig の paths は型解決にしか効かず、node_modules 配下の
@@ -15,17 +14,19 @@ export default defineConfig({
     alias: {
       "styled-system": styledSystemDir,
     },
+    // tsconfig の paths (`@/*`) を Vite が解決する (vite-tsconfig-paths は不要)
+    tsconfigPaths: true,
   },
   build: {
     // ハッシュ付きの成果物を public/assets (ハッシュ無しのフォントや画像) と
     // 別のパスに出し、public/_headers で /_build/* だけ immutable にする
     assetsDir: "_build",
   },
-  plugins: [
+  // 設定値だけを読むコマンドではプラグインを初期化しない
+  plugins: lazyPlugins(() => [
     // Worker の設定 (名前・バインディング) は cloudflare.config.ts にある
     cloudflare({ viteEnvironment: { name: "ssr" } }),
-    tsconfigPaths(),
     tanstackStart({ srcDirectory: "src" }),
     viteReact(),
-  ],
+  ]),
 });
