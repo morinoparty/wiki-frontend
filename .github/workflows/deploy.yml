@@ -49,8 +49,10 @@ jobs:
 
       - run: pnpm run typecheck
 
-      # cf build は検出した vite build に --mode を渡せないので付けない
-      - run: pnpm exec cf build
+      # Vite+ のビルド。成果物 (.cloudflare/output) は Cloudflare Vite plugin が
+      # cloudflare.config.ts を読んで書き出すので、そのまま cf deploy --prebuilt に渡せる。
+      # --mode は付けない (vite build は既定で production を output に記録する)
+      - run: pnpm exec vp build
 
       - run: pnpm exec cf deploy --prebuilt --mode production --dry-run
 

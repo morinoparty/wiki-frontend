@@ -5,6 +5,7 @@ Cloudflare Workers で動かします。記事の読み書きは
 [hagaki](https://github.com/morinoparty/hagaki) 経由です。
 
 - 配信 URL: `https://wiki-frontend.<subdomain>.workers.dev` (Worker 名 `wiki-frontend`。独自ドメインなし)
+- ビルド: [Vite+](https://viteplus.dev/) (`vp`)。`vite` は catalog で Vite+ のコアに差し替えている
 - デプロイ: Cloudflare CLI [`cf`](https://developers.cloudflare.com/cf/) (beta)。main への push で GitHub Actions が実行
 - コンテンツ: [morinoparty/wiki-content](https://github.com/morinoparty/wiki-content)
   (`https://wiki-content.<subdomain>.workers.dev` から配信)
@@ -16,7 +17,7 @@ Cloudflare Workers で動かします。記事の読み書きは
 ```
 .
 ├── cloudflare.config.ts        # Worker 定義 (名前、バインディング、secret)
-├── vite.config.ts              # TanStack Start + Cloudflare Vite plugin
+├── vite.config.ts              # Vite+ (TanStack Start + Cloudflare Vite plugin)
 ├── panda.config.ts             # Panda CSS (chlorophyll のプリセット)
 ├── .github/workflows/deploy.yml
 └── src/
@@ -85,16 +86,17 @@ Node.js 26.12 以上 (`.node-version`) と pnpm 12 (`packageManager`) を使い�
 
 ```sh
 pnpm install          # prepare で panda codegen も走る
-pnpm run dev          # ライセンス一覧と検索 index を作ってから cf dev
+pnpm run dev          # ライセンス一覧と検索 index を作ってから vp dev
 ```
 
-`cf dev` は Worker secret を `.env` から読みます。生成物だけ作り直すときは
+ビルドは Vite+ (`vp`) で行います (`vite` は vite-plus のコアに alias されている)。
+Cloudflare Vite plugin が Worker secret を `.env` から読みます。生成物だけ作り直すときは
 `pnpm run generate`、型チェックは `pnpm run typecheck` です。
 
 ## デプロイ
 
 main に push すると `.github/workflows/deploy.yml` が
-`pnpm run generate` → `cf build` → `cf deploy --prebuilt --mode production` を実行します。
+`pnpm run generate` → `vp build` → `cf deploy --prebuilt --mode production` を実行します。
 pull request では dry-run まで行います。Worker secret は GitHub secrets から
 ファイルを作り、`cf deploy --secrets-file` で渡します。
 
@@ -116,7 +118,7 @@ preview の URL を PR にコメントします (push のたびに同じコメ�
 手元から deploy するときは `.env` の `CLOUDFLARE_*` が使われます。
 
 ```sh
-pnpm run deploy       # generate → cf build → cf deploy --prebuilt --mode production
+pnpm run deploy       # generate → vp build → cf deploy --prebuilt --mode production
 ```
 
 Worker secret を設定・変更するときは、`--secrets-file` に JSON か `.env` 形式の

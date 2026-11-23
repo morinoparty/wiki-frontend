@@ -51,7 +51,7 @@ Minecraft のモデル・テクスチャ・アイテム定義は、別リポジ�
 `src/components/ui/provider.tsx` の `MinecraftProvider` に渡しているので、chlorophyll の `MinecraftItem` などは個別に URL を渡さずに使えます。
 
 ## 主な技術スタック
-- **TanStack Start / Router** + Vite 8 + `@cloudflare/vite-plugin` (v2 beta) + `cf` (Cloudflare CLI, beta)
+- **TanStack Start / Router** + Vite+ (`vite-plus`。`vite` は catalog で Vite+ のコアに差し替える) + `@cloudflare/vite-plugin` (v2 beta) + `cf` (Cloudflare CLI, beta)
 - React 19 / TypeScript
 - **chlorophyll (`@morinoparty/chlorophyll-react`) + Panda CSS** (スタイリング。`colorPalette: mori`)
 - Ark UI (`@ark-ui/react`)、アイコンは `lucide-react`
@@ -98,14 +98,14 @@ Minecraft のモデル・テクスチャ・アイテム定義は、別リポジ�
 ## コマンド
 
 - `pnpm install` - 依存関係のインストール (`prepare` で `panda codegen` も走る)
-- `pnpm run dev` - ライセンス一覧と検索 index を生成してから `cf dev`
-- `pnpm run build` - 生成してから `cf build` (Vite + TanStack Start。出力は `.cloudflare/output`。`cf build` は `--mode` を渡せない)
+- `pnpm run dev` - ライセンス一覧と検索 index を生成してから `vp dev` (Worker secret は `.env` から Cloudflare Vite plugin が読む)
+- `pnpm run build` - 生成してから `vp build` (Vite+ + TanStack Start。出力は `.cloudflare/output`。`--mode` は付けない)
 - `pnpm run typecheck` - `cf workers types && tsc --noEmit`
-- `pnpm run generate` - `generate:license` + `generate:index` (`cf build` の前に必要。`cf` は package.json の scripts を通らない)
+- `pnpm run generate` - `generate:license` + `generate:index` (`vp build` の前に必要。`vp` は package.json の scripts を通らない)
 - `pnpm exec cf deploy --dry-run` - 認証情報なしでデプロイを検証する
 - `pnpm exec tsr generate` - `src/routeTree.gen.ts` の再生成 (通常は Vite プラグインが生成する)
 
-`cloudflare.config.ts` のないディレクトリで `cf dev` / `cf build` / `cf deploy` を実行しないでください。
+`cloudflare.config.ts` のないディレクトリで `vp dev` / `vp build` / `cf deploy` を実行しないでください。
 
 ## コードスタイル
 
@@ -163,7 +163,7 @@ Worker の env は `getEnv()` (`src/lib/env.ts`) を通して読みます。work
 ## デプロイ
 
 - デプロイは通常、main への push で `.github/workflows/deploy.yml` から行われます
-  (`pnpm run generate` → `pnpm run typecheck` → `cf build` → `cf deploy --prebuilt --mode production`。PR では dry-run まで)。
+  (`pnpm run generate` → `pnpm run typecheck` → `vp build` → `cf deploy --prebuilt --mode production`。PR では dry-run まで)。
 - PR では `cf workers versions create --preview-alias` で本番に deploy しない Worker Version を upload し (alias は `pr-<番号>`。commit に固定した URL には Version の URL を使う)、preview の URL を PR にコメントします。preview は本番の secret を引き継ぐので、preview からの保存も wiki-content にコミットされます。
 - 検索 index は配信中の wiki-content から作ります。取得に失敗したとき、push (本番 deploy) では build を止め、PR やローカルでは空の index で続けます。
 - 手元からデプロイ (`pnpm run deploy` / `cf deploy`) や Worker secret の変更など、リモートの状態を変える操作は、ユーザーに明示的に指示されない限り行わないでください。検証には `pnpm exec cf deploy --dry-run` を使ってください。
@@ -230,7 +230,7 @@ emoji コミットの概要
 - `src/components/` に共通コンポーネント (`dashboard/`, `post/`, `ui/` のサブディレクトリあり)、`src/hooks/` にフック、`src/types/` に型、`src/styles/globals.css` にグローバル CSS を配置します。
 - `src/generate-search-index.ts` は検索 index (`public/search-index.json`) を生成する Node スクリプトです。
 - `public/` に静的アセット (`_headers` など) を配置します。
-- `cloudflare.config.ts` (Worker 定義)、`vite.config.ts` (TanStack Start + Cloudflare Vite plugin)、`panda.config.ts` (Panda CSS / chlorophyll のプリセット) はリポジトリルートにあります。
+- `cloudflare.config.ts` (Worker 定義)、`vite.config.ts` (Vite+ / TanStack Start + Cloudflare Vite plugin)、`panda.config.ts` (Panda CSS / chlorophyll のプリセット) はリポジトリルートにあります。
 - `patches/` は pnpm の `patchedDependencies` 用のパッチです。
 
 
